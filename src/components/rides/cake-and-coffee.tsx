@@ -137,40 +137,53 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
   // Upload photo using unsigned upload preset
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !session?.user) return;
+    console.log('[PhotoUpload] File selected:', file?.name, file?.size, file?.type);
+
+    if (!file) {
+      console.log('[PhotoUpload] No file selected');
+      return;
+    }
+    if (!session?.user) {
+      console.log('[PhotoUpload] No user session');
+      alert('Please sign in to upload photos.');
+      return;
+    }
 
     setIsUploading(true);
     try {
       // Use unsigned upload with preset (simpler, no server signature needed)
-      // You need to create an "unsigned" upload preset named "ride_photos" in Cloudinary dashboard
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      console.log('[PhotoUpload] Cloud name:', cloudName || 'NOT SET');
 
       if (!cloudName) {
-        console.error('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME not configured');
-        alert('Photo upload not configured. Please contact support.');
+        console.error('[PhotoUpload] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME not configured');
+        alert('Photo upload not configured. The NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME environment variable is not set.');
         return;
       }
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'ride_photos'); // Unsigned preset
+      formData.append('upload_preset', 'ride_photos');
       formData.append('folder', 'ride-photos');
 
-      const uploadRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        { method: 'POST', body: formData }
-      );
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+      console.log('[PhotoUpload] Uploading to:', uploadUrl);
+
+      const uploadRes = await fetch(uploadUrl, { method: 'POST', body: formData });
+      console.log('[PhotoUpload] Cloudinary response status:', uploadRes.status);
 
       if (!uploadRes.ok) {
         const errorData = await uploadRes.json();
-        console.error('Cloudinary upload error:', errorData);
-        alert('Failed to upload photo. Please try again.');
+        console.error('[PhotoUpload] Cloudinary error:', JSON.stringify(errorData, null, 2));
+        alert(`Cloudinary upload failed: ${errorData.error?.message || JSON.stringify(errorData)}`);
         return;
       }
 
       const uploadData = await uploadRes.json();
+      console.log('[PhotoUpload] Cloudinary success:', uploadData.public_id, uploadData.secure_url);
 
       // Save to database
+      console.log('[PhotoUpload] Saving to database for ride:', rideId);
       const saveRes = await fetch(`/api/rides/${rideId}/photos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -181,21 +194,22 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
           height: uploadData.height,
         }),
       });
+      console.log('[PhotoUpload] Database response status:', saveRes.status);
 
       if (saveRes.ok) {
         const photo = await saveRes.json();
+        console.log('[PhotoUpload] Photo saved:', photo.id);
         setPhotos([photo, ...photos]);
       } else {
         const errorData = await saveRes.json();
-        console.error('Failed to save photo:', errorData);
-        alert('Photo uploaded but failed to save. Please try again.');
+        console.error('[PhotoUpload] Database save error:', JSON.stringify(errorData, null, 2));
+        alert(`Photo uploaded but failed to save: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Failed to upload photo:', error);
-      alert('Failed to upload photo. Please try again.');
+      console.error('[PhotoUpload] Exception:', error);
+      alert(`Failed to upload photo: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
-      // Reset input
       e.target.value = '';
     }
   };
