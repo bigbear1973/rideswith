@@ -5,11 +5,11 @@
 
 /*
  * GroupRide Design System
- * Mobile-first, accessible, Meetup-inspired
+ * Mobile-first, accessible, C40.org-inspired bold design
  */
 
 :root {
-  /* Core brand colors - Meetup-inspired coral/red primary */
+  /* Core brand colors - C40.org-inspired vibrant green */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -17,20 +17,20 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
 
-  /* Primary - Coral/Red like Meetup */
-  --primary: oklch(0.637 0.237 25.331);
-  --primary-foreground: oklch(1 0 0);
+  /* Primary - Vibrant Green (#00D26A) */
+  --primary: oklch(0.75 0.2 155);
+  --primary-foreground: oklch(0.145 0 0);
 
-  /* Secondary - Neutral */
-  --secondary: oklch(0.968 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  /* Secondary - Cyan/Teal (#00B8D4) */
+  --secondary: oklch(0.7 0.14 200);
+  --secondary-foreground: oklch(0.145 0 0);
 
   /* Muted */
   --muted: oklch(0.968 0 0);
   --muted-foreground: oklch(0.556 0 0);
 
-  /* Accent - Teal */
-  --accent: oklch(0.7 0.15 180);
+  /* Accent - Black for dark sections */
+  --accent: oklch(0.145 0 0);
   --accent-foreground: oklch(1 0 0);
 
   /* Destructive */
@@ -39,20 +39,25 @@
   /* Border/Input */
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.637 0.237 25.331);
+  --ring: oklch(0.75 0.2 155);
 
   /* Radius */
   --radius: 0.5rem;
+
+  /* C40 Section colors for colored bands */
+  --c40-green: oklch(0.75 0.2 155);
+  --c40-cyan: oklch(0.7 0.14 200);
+  --c40-black: oklch(0.145 0 0);
 
   /* Pace category colors */
   --pace-casual: oklch(0.723 0.191 149.579);
   --pace-moderate: oklch(0.623 0.214 259.815);
   --pace-fast: oklch(0.795 0.184 86.047);
-  --pace-race: oklch(0.637 0.237 25.331);
+  --pace-race: oklch(0.577 0.245 27.325);
 
   /* Chart colors */
-  --chart-1: oklch(0.637 0.237 25.331);
-  --chart-2: oklch(0.7 0.15 180);
+  --chart-1: oklch(0.75 0.2 155);
+  --chart-2: oklch(0.7 0.14 200);
   --chart-3: oklch(0.795 0.184 86.047);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.723 0.191 149.579);
@@ -60,12 +65,12 @@
   /* Sidebar */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.637 0.237 25.331);
-  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.75 0.2 155);
+  --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.968 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.637 0.237 25.331);
+  --sidebar-ring: oklch(0.75 0.2 155);
 }
 
 .dark {
@@ -76,29 +81,36 @@
   --popover: oklch(0.178 0 0);
   --popover-foreground: oklch(0.985 0 0);
 
-  /* Primary - Coral/Red stays vibrant */
-  --primary: oklch(0.7 0.2 25.331);
+  /* Primary - Vibrant Green stays bold in dark mode */
+  --primary: oklch(0.78 0.2 155);
   --primary-foreground: oklch(0.145 0 0);
 
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  /* Secondary - Cyan */
+  --secondary: oklch(0.72 0.14 200);
+  --secondary-foreground: oklch(0.145 0 0);
+
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.65 0.12 180);
+  --accent: oklch(0.985 0 0);
   --accent-foreground: oklch(0.145 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.3 0 0);
   --input: oklch(0.3 0 0);
-  --ring: oklch(0.7 0.2 25.331);
+  --ring: oklch(0.78 0.2 155);
+
+  /* C40 Section colors for dark mode */
+  --c40-green: oklch(0.78 0.2 155);
+  --c40-cyan: oklch(0.72 0.14 200);
+  --c40-black: oklch(0.08 0 0);
 
   --sidebar: oklch(0.178 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.7 0.2 25.331);
+  --sidebar-primary: oklch(0.78 0.2 155);
   --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.3 0 0);
-  --sidebar-ring: oklch(0.7 0.2 25.331);
+  --sidebar-ring: oklch(0.78 0.2 155);
 }
 
 @theme inline {
@@ -139,6 +151,11 @@
   --color-pace-moderate: var(--pace-moderate);
   --color-pace-fast: var(--pace-fast);
   --color-pace-race: var(--pace-race);
+
+  /* C40 Section colors */
+  --color-c40-green: var(--c40-green);
+  --color-c40-cyan: var(--c40-cyan);
+  --color-c40-black: var(--c40-black);
 
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);

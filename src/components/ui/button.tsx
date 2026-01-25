@@ -19,6 +19,10 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // C40-inspired outlined buttons with uppercase text
+        c40: "border-2 border-foreground bg-transparent text-foreground uppercase font-bold tracking-wide hover:bg-foreground hover:text-background transition-colors",
+        c40Dark: "border-2 border-white bg-transparent text-white uppercase font-bold tracking-wide hover:bg-white hover:text-black transition-colors",
+        c40Green: "border-2 border-primary bg-transparent text-primary uppercase font-bold tracking-wide hover:bg-primary hover:text-primary-foreground transition-colors",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

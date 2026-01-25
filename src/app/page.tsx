@@ -5,7 +5,10 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Users, ArrowRight, Search, Route, Camera } from 'lucide-react';
+import { StatsBanner } from '@/components/ui/stats-banner';
+import { ColoredSection } from '@/components/ui/colored-section';
+import { FeatureCard } from '@/components/ui/feature-card';
+import { MapPin, Users, ArrowRight, Search, Route, Camera, Bike, Clock, Heart } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 
 // Curated Unsplash images for consistent cycling theme
@@ -67,10 +70,10 @@ const PACE_STYLES: Record<string, string> = {
 
 // Pace descriptions with speed ranges
 const PACE_CATEGORIES = [
-  { name: 'Casual', speedKmh: { min: 0, max: 20 }, image: IMAGES.casual, overlay: 'from-green-600/80' },
-  { name: 'Moderate', speedKmh: { min: 20, max: 28 }, image: IMAGES.moderate, overlay: 'from-blue-600/80' },
-  { name: 'Fast', speedKmh: { min: 28, max: 35 }, image: IMAGES.fast, overlay: 'from-amber-600/80' },
-  { name: 'Race', speedKmh: { min: 35, max: 100 }, image: IMAGES.race, overlay: 'from-red-600/80' },
+  { name: 'Casual', speedKmh: { min: 0, max: 20 }, image: IMAGES.casual, desc: 'Relaxed rides for everyone' },
+  { name: 'Moderate', speedKmh: { min: 20, max: 28 }, image: IMAGES.moderate, desc: 'Steady fitness building' },
+  { name: 'Fast', speedKmh: { min: 28, max: 35 }, image: IMAGES.fast, desc: 'Pushing the limits' },
+  { name: 'Race', speedKmh: { min: 35, max: 100 }, image: IMAGES.race, desc: 'Competitive training' },
 ];
 
 export default function HomePage() {
@@ -89,74 +92,75 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section - Mobile-first */}
-      <section className="px-4 py-10 sm:py-16 md:py-20 lg:py-28">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12">
-            <div className="flex-1 text-center lg:text-left">
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-                The{' '}
-                <span className="text-primary">cycling</span>{' '}
-                platform.
-                <br className="hidden sm:block" />
-                Where{' '}
-                <span className="text-primary">riders</span>{' '}
-                become{' '}
-                <span className="text-primary">friends</span>.
+      {/* Hero Section - C40 inspired split layout */}
+      <section className="w-full py-16 md:py-24 lg:py-32">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
+            <div className="flex flex-col justify-center space-y-6">
+              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
+                Find your{' '}
+                <span className="text-primary">ride</span>.
+                <br />
+                Find your{' '}
+                <span className="text-primary">people</span>.
               </h1>
-              <p className="mt-4 text-base text-muted-foreground sm:text-lg md:mt-6 md:text-xl max-w-2xl mx-auto lg:mx-0">
+              <p className="text-lg leading-relaxed text-muted-foreground md:text-xl">
                 Whatever your pace, from casual coffee rides to competitive training,
                 there are thousands of cyclists who share it on GroupRide.
               </p>
-              <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <Button size="lg" className="w-full sm:w-auto text-base" asChild>
+              <div className="flex flex-wrap gap-4">
+                <Button variant="c40" size="lg" asChild>
                   <Link href="/discover">
-                    <Search className="mr-2 h-5 w-5" />
-                    Find Rides
+                    FIND RIDES
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto text-base" asChild>
+                <Button variant="c40Green" size="lg" asChild>
                   <Link href="/create">
-                    <Route className="mr-2 h-5 w-5" />
-                    Create a Ride
+                    CREATE A RIDE
                   </Link>
                 </Button>
               </div>
             </div>
 
-            {/* Hero visual - Hidden on mobile */}
-            <div className="hidden lg:flex flex-1 justify-center">
-              <div className="relative w-96 h-80">
-                <div className="absolute top-4 right-4 w-48 h-48 bg-primary/10 rounded-2xl" />
-                <div className="absolute bottom-4 left-4 w-48 h-48 bg-accent/10 rounded-2xl" />
-                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-xl">
-                  <Image
-                    src={IMAGES.hero}
-                    alt="Group of cyclists riding together"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
+            {/* Hero visual */}
+            <div className="hidden md:flex items-center justify-center">
+              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src={IMAGES.hero}
+                  alt="Group of cyclists riding together"
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Stats Banner - C40 green band */}
+      <StatsBanner
+        stats={[
+          { value: '500+', label: 'Active Rides' },
+          { value: '10,000+', label: 'Kilometers Ridden' },
+          { value: '2,000+', label: 'Cyclists' },
+          { value: '100+', label: 'Clubs' },
+        ]}
+      />
+
       {/* Rides Near You */}
-      <section className="border-t bg-muted/30 px-4 py-10 sm:py-12">
+      <section className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-xl font-bold sm:text-2xl">Rides near you</h2>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h2 className="text-2xl font-bold sm:text-3xl">Rides near you</h2>
+              <p className="text-muted-foreground mt-2">
                 Discover group rides happening in your area
               </p>
             </div>
-            <Button variant="ghost" asChild className="hidden sm:flex">
+            <Button variant="c40" size="lg" asChild className="hidden sm:flex">
               <Link href="/discover">
-                See all
+                SEE ALL
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -170,7 +174,7 @@ export default function HomePage() {
                 href={`/rides/${ride.id}`}
                 className="flex-shrink-0 w-[280px] sm:w-auto snap-start"
               >
-                <Card className="h-full overflow-hidden transition-shadow hover:shadow-md">
+                <Card className="h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
                   <div className="aspect-video bg-muted relative">
                     <Image
                       src={ride.image}
@@ -185,7 +189,7 @@ export default function HomePage() {
                       <span>·</span>
                       <span>{ride.time}</span>
                     </div>
-                    <h3 className="font-semibold line-clamp-2 mb-1">{ride.title}</h3>
+                    <h3 className="font-bold line-clamp-2 mb-1">{ride.title}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{ride.organizer}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                       <MapPin className="h-4 w-4 flex-shrink-0" />
@@ -209,10 +213,10 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="mt-4 sm:hidden">
-            <Button variant="outline" className="w-full" asChild>
+          <div className="mt-6 sm:hidden">
+            <Button variant="c40" className="w-full" asChild>
               <Link href="/discover">
-                See all rides
+                SEE ALL RIDES
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -220,108 +224,141 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Explore by Pace */}
-      <section className="px-4 py-10 sm:py-12">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-xl font-bold sm:text-2xl mb-6">Explore by pace</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {PACE_CATEGORIES.map((cat) => (
-              <Link
-                key={cat.name}
-                href={`/discover?pace=${cat.name.toLowerCase()}`}
-                className="group relative aspect-[4/3] rounded-xl overflow-hidden"
-              >
-                <Image
-                  src={cat.image}
-                  alt={`${cat.name} pace cycling`}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t ${cat.overlay} to-transparent`} />
-                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                  <span className="font-semibold text-sm sm:text-base block">{cat.name}</span>
-                  <span className="text-xs opacity-90">{formatPaceDesc(cat)}</span>
+      {/* Explore by Pace - Cyan section */}
+      <ColoredSection color="cyan">
+        <h2 className="text-2xl font-bold sm:text-3xl mb-8 text-center">Find your pace</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+          {PACE_CATEGORIES.map((cat) => (
+            <Link
+              key={cat.name}
+              href={`/discover?pace=${cat.name.toLowerCase()}`}
+              className="group"
+            >
+              <div className="bg-white rounded-lg p-4 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl">
+                <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
+                  <Image
+                    src={cat.image}
+                    alt={`${cat.name} pace cycling`}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
                 </div>
-              </Link>
-            ))}
-          </div>
+                <h3 className="font-bold text-lg text-foreground">{cat.name}</h3>
+                <p className="text-sm text-muted-foreground">{formatPaceDesc(cat)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{cat.desc}</p>
+              </div>
+            </Link>
+          ))}
         </div>
-      </section>
+      </ColoredSection>
 
       {/* How It Works */}
-      <section className="border-t bg-muted/30 px-4 py-10 sm:py-12">
+      <section className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-xl font-bold sm:text-2xl text-center mb-8">How GroupRide works</h2>
-          <div className="grid gap-8 sm:grid-cols-3">
-            {[
-              { icon: Search, title: 'Discover rides', desc: 'Find local group rides that match your pace and schedule.' },
-              { icon: Users, title: 'Join the group', desc: 'RSVP with one click and download routes for any GPS device.' },
-              { icon: Camera, title: 'Ride & share', desc: 'Meet at the start, enjoy the ride, and share photos with everyone.' },
-            ].map((step, i) => (
-              <div key={i} className="flex flex-col items-center text-center">
-                <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10">
-                  <step.icon className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.desc}</p>
-              </div>
-            ))}
+          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-4">How GroupRide works</h2>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Join thousands of cyclists who use GroupRide to find their community
+          </p>
+          <div className="grid gap-6 sm:grid-cols-3">
+            <FeatureCard
+              icon={Search}
+              title="Discover rides"
+              description="Find local group rides that match your pace, schedule, and riding style."
+            />
+            <FeatureCard
+              icon={Users}
+              title="Join the group"
+              description="RSVP with one click and download routes for any GPS device."
+            />
+            <FeatureCard
+              icon={Bike}
+              title="Ride together"
+              description="Meet at the start, enjoy the ride, and become part of the community."
+            />
           </div>
         </div>
       </section>
 
-      {/* Organizer CTA */}
-      <section className="px-4 py-10 sm:py-12">
-        <div className="mx-auto max-w-4xl">
-          <Card className="overflow-hidden">
-            <div className="flex flex-col md:flex-row">
-              <div className="flex-1 p-6 md:p-8">
-                <h2 className="text-xl font-bold sm:text-2xl mb-3">Organize group rides?</h2>
-                <p className="text-muted-foreground mb-6">
-                  Create a club profile, manage all your rides in one place,
-                  and grow your community with easy invite links.
-                </p>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button asChild>
-                    <Link href="/organizers/create">Get started free</Link>
-                  </Button>
-                  <Button variant="ghost" asChild>
-                    <Link href="/about/organizers">Learn more</Link>
-                  </Button>
-                </div>
-              </div>
-              <div className="hidden md:block flex-1 relative min-h-[200px]">
-                <Image
-                  src={IMAGES.organizer}
-                  alt="Cycling club group"
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
-              </div>
+      {/* Organizer CTA - Black section */}
+      <ColoredSection color="black">
+        <div className="grid gap-12 md:grid-cols-2 md:items-center">
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl text-white">
+              Organize group rides?
+            </h2>
+            <p className="text-lg text-white/80">
+              Create a club profile, manage all your rides in one place,
+              and grow your community with easy invite links.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button variant="c40Dark" size="lg" asChild>
+                <Link href="/organizers/create">GET STARTED FREE</Link>
+              </Button>
+              <Button variant="c40Dark" size="lg" asChild>
+                <Link href="/about/organizers">LEARN MORE</Link>
+              </Button>
             </div>
-          </Card>
+          </div>
+          <div className="hidden md:block relative aspect-[4/3] rounded-2xl overflow-hidden">
+            <Image
+              src={IMAGES.organizer}
+              alt="Cycling club group"
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
-      </section>
+      </ColoredSection>
 
-      {/* Stats */}
-      <section className="border-t bg-muted/30 px-4 py-10 sm:py-12">
+      {/* Why GroupRide */}
+      <section className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {[
-              { value: '500+', label: 'Active Rides' },
-              { value: '2,000+', label: 'Cyclists' },
-              { value: '50+', label: 'Cities' },
-              { value: '100+', label: 'Clubs' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl font-bold text-primary sm:text-3xl">{stat.value}</div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-              </div>
-            ))}
+          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-12">Why cyclists choose GroupRide</h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <FeatureCard
+              icon={MapPin}
+              title="Local rides everywhere"
+              description="Find group rides in your city, no matter where you are."
+            />
+            <FeatureCard
+              icon={Clock}
+              title="Fits your schedule"
+              description="Morning, evening, weekend - find rides when you're free."
+            />
+            <FeatureCard
+              icon={Heart}
+              title="Build community"
+              description="Turn strangers into riding buddies and lifelong friends."
+            />
+            <FeatureCard
+              icon={Route}
+              title="GPX downloads"
+              description="Get the route on your GPS device before every ride."
+            />
+            <FeatureCard
+              icon={Camera}
+              title="Share memories"
+              description="Post photos and relive the best moments together."
+            />
+            <FeatureCard
+              icon={Users}
+              title="All levels welcome"
+              description="From beginners to racers, there's a group for everyone."
+            />
           </div>
         </div>
       </section>
+
+      {/* Final CTA */}
+      <StatsBanner
+        stats={[
+          { value: '50+', label: 'Cities' },
+          { value: '4.9★', label: 'App Rating' },
+          { value: '0', label: 'Cost to Join' },
+          { value: '∞', label: 'Adventures Ahead' },
+        ]}
+        className="mb-0"
+      />
     </div>
   );
 }

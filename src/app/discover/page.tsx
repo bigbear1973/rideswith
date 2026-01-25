@@ -342,10 +342,14 @@ export default function DiscoverPage() {
             <div className="hidden sm:flex gap-2 flex-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button
+                    variant={selectedPaces.length > 0 ? "default" : "outline"}
+                    size="sm"
+                    className="gap-2 font-semibold"
+                  >
                     Pace
                     {selectedPaces.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-primary-foreground text-primary">
                         {selectedPaces.length}
                       </Badge>
                     )}
@@ -369,10 +373,14 @@ export default function DiscoverPage() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button
+                    variant={selectedDistances.length > 0 ? "default" : "outline"}
+                    size="sm"
+                    className="gap-2 font-semibold"
+                  >
                     Distance
                     {selectedDistances.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-primary-foreground text-primary">
                         {selectedDistances.length}
                       </Badge>
                     )}
@@ -395,9 +403,9 @@ export default function DiscoverPage() {
               </DropdownMenu>
 
               {activeFilterCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <Button variant="outline" size="sm" onClick={clearFilters} className="font-semibold">
                   <X className="h-4 w-4 mr-1" />
-                  Clear
+                  Clear filters
                 </Button>
               )}
             </div>
@@ -485,9 +493,9 @@ export default function DiscoverPage() {
 
         {/* Ride List */}
         <div className="flex-1 lg:flex-none lg:w-96 xl:w-[420px] flex flex-col">
-          <div className="px-4 py-3 border-b bg-muted/30">
-            <h2 className="font-semibold">Upcoming Rides</h2>
-            <p className="text-sm text-muted-foreground">
+          <div className="px-4 py-4 border-b bg-primary">
+            <h2 className="font-bold text-primary-foreground text-lg">Upcoming Rides</h2>
+            <p className="text-sm text-primary-foreground/80">
               {filteredRides.length} ride{filteredRides.length !== 1 ? 's' : ''} within {formatRadius(searchRadius)}
             </p>
           </div>
@@ -503,7 +511,7 @@ export default function DiscoverPage() {
               ) : (
                 filteredRides.map((ride) => (
                   <Link key={ride.id} href={`/rides/${ride.id}`}>
-                    <Card className="overflow-hidden transition-shadow hover:shadow-md">
+                    <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                           <Calendar className="h-3.5 w-3.5" />
