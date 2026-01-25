@@ -113,7 +113,7 @@ Natural language / voice input to auto-fill ride details:
 | `/auth/signin` | `src/app/auth/signin/page.tsx` | Working |
 | `/auth/verify` | `src/app/auth/verify/page.tsx` | Working |
 | `/auth/error` | `src/app/auth/error/page.tsx` | Working |
-| `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (mock data) |
+| `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (fetches from DB) |
 | `/organizers/[id]` | `src/app/organizers/[id]/page.tsx` | Placeholder only |
 
 ### Broken Links (404s)
@@ -134,7 +134,7 @@ Natural language / voice input to auto-fill ride details:
 | `/profile` | Does not exist | Create user profile page |
 | `/organizers/create` | Does not exist | Create organizer signup flow |
 | `/organizers/[id]` | Shows ID only | Full organizer profile with rides |
-| `/rides/[id]` | Hardcoded mock data | Fetch from database |
+| `/rides/[id]` | ✅ DONE | Fetches from database |
 
 ---
 
@@ -152,7 +152,7 @@ Natural language / voice input to auto-fill ride details:
 
 ### 3. Wire Up Database
 - [ ] `/discover` - Fetch rides from DB instead of mock data
-- [ ] `/rides/[id]` - Fetch ride details from DB
+- [x] `/rides/[id]` - Fetch ride details from DB
 - [ ] Homepage - Fetch featured rides from DB
 
 ---
@@ -229,7 +229,6 @@ Natural language / voice input to auto-fill ride details:
 **Mock Data (not wired to DB):**
 - Homepage rides (5 hardcoded)
 - Discover page rides (5 Irish locations)
-- Ride detail page (single mock ride)
 
 **Broken (404s):**
 - /profile
@@ -251,5 +250,35 @@ Natural language / voice input to auto-fill ride details:
 - C40 button variants (outlined, uppercase, hover fills)
 - Homepage redesign with stats banners, colored sections, feature grids
 - Discover page styling updates
+- Ride detail page now fetches from database (was mock data)
 
-**Next Priority:** Wire discover page and ride detail page to database, fix remaining 404s.
+**Next Priority:** Wire discover page to database, fix UI/UX bugs, build profile pages.
+
+---
+
+## Active TODO List
+
+### High Priority (Bugs)
+- [ ] Fix discover page: distance dropdown doesn't filter rides
+- [ ] Fix discover page: Pace/Distance filter buttons hidden behind map on mobile (z-index)
+- [ ] Fix nav menu dropdown appearing behind map (Leaflet z-index issue)
+- [ ] Fix: newly created rides not showing on discover page/map (still using mock data)
+- [ ] Wire discover page to fetch rides from database
+
+### Medium Priority (Features)
+- [ ] Add edit ride functionality after creation
+- [ ] Modernize date/time picker on create ride page
+- [ ] Add ride history to user profile page
+- [ ] Hide rides older than 14 days from discover, add past rides archive view
+
+### Profile System
+- [ ] Build /profile page with user details
+- [ ] Each user should have a unique URL (e.g., /u/username)
+- [ ] Allow users to edit their personalized URL/slug
+
+### Known Leaflet Z-Index Issues
+The Leaflet map uses high z-index values that cause UI elements to appear behind it:
+- Navigation dropdown menu
+- Filter dropdowns (pace, distance)
+- Mobile filter buttons
+Solution: Add higher z-index values to these elements or use Leaflet's `zIndexOffset`.
