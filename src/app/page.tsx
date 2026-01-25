@@ -200,8 +200,9 @@ export default function HomePage() {
                 const rideDate = new Date(ride.date);
                 const formattedDate = rideDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 const formattedTime = rideDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                // Use brand backdrop if available, otherwise fall back to default images
-                const imageUrl = ride.brand?.backdrop || RIDE_IMAGES[index % RIDE_IMAGES.length];
+                // Use brand backdrop if available and valid, otherwise fall back to default images
+                const hasBrandBackdrop = ride.brand?.backdrop && ride.brand.backdrop.length > 0;
+                const fallbackImage = RIDE_IMAGES[index % RIDE_IMAGES.length];
 
                 return (
                   <Link
@@ -211,14 +212,24 @@ export default function HomePage() {
                   >
                     <Card className="h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
                       <div className="aspect-video bg-muted relative">
-                        <Image
-                          src={imageUrl}
-                          alt={ride.title}
-                          fill
-                          className="object-cover"
-                        />
+                        {hasBrandBackdrop ? (
+                          // Use regular img for brand backdrops (external URLs)
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={ride.brand!.backdrop!}
+                            alt={ride.title}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Image
+                            src={fallbackImage}
+                            alt={ride.title}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                         {/* Brand logo overlay for branded rides */}
-                        {ride.brand?.logo && (
+                        {ride.brand?.logo && ride.brand.logo.length > 0 && (
                           <div className="absolute top-2 left-2 h-8 w-8 rounded bg-white p-1 shadow-md">
                             <img
                               src={ride.brand.logo}
