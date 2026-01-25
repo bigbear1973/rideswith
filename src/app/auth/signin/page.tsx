@@ -26,13 +26,13 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        console.error('Sign in error:', result.error);
+        console.error('Sign in error:', result.error, result);
         if (result.error === 'Configuration') {
-          setError('Email service is not configured properly. Please contact support.');
+          setError('Configuration error. Check server logs for details.');
         } else if (result.error === 'EmailSignin') {
-          setError('Failed to send email. Please check your email address and try again.');
+          setError('Failed to send email. Please try again.');
         } else {
-          setError('Something went wrong. Please try again.');
+          setError(`Error: ${result.error}`);
         }
       } else {
         // Redirect to verify page
