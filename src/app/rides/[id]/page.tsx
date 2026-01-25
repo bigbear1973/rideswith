@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { RideMap } from '@/components/rides';
+import { RideMap, CopyRideInfo } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
@@ -15,8 +15,6 @@ import {
   MapPin,
   Users,
   Route,
-  Download,
-  Share2,
   ChevronLeft,
   ArrowUpRight,
   Edit,
@@ -125,8 +123,29 @@ export default async function RidePage({ params }: RidePageProps) {
     };
   });
 
+  // Build ride info text for copying
+  const rideUrl = `https://rideswith.com/rides/${id}`;
+  const rideInfoText = [
+    `${ride.title}`,
+    ``,
+    `${formattedDate}`,
+    `${formattedStartTime}${formattedEndTime ? ` - ${formattedEndTime}` : ''}`,
+    ``,
+    `${ride.locationName}`,
+    ride.locationAddress,
+    ``,
+    ride.distance ? `Distance: ${ride.distance} km` : null,
+    ride.elevation ? `Elevation: ${ride.elevation} m` : null,
+    `Pace: ${pace}`,
+    ride.terrain ? `Terrain: ${ride.terrain}` : null,
+    ``,
+    ride.description ? `${ride.description}` : null,
+    ``,
+    `Join the ride: ${rideUrl}`,
+  ].filter(Boolean).join('\n');
+
   return (
-    <div className="min-h-screen pb-24 lg:pb-8">
+    <div className="min-h-screen pb-8">
       {/* Mobile Header */}
       <div className="sticky top-14 z-30 bg-background border-b px-4 py-3 lg:hidden">
         <div className="flex items-center gap-3">
@@ -315,6 +334,10 @@ export default async function RidePage({ params }: RidePageProps) {
                     <p className="text-xs text-muted-foreground">No attendees yet. Be the first!</p>
                   )}
                 </div>
+
+                {/* Copy ride info */}
+                <Separator />
+                <CopyRideInfo rideInfo={rideInfoText} />
               </CardContent>
             </Card>
           </div>
@@ -322,38 +345,6 @@ export default async function RidePage({ params }: RidePageProps) {
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block">
             <div className="sticky top-24 space-y-4">
-              {/* RSVP Card */}
-              <Card>
-                <CardContent className="p-6 space-y-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">
-                      {ride.isFree ? 'Free' : `€${ride.price?.toFixed(2)}`}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {totalAttendees} going
-                      {ride.maxAttendees && ` · ${ride.maxAttendees - totalAttendees} spots left`}
-                    </p>
-                  </div>
-                  <Button className="w-full" size="lg">
-                    Attend
-                  </Button>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" size="sm">
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share
-                    </Button>
-                    {ride.routeUrl && (
-                      <Button variant="outline" className="flex-1" size="sm" asChild>
-                        <a href={ride.routeUrl} target="_blank" rel="noopener noreferrer">
-                          <Download className="h-4 w-4 mr-2" />
-                          Route
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Ride Stats Card */}
               <Card>
                 <CardContent className="p-4 space-y-3">
@@ -453,37 +444,14 @@ export default async function RidePage({ params }: RidePageProps) {
                       <p className="text-xs text-muted-foreground">No attendees yet. Be the first!</p>
                     )}
                   </div>
+
+                  {/* Copy ride info */}
+                  <Separator />
+                  <CopyRideInfo rideInfo={rideInfoText} />
                 </CardContent>
               </Card>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Mobile Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 lg:hidden safe-area-inset-bottom">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <p className="font-semibold">
-              {ride.isFree ? 'Free' : `€${ride.price?.toFixed(2)}`}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {totalAttendees} going
-            </p>
-          </div>
-          <Button variant="outline" size="icon">
-            <Share2 className="h-4 w-4" />
-          </Button>
-          {ride.routeUrl && (
-            <Button variant="outline" size="icon" asChild>
-              <a href={ride.routeUrl} target="_blank" rel="noopener noreferrer">
-                <Download className="h-4 w-4" />
-              </a>
-            </Button>
-          )}
-          <Button size="lg">
-            Attend
-          </Button>
         </div>
       </div>
     </div>
