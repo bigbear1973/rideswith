@@ -8,15 +8,35 @@ interface RouteEmbedProps {
 }
 
 /**
- * Parses a route URL and returns embed information
+ * Extracts URL from an iframe embed code if provided
+ * Returns the original string if it's not an iframe
+ */
+function extractUrlFromEmbed(input: string): string {
+  const trimmed = input.trim();
+
+  // Check if it's an iframe embed code
+  if (trimmed.startsWith('<iframe')) {
+    const srcMatch = trimmed.match(/src=["']([^"']+)["']/);
+    if (srcMatch) {
+      return srcMatch[1];
+    }
+  }
+
+  return trimmed;
+}
+
+/**
+ * Parses a route URL or embed code and returns embed information
  * Supports: Komoot (with share_token), RideWithGPS
  *
- * Komoot requires a share_token for embeds to work. Users should paste the
- * embed URL from Komoot's share dialog, e.g.:
- * https://www.komoot.com/tour/123456789/embed?share_token=abc123&profile=1
+ * Accepts either:
+ * - Direct URL: https://www.komoot.com/tour/123456789/embed?share_token=abc123&profile=1
+ * - Full iframe: <iframe src="https://www.komoot.com/tour/123456789/embed?share_token=abc123&profile=1" ...></iframe>
  */
-function parseRouteUrl(url: string): { platform: string; embedUrl: string; originalUrl: string; canEmbed: boolean } | null {
+function parseRouteUrl(input: string): { platform: string; embedUrl: string; originalUrl: string; canEmbed: boolean } | null {
   try {
+    // Extract URL from iframe if needed
+    const url = extractUrlFromEmbed(input);
     const urlObj = new URL(url);
 
     // Komoot: Check if it's an embed URL with share_token (required for embedding)
