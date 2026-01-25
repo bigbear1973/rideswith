@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, Sun, Moon, MapPin, PlusCircle, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Menu, Sun, Moon, MapPin, PlusCircle } from 'lucide-react';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useBrand } from '@/components/providers/brand-provider';
 import { Button } from '@/components/ui/button';
+import { UserMenu } from './user-menu';
 import {
   Sheet,
   SheetContent,
@@ -96,6 +96,9 @@ export function Navbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* User Menu */}
+          <UserMenu />
         </div>
 
         {/* Mobile Navigation */}

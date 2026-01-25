@@ -9,5 +9,185 @@ datasource db {
   extensions = [postgis]
 }
 
-// Models will be added in next prompt
-// This sets up the foundation with PostGIS support
+// ============================================
+// Auth.js Models (required for authentication)
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  organizers    OrganizerMember[]
+  rsvps         Rsvp[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// App Models
+// ============================================
+
+model Organizer {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  logoUrl     String?
+  coverUrl    String?
+  website     String?
+
+  // Brand theming
+  primaryColor   String?
+  secondaryColor String?
+
+  // Stats
+  memberCount Int @default(0)
+  rideCount   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  members OrganizerMember[]
+  rides   Ride[]
+}
+
+model OrganizerMember {
+  id          String   @id @default(cuid())
+  organizerId String
+  userId      String
+  role        OrganizerRole @default(MEMBER)
+  joinedAt    DateTime @default(now())
+
+  organizer Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizerId, userId])
+}
+
+enum OrganizerRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Ride {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+
+  // Date & Time
+  date        DateTime
+  endTime     DateTime?
+  timezone    String   @default("UTC")
+
+  // Location
+  locationName    String
+  locationAddress String
+  latitude        Float
+  longitude       Float
+
+  // Ride details
+  distance    Float?   // in km
+  elevation   Float?   // in meters
+  pace        RidePace @default(MODERATE)
+  terrain     String?
+
+  // Route
+  routeUrl    String?
+  gpxUrl      String?
+
+  // Capacity
+  maxAttendees Int?
+
+  // Pricing
+  isFree      Boolean @default(true)
+  price       Float?
+  currency    String  @default("EUR")
+
+  // Status
+  status      RideStatus @default(PUBLISHED)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  organizerId String
+  organizer   Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  rsvps       Rsvp[]
+}
+
+enum RidePace {
+  CASUAL
+  MODERATE
+  FAST
+  RACE
+}
+
+enum RideStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+model Rsvp {
+  id        String     @id @default(cuid())
+  rideId    String
+  userId    String
+  status    RsvpStatus @default(GOING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([rideId, userId])
+}
+
+enum RsvpStatus {
+  GOING
+  MAYBE
+  NOT_GOING
+}

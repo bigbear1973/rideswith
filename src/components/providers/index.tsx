@@ -3,15 +3,18 @@
 import { ReactNode, Suspense } from 'react';
 import { ThemeProvider } from './theme-provider';
 import { BrandProvider } from './brand-provider';
+import { AuthProvider } from './auth-provider';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <Suspense fallback={null}>
-        <BrandProvider>
-          {children}
-        </BrandProvider>
-      </Suspense>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <Suspense fallback={null}>
+          <BrandProvider>
+            {children}
+          </BrandProvider>
+        </Suspense>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
