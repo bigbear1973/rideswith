@@ -67,6 +67,25 @@ export default async function RidePage({ params }: RidePageProps) {
           },
         },
       },
+      chapter: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          city: true,
+          brand: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logo: true,
+              logoIcon: true,
+              primaryColor: true,
+              secondaryColor: true,
+            },
+          },
+        },
+      },
       rsvps: {
         where: { status: 'GOING' },
         include: {
@@ -96,6 +115,11 @@ export default async function RidePage({ params }: RidePageProps) {
 
   const totalAttendees = ride._count.rsvps;
   const pace = ride.pace.toLowerCase();
+
+  // Brand info for branded rides
+  const brand = ride.chapter?.brand;
+  const chapter = ride.chapter;
+  const hasBranding = !!brand;
 
   // Check if current user can edit this ride
   const canEdit = session?.user?.id && ride.organizer.members.some(
@@ -146,6 +170,42 @@ export default async function RidePage({ params }: RidePageProps) {
 
   return (
     <div className="min-h-screen pb-8">
+      {/* Brand Header - shown for branded rides */}
+      {hasBranding && brand && chapter && (
+        <div
+          className="py-6 text-white"
+          style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
+        >
+          <div className="mx-auto max-w-6xl px-4">
+            <Link
+              href={`/brands/${brand.slug}/${chapter.slug}`}
+              className="inline-flex items-center gap-4 hover:opacity-90 transition-opacity"
+            >
+              {brand.logo ? (
+                <img
+                  src={brand.logo}
+                  alt={brand.name}
+                  className="h-12 w-12 object-contain rounded-lg bg-white p-1.5"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-lg bg-white/20 flex items-center justify-center text-lg font-bold">
+                  {brand.name.charAt(0)}
+                </div>
+              )}
+              <div>
+                <p className="font-semibold text-lg">
+                  {brand.name} {chapter.name}
+                </p>
+                <p className="text-white/80 text-sm flex items-center gap-1">
+                  {chapter.city}
+                  <ArrowUpRight className="h-3 w-3" />
+                </p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Header */}
       <div className="sticky top-14 z-30 bg-background border-b px-4 py-3 lg:hidden">
         <div className="flex items-center gap-3">
@@ -172,11 +232,11 @@ export default async function RidePage({ params }: RidePageProps) {
           <div className="lg:col-span-2 space-y-6">
             {/* Back link - Desktop */}
             <Link
-              href="/discover"
+              href={hasBranding && brand && chapter ? `/brands/${brand.slug}/${chapter.slug}` : '/discover'}
               className="hidden lg:inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Back to rides
+              {hasBranding && brand && chapter ? `Back to ${brand.name} ${chapter.name}` : 'Back to rides'}
             </Link>
 
             {/* Title Section */}
