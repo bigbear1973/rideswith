@@ -4,7 +4,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Menu, Sun, Moon, MapPin, PlusCircle, Building2 } from 'lucide-react';
+import { Menu, Sun, Moon, MapPin, PlusCircle, Building2, User, Settings, LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useBrand } from '@/components/providers/brand-provider';
 import { Button } from '@/components/ui/button';
@@ -136,7 +139,31 @@ export function Navbar() {
               <SheetHeader>
                 <SheetTitle className="text-left">Menu</SheetTitle>
               </SheetHeader>
-              <nav className="mt-6 flex flex-col gap-2">
+
+              {/* User Info - shown when logged in */}
+              {session?.user && (
+                <div className="mt-4 flex items-center gap-3 px-2 py-3 bg-muted/50 rounded-lg">
+                  <Avatar className="h-10 w-10">
+                    {session.user.image && (
+                      <AvatarImage src={session.user.image} alt={session.user.name || ''} />
+                    )}
+                    <AvatarFallback className="text-sm">
+                      {session.user.name
+                        ?.split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2) || session.user.email?.slice(0, 2).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{session.user.name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
+                  </div>
+                </div>
+              )}
+
+              <nav className="mt-4 flex flex-col gap-2">
                 {navLinks.map((link) => {
                   const Icon = link.icon;
                   const isActive = pathname === link.href;
@@ -154,6 +181,54 @@ export function Navbar() {
                     </Button>
                   );
                 })}
+
+                {/* Account Section */}
+                {session?.user ? (
+                  <>
+                    <Separator className="my-2" />
+                    <Button
+                      variant={pathname === '/profile' ? 'secondary' : 'ghost'}
+                      className="justify-start gap-3 h-12"
+                      asChild
+                    >
+                      <Link href="/profile">
+                        <User className="h-5 w-5" />
+                        Profile
+                      </Link>
+                    </Button>
+                    <Button
+                      variant={pathname === '/settings' ? 'secondary' : 'ghost'}
+                      className="justify-start gap-3 h-12"
+                      asChild
+                    >
+                      <Link href="/settings">
+                        <Settings className="h-5 w-5" />
+                        Settings
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sign out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Separator className="my-2" />
+                    <Button
+                      className="justify-start gap-3 h-12"
+                      asChild
+                    >
+                      <Link href="/auth/signin">
+                        <User className="h-5 w-5" />
+                        Sign In
+                      </Link>
+                    </Button>
+                  </>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
