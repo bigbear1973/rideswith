@@ -327,6 +327,7 @@ model RidePhoto {
   thumbnailUrl String? // Pre-generated thumbnail URL
   width       Int?
   height      Int?
+  isVideo     Boolean  @default(false) // true for video uploads
 
   caption     String?
   createdAt   DateTime @default(now())

@@ -35,6 +35,7 @@ export async function GET(
       thumbnailUrl: photo.thumbnailUrl || getThumbnailUrl(photo.publicId),
       width: photo.width,
       height: photo.height,
+      isVideo: photo.isVideo,
       caption: photo.caption,
       createdAt: photo.createdAt,
       user: {
@@ -64,7 +65,7 @@ export async function POST(
     }
 
     const { id: rideId } = await params;
-    const { publicId, url, width, height, caption } = await request.json();
+    const { publicId, url, width, height, caption, isVideo } = await request.json();
 
     if (!publicId || !url) {
       return NextResponse.json({ error: 'publicId and url are required' }, { status: 400 });
@@ -80,8 +81,10 @@ export async function POST(
       return NextResponse.json({ error: 'Ride not found' }, { status: 404 });
     }
 
-    // Generate thumbnail URL
-    const thumbnailUrl = getThumbnailUrl(publicId);
+    // Generate thumbnail URL (for videos, Cloudinary generates a thumbnail from the video)
+    const thumbnailUrl = isVideo
+      ? `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/video/upload/c_fill,w_400,h_300,q_auto,f_jpg/${publicId}`
+      : getThumbnailUrl(publicId);
 
     // Create photo record
     const photo = await prisma.ridePhoto.create({
@@ -93,6 +96,7 @@ export async function POST(
         thumbnailUrl,
         width: width || null,
         height: height || null,
+        isVideo: isVideo || false,
         caption: caption?.trim() || null,
       },
       include: {
@@ -115,6 +119,7 @@ export async function POST(
       thumbnailUrl: photo.thumbnailUrl,
       width: photo.width,
       height: photo.height,
+      isVideo: photo.isVideo,
       caption: photo.caption,
       createdAt: photo.createdAt,
       user: {

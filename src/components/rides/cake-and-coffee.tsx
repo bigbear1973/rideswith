@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { formatDistanceToNow } from 'date-fns';
-import { Coffee, Camera, Send, Trash2, X, Loader2, ImagePlus } from 'lucide-react';
+import { Coffee, Camera, Send, Trash2, X, Loader2, ImagePlus, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +31,7 @@ interface Photo {
   width: number | null;
   height: number | null;
   caption: string | null;
+  isVideo: boolean;
   createdAt: string;
   user: {
     id: string;
@@ -134,30 +135,33 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
     }
   };
 
-  // Upload photo using unsigned upload preset
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload photo or video using unsigned upload preset
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log('[PhotoUpload] File selected:', file?.name, file?.size, file?.type);
+    console.log('[MediaUpload] File selected:', file?.name, file?.size, file?.type);
 
     if (!file) {
-      console.log('[PhotoUpload] No file selected');
+      console.log('[MediaUpload] No file selected');
       return;
     }
     if (!session?.user) {
-      console.log('[PhotoUpload] No user session');
+      console.log('[MediaUpload] No user session');
       alert('Please sign in to upload photos.');
       return;
     }
 
+    // Determine if it's a video or image
+    const isVideo = file.type.startsWith('video/');
+    const resourceType = isVideo ? 'video' : 'image';
+
     setIsUploading(true);
     try {
-      // Use unsigned upload with preset (simpler, no server signature needed)
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      console.log('[PhotoUpload] Cloud name:', cloudName || 'NOT SET');
+      console.log('[MediaUpload] Cloud name:', cloudName || 'NOT SET');
 
       if (!cloudName) {
-        console.error('[PhotoUpload] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME not configured');
-        alert('Photo upload not configured. The NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME environment variable is not set.');
+        console.error('[MediaUpload] NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME not configured');
+        alert('Upload not configured. The NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME environment variable is not set.');
         return;
       }
 
@@ -166,24 +170,24 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
       formData.append('upload_preset', 'ride_photos');
       formData.append('folder', 'ride-photos');
 
-      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-      console.log('[PhotoUpload] Uploading to:', uploadUrl);
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+      console.log('[MediaUpload] Uploading to:', uploadUrl);
 
       const uploadRes = await fetch(uploadUrl, { method: 'POST', body: formData });
-      console.log('[PhotoUpload] Cloudinary response status:', uploadRes.status);
+      console.log('[MediaUpload] Cloudinary response status:', uploadRes.status);
 
       if (!uploadRes.ok) {
         const errorData = await uploadRes.json();
-        console.error('[PhotoUpload] Cloudinary error:', JSON.stringify(errorData, null, 2));
+        console.error('[MediaUpload] Cloudinary error:', JSON.stringify(errorData, null, 2));
         alert(`Cloudinary upload failed: ${errorData.error?.message || JSON.stringify(errorData)}`);
         return;
       }
 
       const uploadData = await uploadRes.json();
-      console.log('[PhotoUpload] Cloudinary success:', uploadData.public_id, uploadData.secure_url);
+      console.log('[MediaUpload] Cloudinary success:', uploadData.public_id, uploadData.secure_url);
 
       // Save to database
-      console.log('[PhotoUpload] Saving to database for ride:', rideId);
+      console.log('[MediaUpload] Saving to database for ride:', rideId);
       const saveRes = await fetch(`/api/rides/${rideId}/photos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -192,22 +196,23 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
           url: uploadData.secure_url,
           width: uploadData.width,
           height: uploadData.height,
+          isVideo,
         }),
       });
-      console.log('[PhotoUpload] Database response status:', saveRes.status);
+      console.log('[MediaUpload] Database response status:', saveRes.status);
 
       if (saveRes.ok) {
         const photo = await saveRes.json();
-        console.log('[PhotoUpload] Photo saved:', photo.id);
+        console.log('[MediaUpload] Media saved:', photo.id);
         setPhotos([photo, ...photos]);
       } else {
         const errorData = await saveRes.json();
-        console.error('[PhotoUpload] Database save error:', JSON.stringify(errorData, null, 2));
-        alert(`Photo uploaded but failed to save: ${errorData.error || 'Unknown error'}`);
+        console.error('[MediaUpload] Database save error:', JSON.stringify(errorData, null, 2));
+        alert(`Media uploaded but failed to save: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('[PhotoUpload] Exception:', error);
-      alert(`Failed to upload photo: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('[MediaUpload] Exception:', error);
+      alert(`Failed to upload: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
       e.target.value = '';
@@ -284,8 +289,8 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
               <label className="cursor-pointer">
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
+                  accept="image/*,video/*"
+                  onChange={handleMediaUpload}
                   disabled={isUploading}
                   className="hidden"
                 />
@@ -296,7 +301,7 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
                     ) : (
                       <ImagePlus className="h-4 w-4 mr-2" />
                     )}
-                    Add Photo
+                    Add Photo/Video
                   </span>
                 </Button>
               </label>
@@ -324,6 +329,14 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
                     alt={photo.caption || 'Ride photo'}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   />
+                  {/* Video play indicator */}
+                  {photo.isVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-black/50 rounded-full p-2">
+                        <Play className="h-6 w-6 text-white fill-white" />
+                      </div>
+                    </div>
+                  )}
                   {(session?.user?.id === photo.user.id || isOrganizer) && (
                     <button
                       onClick={(e) => {
@@ -341,27 +354,37 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
           )}
         </div>
 
-        {/* Photo Lightbox */}
+        {/* Photo/Video Lightbox */}
         {selectedPhoto && (
           <div
             className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
             onClick={() => setSelectedPhoto(null)}
           >
             <button
-              className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full"
+              className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full z-10"
               onClick={() => setSelectedPhoto(null)}
             >
               <X className="h-6 w-6" />
             </button>
-            <img
-              src={selectedPhoto.url}
-              alt={selectedPhoto.caption || 'Ride photo'}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
+            {selectedPhoto.isVideo ? (
+              <video
+                src={selectedPhoto.url}
+                controls
+                autoPlay
+                className="max-w-full max-h-[90vh] rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <img
+                src={selectedPhoto.url}
+                alt={selectedPhoto.caption || 'Ride photo'}
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
             <div className="absolute bottom-4 left-4 right-4 text-center text-white">
               <p className="text-sm">
-                Photo by {selectedPhoto.user.name} &middot;{' '}
+                {selectedPhoto.isVideo ? 'Video' : 'Photo'} by {selectedPhoto.user.name} &middot;{' '}
                 {formatDistanceToNow(new Date(selectedPhoto.createdAt), { addSuffix: true })}
               </p>
             </div>
