@@ -547,18 +547,21 @@ export default function CreateRidePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="routeUrl">Route Link (Strava, Komoot, etc.)</Label>
+                <Label htmlFor="routeUrl">Route Link or Embed Code</Label>
                 <div className="relative">
                   <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="routeUrl"
-                    type="url"
-                    placeholder="https://www.strava.com/routes/..."
+                    type="text"
+                    placeholder="URL or paste embed code from Komoot, RideWithGPS..."
                     value={routeUrl}
                     onChange={(e) => setRouteUrl(e.target.value)}
                     className="pl-9"
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Paste a route URL or full iframe embed code from Komoot, RideWithGPS, etc.
+                </p>
               </div>
             </CardContent>
           </Card>
