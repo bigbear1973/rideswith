@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { RideMap } from '@/components/rides';
 import {
   Calendar,
   Clock,
@@ -185,18 +186,8 @@ export default async function RidePage({ params }: RidePageProps) {
               </CardContent>
             </Card>
 
-            {/* Map Placeholder */}
-            <Card className="overflow-hidden">
-              <div className="aspect-video bg-muted flex items-center justify-center">
-                <div className="text-center p-4">
-                  <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Map loading...</p>
-                </div>
-              </div>
-              <CardContent className="p-3 border-t">
-                <p className="text-sm text-muted-foreground">{ride.location.address}</p>
-              </CardContent>
-            </Card>
+            {/* Map */}
+            <RideMap location={ride.location} />
 
             {/* Details Section */}
             <div>
