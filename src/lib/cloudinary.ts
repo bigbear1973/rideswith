@@ -1,9 +1,12 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-// Get cloud name from env (supports both server and client-side naming)
-const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+// Cloud name - check both server and client env var names
+// IMPORTANT: NEXT_PUBLIC_ vars are NOT available server-side at runtime unless also set without prefix
+function getCloudName(): string {
+  return process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+}
 
-// Configure Cloudinary (only if credentials are available)
+// Configure Cloudinary (only if full credentials are available)
 if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -30,20 +33,22 @@ export async function deleteImage(publicId: string) {
 }
 
 // Generate thumbnail URL manually (doesn't require cloudinary SDK config)
-export function getThumbnailUrl(publicId: string) {
-  if (!CLOUD_NAME) {
-    console.error('No Cloudinary cloud name configured');
+export function getThumbnailUrl(publicId: string, cloudName?: string) {
+  const name = cloudName || getCloudName();
+  if (!name) {
+    console.error('No Cloudinary cloud name configured. Set CLOUDINARY_CLOUD_NAME env var.');
     return '';
   }
   // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/{public_id}
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_fill,w_400,h_300,q_auto,f_auto/${publicId}`;
+  return `https://res.cloudinary.com/${name}/image/upload/c_fill,w_400,h_300,q_auto,f_auto/${publicId}`;
 }
 
 // Get full-size optimized URL (max 1600px wide)
-export function getFullSizeUrl(publicId: string) {
-  if (!CLOUD_NAME) {
-    console.error('No Cloudinary cloud name configured');
+export function getFullSizeUrl(publicId: string, cloudName?: string) {
+  const name = cloudName || getCloudName();
+  if (!name) {
+    console.error('No Cloudinary cloud name configured. Set CLOUDINARY_CLOUD_NAME env var.');
     return '';
   }
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_1600,q_auto,f_auto/${publicId}`;
+  return `https://res.cloudinary.com/${name}/image/upload/c_limit,w_1600,q_auto,f_auto/${publicId}`;
 }
