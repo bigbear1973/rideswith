@@ -30,6 +30,7 @@ model User {
   chapters      ChapterMember[]
   rsvps         Rsvp[]
   brands        Brand[]
+  rideRoutes    RideRoute[]
 }
 
 model Account {
@@ -240,7 +241,23 @@ model Ride {
   chapterId String?
   chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
 
-  rsvps Rsvp[]
+  rsvps      Rsvp[]
+  routes     RideRoute[]  // Community-contributed route links
+}
+
+// Community-contributed route links (Komoot, RideWithGPS, Garmin, Strava, etc.)
+model RideRoute {
+  id        String   @id @default(cuid())
+  rideId    String
+  userId    String
+  platform  String   // e.g., "Komoot", "RideWithGPS", "Garmin", "Strava"
+  url       String   // URL or embed code
+  createdAt DateTime @default(now())
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([rideId, platform]) // One link per platform per ride
 }
 
 enum RidePace {
