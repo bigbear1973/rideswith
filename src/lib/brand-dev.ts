@@ -47,10 +47,32 @@ export interface BrandAssets {
 
 const BRAND_DEV_API_URL = "https://api.brand.dev/v1";
 
+interface BrandDevApiResponse {
+  status: string;
+  code: number;
+  brand: {
+    domain: string;
+    title?: string;
+    description?: string;
+    slogan?: string;
+    colors?: Array<{ hex: string; name: string }>;
+    logos?: Array<{
+      url: string;
+      mode: string;
+      type: "icon" | "logo";
+      resolution?: { width: number; height: number };
+    }>;
+    backdrops?: Array<{
+      url: string;
+      colors: Array<{ hex: string; name: string }>;
+    }>;
+  };
+}
+
 /**
  * Fetch brand assets from Brand.dev API
  *
- * @param domain - The domain to look up (e.g., "straede.cc")
+ * @param domain - The domain to look up (e.g., "rapha.cc")
  * @returns Brand assets or null if not found/error
  */
 export async function fetchBrandAssets(
@@ -71,14 +93,17 @@ export async function fetchBrandAssets(
     .toLowerCase();
 
   try {
-    const response = await fetch(`${BRAND_DEV_API_URL}/brand/${cleanDomain}`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      // Cache for 24 hours - brand assets don't change often
-      next: { revalidate: 86400 },
-    });
+    const response = await fetch(
+      `${BRAND_DEV_API_URL}/brand/retrieve?domain=${encodeURIComponent(cleanDomain)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        // Cache for 24 hours - brand assets don't change often
+        next: { revalidate: 86400 },
+      }
+    );
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -88,17 +113,32 @@ export async function fetchBrandAssets(
       throw new Error(`Brand.dev API error: ${response.status}`);
     }
 
-    const data: BrandDevResponse = await response.json();
+    const data: BrandDevApiResponse = await response.json();
+
+    if (data.status !== "ok" || !data.brand) {
+      console.log(`Brand.dev returned non-ok status for: ${cleanDomain}`);
+      return null;
+    }
+
+    const brand = data.brand;
+
+    // Find the best logo (prefer SVG or wide logo, then icon)
+    const logoImage = brand.logos?.find((l) => l.type === "logo") ||
+      brand.logos?.find((l) => l.type === "icon");
+    const iconImage = brand.logos?.find((l) => l.type === "icon");
+
+    // Get primary and secondary colors from the color array
+    const primaryColor = brand.colors?.[0]?.hex;
+    const secondaryColor = brand.colors?.[1]?.hex;
 
     // Transform to our internal format
     return {
-      name: data.name,
-      logo: data.logo?.url,
-      logoIcon: data.logo?.icon,
-      primaryColor: data.colors?.primary,
-      secondaryColor: data.colors?.secondary,
-      fonts: data.fonts,
-      description: data.description,
+      name: brand.title,
+      logo: logoImage?.url,
+      logoIcon: iconImage?.url,
+      primaryColor,
+      secondaryColor,
+      description: brand.description,
     };
   } catch (error) {
     console.error("Error fetching brand assets:", error);
