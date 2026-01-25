@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { MapPin, Calendar, Clock, Users, X, Loader2, Navigation, Filter } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, X, Loader2, Navigation, Filter, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -519,6 +519,12 @@ export default function DiscoverPage() {
                   <MapPin className="h-10 w-10 mx-auto mb-3 opacity-50" />
                   <p className="font-medium">No rides found</p>
                   <p className="text-sm mt-1">Try increasing the search radius or changing location</p>
+                  <Link href="/discover/past" className="mt-4 inline-block">
+                    <Button variant="outline" size="sm">
+                      <History className="h-4 w-4 mr-2" />
+                      Browse past rides
+                    </Button>
+                  </Link>
                 </div>
               ) : (
                 filteredRides.map((ride) => (
@@ -556,6 +562,18 @@ export default function DiscoverPage() {
                     </Card>
                   </Link>
                 ))
+              )}
+
+              {/* Link to past rides archive */}
+              {!isLoadingRides && filteredRides.length > 0 && (
+                <div className="pt-4 pb-2 border-t mt-4">
+                  <Link href="/discover/past">
+                    <Button variant="ghost" size="sm" className="w-full text-muted-foreground hover:text-foreground">
+                      <History className="h-4 w-4 mr-2" />
+                      Browse past rides archive
+                    </Button>
+                  </Link>
+                </div>
               )}
             </div>
           </ScrollArea>

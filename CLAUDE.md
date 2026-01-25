@@ -107,19 +107,23 @@ Natural language / voice input to auto-fill ride details:
 | Route | File | Status |
 |-------|------|--------|
 | `/` | `src/app/page.tsx` | Working (mock data) |
-| `/discover` | `src/app/discover/page.tsx` | Working (mock data) |
+| `/discover` | `src/app/discover/page.tsx` | Fully working (fetches from DB) |
+| `/discover/past` | `src/app/discover/past/page.tsx` | Past rides archive |
 | `/create` | `src/app/create/page.tsx` | Fully working (requires auth) |
 | `/settings` | `src/app/settings/page.tsx` | Fully working |
+| `/profile` | `src/app/profile/page.tsx` | User profile with ride history |
+| `/profile/edit` | `src/app/profile/edit/page.tsx` | Edit profile with custom URL |
+| `/u/[slug]` | `src/app/u/[slug]/page.tsx` | Public profile by custom URL |
 | `/auth/signin` | `src/app/auth/signin/page.tsx` | Working |
 | `/auth/verify` | `src/app/auth/verify/page.tsx` | Working |
 | `/auth/error` | `src/app/auth/error/page.tsx` | Working |
 | `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (fetches from DB) |
+| `/rides/[id]/edit` | `src/app/rides/[id]/edit/page.tsx` | Edit/delete rides |
 | `/organizers/[id]` | `src/app/organizers/[id]/page.tsx` | Placeholder only |
 
 ### Broken Links (404s)
 | Link | Referenced In | Priority |
 |------|---------------|----------|
-| `/profile` | User menu dropdown | HIGH - visible to logged-in users |
 | `/organizers/create` | Homepage CTA + Footer | HIGH - main conversion path |
 | `/privacy` | Footer + Sign-in page | MEDIUM - legal requirement |
 | `/terms` | Footer + Sign-in page | MEDIUM - legal requirement |
@@ -131,7 +135,11 @@ Natural language / voice input to auto-fill ride details:
 | Page | Current State | What's Needed |
 |------|---------------|---------------|
 | `/create` | ✅ DONE | Full form with location search, wired to API |
-| `/profile` | Does not exist | Create user profile page |
+| `/profile` | ✅ DONE | User profile with ride history and stats |
+| `/profile/edit` | ✅ DONE | Edit profile including custom URL slug |
+| `/u/[slug]` | ✅ DONE | Public profile pages |
+| `/rides/[id]/edit` | ✅ DONE | Edit and delete rides |
+| `/discover/past` | ✅ DONE | Past rides archive with filters |
 | `/organizers/create` | Does not exist | Create organizer signup flow |
 | `/organizers/[id]` | Shows ID only | Full organizer profile with rides |
 | `/rides/[id]` | ✅ DONE | Fetches from database |
@@ -141,17 +149,22 @@ Natural language / voice input to auto-fill ride details:
 ## Immediate TODO (Fix Basics First)
 
 ### 1. Fix Critical 404s
-- [ ] Create `/profile` page (user profile)
+- [x] Create `/profile` page (user profile)
 - [ ] Create `/organizers/create` page (organizer signup)
 - [ ] Create `/privacy` page (privacy policy)
 - [ ] Create `/terms` page (terms of service)
 
 ### 2. Complete Placeholder Pages
 - [x] `/create` - Full form with location search, API endpoint
+- [x] `/profile` - User profile with ride history and stats
+- [x] `/profile/edit` - Edit profile with custom slug
+- [x] `/u/[slug]` - Public profile pages
+- [x] `/rides/[id]/edit` - Edit and delete rides
+- [x] `/discover/past` - Past rides archive
 - [ ] `/organizers/[id]` - Fetch real organizer data, show rides
 
 ### 3. Wire Up Database
-- [ ] `/discover` - Fetch rides from DB instead of mock data
+- [x] `/discover` - Fetch rides from DB instead of mock data
 - [x] `/rides/[id]` - Fetch ride details from DB
 - [ ] Homepage - Fetch featured rides from DB
 
@@ -178,20 +191,26 @@ Natural language / voice input to auto-fill ride details:
 - [x] Unit switcher (km/mi) with context
 - [x] C40.org-inspired redesign (green/cyan/black, bold typography, outlined buttons)
 
-### Phase 3: Fix Basics (IN PROGRESS)
-- [ ] Create missing pages (profile, organizers/create, privacy, terms)
+### Phase 3: Fix Basics (MOSTLY COMPLETE)
+- [x] Create profile pages (/profile, /profile/edit, /u/[slug])
+- [ ] Create missing pages (organizers/create, privacy, terms)
 - [x] Enable create ride form
 - [ ] Build organizer profile page
-- [ ] Wire pages to database (discover, rides, homepage)
+- [x] Wire pages to database (discover, rides)
+- [ ] Wire homepage to database
 
 ### Phase 4: Backend APIs
 - [x] GET/POST /api/rides - List and create rides
+- [x] GET/PUT/DELETE /api/rides/[id] - Individual ride operations
+- [x] GET /api/rides/past - Past rides for archive
+- [x] GET/PUT /api/profile - User profile management
+- [x] GET /api/profile/check-slug - Slug availability check
 - [ ] GET/POST /api/rsvps - Manage attendance
 - [ ] GET/POST /api/organizers - Organizer profiles
 
 ### Phase 5: Ride Management
 - [x] Create ride form (full implementation)
-- [ ] Edit/delete rides
+- [x] Edit/delete rides
 - [ ] RSVP functionality (going/maybe/not going)
 - [ ] Attendee list on ride detail
 - [ ] Organizer dashboard
@@ -211,9 +230,10 @@ Natural language / voice input to auto-fill ride details:
 ### Phase 8: Discovery & Social
 - [ ] Advanced search (location, date, pace)
 - [ ] Follow organizers
-- [ ] Ride history
-- [ ] User ride stats
+- [x] Ride history (on profile page)
+- [x] User ride stats (on profile page)
 - [ ] Social sharing
+- [x] Past rides archive (/discover/past)
 
 ---
 
@@ -224,14 +244,17 @@ Natural language / voice input to auto-fill ride details:
 - All UI pages rendered (responsive)
 - Settings persistence (localStorage)
 - Map with location search
-- Filter UI on discover page
+- Filter UI on discover page (with working distance + pace filters)
+- Discover page fetches from database
+- User profile pages with ride history and stats
+- Public profile URLs (/u/username)
+- Edit/delete rides for organizers
+- Past rides archive
 
 **Mock Data (not wired to DB):**
 - Homepage rides (5 hardcoded)
-- Discover page rides (5 Irish locations)
 
 **Broken (404s):**
-- /profile
 - /organizers/create
 - /privacy, /terms
 - /about, /how-it-works, /about/organizers
@@ -242,43 +265,47 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (rsvps, organizers)
 
 **Recently Completed:**
-- Create ride form (full implementation with location search)
-- GET/POST /api/rides endpoints
-- Auto-creates organizer for first-time ride creators
-- C40.org-inspired site redesign (green/cyan/black color scheme, bold typography)
-- New UI components: StatsBanner, ColoredSection, FeatureCard, SplitHero
-- C40 button variants (outlined, uppercase, hover fills)
-- Homepage redesign with stats banners, colored sections, feature grids
-- Discover page styling updates
-- Ride detail page now fetches from database (was mock data)
+- Discover page wired to database (was mock data)
+- Fixed distance dropdown filter (was not applying filter)
+- Fixed z-index issues (nav menu, filters appearing behind Leaflet map)
+- User profile system (/profile, /profile/edit, /u/[slug])
+- Profile includes ride history, stats, custom URL slugs
+- Edit ride functionality with delete confirmation
+- Modern date/time pickers (shadcn calendar + popover)
+- Past rides archive (/discover/past) with time range and pace filters
 
-**Next Priority:** Wire discover page to database, fix UI/UX bugs, build profile pages.
+**Next Priority:** Build organizer profile page, add RSVP functionality, wire homepage to database.
 
 ---
 
 ## Active TODO List
 
-### High Priority (Bugs)
-- [ ] Fix discover page: distance dropdown doesn't filter rides
-- [ ] Fix discover page: Pace/Distance filter buttons hidden behind map on mobile (z-index)
-- [ ] Fix nav menu dropdown appearing behind map (Leaflet z-index issue)
-- [ ] Fix: newly created rides not showing on discover page/map (still using mock data)
-- [ ] Wire discover page to fetch rides from database
+### Completed Recently
+- [x] Fix discover page: distance dropdown doesn't filter rides
+- [x] Fix discover page: Pace/Distance filter buttons hidden behind map on mobile (z-index)
+- [x] Fix nav menu dropdown appearing behind map (Leaflet z-index issue)
+- [x] Fix: newly created rides not showing on discover page/map (wired to DB)
+- [x] Wire discover page to fetch rides from database
+- [x] Add edit ride functionality after creation
+- [x] Modernize date/time picker on create ride page
+- [x] Add ride history to user profile page
+- [x] Hide rides older than 14 days from discover, add past rides archive view
+- [x] Build /profile page with user details
+- [x] Each user should have a unique URL (/u/username)
+- [x] Allow users to edit their personalized URL/slug
 
-### Medium Priority (Features)
-- [ ] Add edit ride functionality after creation
-- [ ] Modernize date/time picker on create ride page
-- [ ] Add ride history to user profile page
-- [ ] Hide rides older than 14 days from discover, add past rides archive view
+### High Priority (Next Up)
+- [ ] Build organizer profile page (/organizers/[id])
+- [ ] Add RSVP functionality (going/maybe/not going)
+- [ ] Wire homepage to fetch featured rides from database
 
-### Profile System
-- [ ] Build /profile page with user details
-- [ ] Each user should have a unique URL (e.g., /u/username)
-- [ ] Allow users to edit their personalized URL/slug
+### Medium Priority
+- [ ] Create /organizers/create page (organizer signup)
+- [ ] Create /privacy page (privacy policy)
+- [ ] Create /terms page (terms of service)
 
-### Known Leaflet Z-Index Issues
-The Leaflet map uses high z-index values that cause UI elements to appear behind it:
-- Navigation dropdown menu
-- Filter dropdowns (pace, distance)
-- Mobile filter buttons
-Solution: Add higher z-index values to these elements or use Leaflet's `zIndexOffset`.
+### Leaflet Z-Index (RESOLVED)
+Fixed by adding higher z-index values to UI elements:
+- Navbar: z-[1000]
+- Dropdown menus: z-[1100]
+- Mobile sheet: z-[1200]
