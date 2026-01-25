@@ -134,32 +134,40 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
     }
   };
 
-  // Upload photo
+  // Upload photo using unsigned upload preset
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !session?.user) return;
 
     setIsUploading(true);
     try {
-      // Get upload signature
-      const sigRes = await fetch('/api/upload/signature');
-      if (!sigRes.ok) throw new Error('Failed to get upload signature');
-      const { timestamp, signature, cloudName, apiKey, folder } = await sigRes.json();
+      // Use unsigned upload with preset (simpler, no server signature needed)
+      // You need to create an "unsigned" upload preset named "ride_photos" in Cloudinary dashboard
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-      // Upload to Cloudinary
+      if (!cloudName) {
+        console.error('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME not configured');
+        alert('Photo upload not configured. Please contact support.');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', timestamp.toString());
-      formData.append('signature', signature);
-      formData.append('folder', folder);
+      formData.append('upload_preset', 'ride_photos'); // Unsigned preset
+      formData.append('folder', 'ride-photos');
 
       const uploadRes = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         { method: 'POST', body: formData }
       );
 
-      if (!uploadRes.ok) throw new Error('Failed to upload to Cloudinary');
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json();
+        console.error('Cloudinary upload error:', errorData);
+        alert('Failed to upload photo. Please try again.');
+        return;
+      }
+
       const uploadData = await uploadRes.json();
 
       // Save to database
@@ -177,9 +185,14 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
       if (saveRes.ok) {
         const photo = await saveRes.json();
         setPhotos([photo, ...photos]);
+      } else {
+        const errorData = await saveRes.json();
+        console.error('Failed to save photo:', errorData);
+        alert('Photo uploaded but failed to save. Please try again.');
       }
     } catch (error) {
       console.error('Failed to upload photo:', error);
+      alert('Failed to upload photo. Please try again.');
     } finally {
       setIsUploading(false);
       // Reset input
