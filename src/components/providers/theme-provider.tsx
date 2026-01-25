@@ -98,11 +98,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.removeProperty('--brand-secondary');
   };
 
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   return (
     <ThemeContext.Provider
       value={{ theme, setTheme, resolvedTheme, brandColors, setBrandColors, resetBrand }}
