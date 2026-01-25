@@ -17,7 +17,7 @@ Cycling group ride discovery and management platform.
 
 - `src/lib/auth.ts` - Auth.js config with custom Resend email provider
 - `src/lib/prisma.ts` - Prisma client singleton
-- `src/contexts/UnitsContext.tsx` - km/mi unit preference context
+- `src/components/providers/units-provider.tsx` - km/mi unit preference context
 - `prisma/schema.prisma` - Database schema (User, Organizer, Ride, Rsvp models)
 - `railway.json` - Railway deployment config
 
@@ -41,14 +41,209 @@ npm run db:studio    # Open Prisma Studio
 
 ## Design Notes
 
-- Meetup-inspired UI with green (#16a34a) primary color
 - Mobile-first responsive design
 - Supports km/mi unit switching (stored in localStorage)
 - Organizers can have custom branding (colors, logos)
 
-## Current State
+### Design Inspiration: C40.org
+Key elements to adopt from https://www.c40.org/:
 
-- Auth with magic links working
-- Homepage with ride cards (static data for now)
-- Discover page with map view
-- Unit switcher in navbar
+**Color Palette:**
+- Primary: Vibrant green (#00D26A or similar) - used for stats banners, CTAs
+- Secondary: Cyan/teal (#00B8D4) - used for feature sections
+- Accent: Black (#000) for contrast sections
+- Background: Clean white with generous whitespace
+
+**Typography:**
+- Bold, impactful headlines (large font sizes, strong weight)
+- Clear hierarchy with size and weight variations
+- Sans-serif throughout for modern feel
+
+**Layout Patterns:**
+- Split hero sections: image left, content right (or vice versa)
+- Full-width colored bands for visual breaks
+- Card grids on colored backgrounds (like the 4-column feature cards on cyan)
+- Generous padding and whitespace between sections
+- Stats displayed prominently with large numbers
+
+**Components to Implement:**
+- [ ] Stats banner (green background, big numbers) - e.g., "500+ rides", "10,000+ km ridden"
+- [ ] Split hero sections with illustration/photo + text
+- [ ] Feature cards on colored background (pace categories, ride types)
+- [ ] Scrolling marquee of organizer/city names
+- [ ] Bold section headers with supporting text
+- [ ] Outlined buttons with hover fills (like "LEARN MORE", "FIND OUT MORE")
+
+**Button Styles:**
+- Outlined/bordered buttons (not filled)
+- Black border on white, white border on dark backgrounds
+- Uppercase text for CTAs
+- Hover: fill with contrasting color
+
+---
+
+## Planned Integrations
+
+### Brand.dev (https://www.brand.dev/)
+Use Brand.dev API to auto-fetch organizer branding:
+- Logo, colors, fonts from company domain
+- Auto-populate organizer profile when creating
+- Apply brand colors to organizer's ride pages
+- Environment variable: `BRAND_DEV_API_KEY`
+
+### AI-Assisted Ride Creation
+Natural language / voice input to auto-fill ride details:
+- User describes ride: "Saturday morning coffee ride, 45km, starting at Phoenix Park at 8am, moderate pace, mostly flat roads"
+- AI extracts: title, distance, location, time, pace, terrain
+- Could use Claude API or OpenAI for parsing
+- Optional voice input via Web Speech API
+- Environment variable: `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
+
+---
+
+## Site Structure & 404 Analysis
+
+### Existing Pages (Working)
+| Route | File | Status |
+|-------|------|--------|
+| `/` | `src/app/page.tsx` | Working (mock data) |
+| `/discover` | `src/app/discover/page.tsx` | Working (mock data) |
+| `/create` | `src/app/create/page.tsx` | Fully working (requires auth) |
+| `/settings` | `src/app/settings/page.tsx` | Fully working |
+| `/auth/signin` | `src/app/auth/signin/page.tsx` | Working |
+| `/auth/verify` | `src/app/auth/verify/page.tsx` | Working |
+| `/auth/error` | `src/app/auth/error/page.tsx` | Working |
+| `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (mock data) |
+| `/organizers/[id]` | `src/app/organizers/[id]/page.tsx` | Placeholder only |
+
+### Broken Links (404s)
+| Link | Referenced In | Priority |
+|------|---------------|----------|
+| `/profile` | User menu dropdown | HIGH - visible to logged-in users |
+| `/organizers/create` | Homepage CTA + Footer | HIGH - main conversion path |
+| `/privacy` | Footer + Sign-in page | MEDIUM - legal requirement |
+| `/terms` | Footer + Sign-in page | MEDIUM - legal requirement |
+| `/about` | Footer | LOW |
+| `/how-it-works` | Footer | LOW |
+| `/about/organizers` | Homepage "Learn more" | LOW |
+
+### Pages Needing Work
+| Page | Current State | What's Needed |
+|------|---------------|---------------|
+| `/create` | ✅ DONE | Full form with location search, wired to API |
+| `/profile` | Does not exist | Create user profile page |
+| `/organizers/create` | Does not exist | Create organizer signup flow |
+| `/organizers/[id]` | Shows ID only | Full organizer profile with rides |
+| `/rides/[id]` | Hardcoded mock data | Fetch from database |
+
+---
+
+## Immediate TODO (Fix Basics First)
+
+### 1. Fix Critical 404s
+- [ ] Create `/profile` page (user profile)
+- [ ] Create `/organizers/create` page (organizer signup)
+- [ ] Create `/privacy` page (privacy policy)
+- [ ] Create `/terms` page (terms of service)
+
+### 2. Complete Placeholder Pages
+- [x] `/create` - Full form with location search, API endpoint
+- [ ] `/organizers/[id]` - Fetch real organizer data, show rides
+
+### 3. Wire Up Database
+- [ ] `/discover` - Fetch rides from DB instead of mock data
+- [ ] `/rides/[id]` - Fetch ride details from DB
+- [ ] Homepage - Fetch featured rides from DB
+
+---
+
+## Development Roadmap
+
+### Phase 1: Foundation (COMPLETE)
+- [x] Next.js 16 + TypeScript setup
+- [x] PostgreSQL + Prisma ORM
+- [x] Auth.js magic link authentication via Resend
+- [x] shadcn/ui component library
+- [x] Dark/light theme support
+- [x] Railway deployment pipeline
+- [x] Database schema (User, Organizer, Ride, RSVP models)
+
+### Phase 2: Core UI (COMPLETE)
+- [x] Responsive navbar with user menu
+- [x] Homepage with hero, featured rides, pace categories
+- [x] Discover page with Leaflet map + filters
+- [x] Ride detail page layout
+- [x] Settings page (units, language, timezone)
+- [x] Auth pages (signin, verify, error)
+- [x] Unit switcher (km/mi) with context
+
+### Phase 3: Fix Basics (IN PROGRESS)
+- [ ] Create missing pages (profile, organizers/create, privacy, terms)
+- [x] Enable create ride form
+- [ ] Build organizer profile page
+- [ ] Wire pages to database (discover, rides, homepage)
+
+### Phase 4: Backend APIs
+- [x] GET/POST /api/rides - List and create rides
+- [ ] GET/POST /api/rsvps - Manage attendance
+- [ ] GET/POST /api/organizers - Organizer profiles
+
+### Phase 5: Ride Management
+- [x] Create ride form (full implementation)
+- [ ] Edit/delete rides
+- [ ] RSVP functionality (going/maybe/not going)
+- [ ] Attendee list on ride detail
+- [ ] Organizer dashboard
+
+### Phase 6: Organizer Features
+- [ ] Member management (invite, roles)
+- [ ] Organizer branding (logo, colors)
+- [ ] Organizer ride calendar
+
+### Phase 7: Enhanced Features
+- [ ] GPX route upload + map visualization
+- [ ] Photo upload for rides
+- [ ] Recurring rides
+- [ ] Ride series/events
+- [ ] Email notifications (ride reminders, updates)
+
+### Phase 8: Discovery & Social
+- [ ] Advanced search (location, date, pace)
+- [ ] Follow organizers
+- [ ] Ride history
+- [ ] User ride stats
+- [ ] Social sharing
+
+---
+
+## Current Status Summary
+
+**Working:**
+- Authentication (magic link emails)
+- All UI pages rendered (responsive)
+- Settings persistence (localStorage)
+- Map with location search
+- Filter UI on discover page
+
+**Mock Data (not wired to DB):**
+- Homepage rides (5 hardcoded)
+- Discover page rides (5 Irish locations)
+- Ride detail page (single mock ride)
+
+**Broken (404s):**
+- /profile
+- /organizers/create
+- /privacy, /terms
+- /about, /how-it-works, /about/organizers
+
+**Placeholder/Disabled:**
+- Organizer detail page (shows ID only)
+- RSVP buttons
+- Some API endpoints (rsvps, organizers)
+
+**Recently Completed:**
+- Create ride form (full implementation with location search)
+- GET/POST /api/rides endpoints
+- Auto-creates organizer for first-time ride creators
+
+**Next Priority:** Wire discover page and ride detail page to database, fix remaining 404s.

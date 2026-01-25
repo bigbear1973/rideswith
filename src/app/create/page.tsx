@@ -1,51 +1,580 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
+import {
+  MapPin,
+  Calendar,
+  Route,
+  Users,
+  Loader2,
+  Search,
+  ChevronLeft,
+  Link as LinkIcon,
+  Euro,
+} from 'lucide-react';
+import { useUnits } from '@/components/providers/units-provider';
+
+interface LocationResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
+const PACE_OPTIONS = [
+  { value: 'CASUAL', label: 'Casual', desc: '< 20 km/h' },
+  { value: 'MODERATE', label: 'Moderate', desc: '20-28 km/h' },
+  { value: 'FAST', label: 'Fast', desc: '28-35 km/h' },
+  { value: 'RACE', label: 'Race', desc: '> 35 km/h' },
+];
+
+const TERRAIN_OPTIONS = [
+  'Road',
+  'Gravel',
+  'Mixed (Road & Gravel)',
+  'Mixed (Road & Cycle Path)',
+  'Mountain Bike',
+  'Cycle Path Only',
+];
+
 export default function CreateRidePage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const { unitSystem } = useUnits();
+
+  // Form state
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [locationName, setLocationName] = useState('');
+  const [locationAddress, setLocationAddress] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [distance, setDistance] = useState('');
+  const [elevation, setElevation] = useState('');
+  const [pace, setPace] = useState('MODERATE');
+  const [terrain, setTerrain] = useState('');
+  const [maxAttendees, setMaxAttendees] = useState('');
+  const [routeUrl, setRouteUrl] = useState('');
+  const [isFree, setIsFree] = useState(true);
+  const [price, setPrice] = useState('');
+
+  // Location search state
+  const [locationSearch, setLocationSearch] = useState('');
+  const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showLocationResults, setShowLocationResults] = useState(false);
+
+  // Form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  // Redirect to sign in if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin?callbackUrl=/create');
+    }
+  }, [status, router]);
+
+  // Location search with Nominatim
+  const searchLocation = async (query: string) => {
+    if (query.length < 3) {
+      setLocationResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
+        {
+          headers: {
+            'User-Agent': 'GroupRide App',
+          },
+        }
+      );
+      const data = await response.json();
+      setLocationResults(data);
+      setShowLocationResults(true);
+    } catch (err) {
+      console.error('Location search error:', err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced location search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (locationSearch) {
+        searchLocation(locationSearch);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [locationSearch]);
+
+  const selectLocation = (result: LocationResult) => {
+    // Extract a shorter name from the full display name
+    const parts = result.display_name.split(',');
+    const shortName = parts.slice(0, 2).join(',').trim();
+
+    setLocationName(shortName);
+    setLocationAddress(result.display_name);
+    setLatitude(parseFloat(result.lat));
+    setLongitude(parseFloat(result.lon));
+    setLocationSearch('');
+    setShowLocationResults(false);
+    setLocationResults([]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // Validation
+    if (!title.trim()) {
+      setError('Please enter a ride title');
+      return;
+    }
+    if (!date) {
+      setError('Please select a date');
+      return;
+    }
+    if (!startTime) {
+      setError('Please select a start time');
+      return;
+    }
+    if (!latitude || !longitude) {
+      setError('Please select a meeting location');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Combine date and time into ISO string
+      const dateTime = new Date(`${date}T${startTime}`);
+      const endDateTime = endTime ? new Date(`${date}T${endTime}`) : null;
+
+      const response = await fetch('/api/rides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim() || null,
+          date: dateTime.toISOString(),
+          endTime: endDateTime?.toISOString() || null,
+          locationName,
+          locationAddress,
+          latitude,
+          longitude,
+          distance: distance ? parseFloat(distance) : null,
+          elevation: elevation ? parseFloat(elevation) : null,
+          pace,
+          terrain: terrain || null,
+          maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
+          routeUrl: routeUrl.trim() || null,
+          isFree,
+          price: !isFree && price ? parseFloat(price) : null,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create ride');
+      }
+
+      const ride = await response.json();
+      router.push(`/rides/${ride.id}`);
+    } catch (err) {
+      console.error('Create ride error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create ride');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Show loading while checking auth
+  if (status === 'loading') {
+    return (
+      <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Don't render form if not authenticated (will redirect)
+  if (status === 'unauthenticated') {
+    return null;
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Create a Ride</h1>
-      <p className="text-gray-600 mb-8">
-        Organize a group ride and share it with the cycling community.
-      </p>
-
-      <div className="bg-white border rounded-lg p-6">
-        <p className="text-gray-500">Ride creation form will be implemented here.</p>
-
-        <div className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Ride Title</label>
-            <input
-              type="text"
-              placeholder="Saturday Morning Coffee Ride"
-              className="w-full px-3 py-2 border rounded-md"
-              disabled
-            />
+    <div className="min-h-screen pb-8">
+      {/* Header */}
+      <div className="sticky top-14 z-30 bg-background border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/discover">
+                <ChevronLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <h1 className="text-lg font-semibold">Create a Ride</h1>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Date & Time</label>
-            <input
-              type="datetime-local"
-              className="w-full px-3 py-2 border rounded-md"
-              disabled
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Meeting Location</label>
-            <input
-              type="text"
-              placeholder="Start location address"
-              className="w-full px-3 py-2 border rounded-md"
-              disabled
-            />
-          </div>
-
-          <button
-            disabled
-            className="w-full bg-blue-600 text-white py-2 rounded-md opacity-50 cursor-not-allowed"
-          >
-            Create Ride (Coming Soon)
-          </button>
         </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Basic Info</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Ride Title *</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g., Sunday Morning Social"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <textarea
+                  id="description"
+                  placeholder="Tell riders what to expect - route highlights, what to bring, coffee stops, etc."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border rounded-md bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Date & Time */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Date & Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Date *</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startTime">Start Time *</Label>
+                  <Input
+                    id="startTime"
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endTime">End Time (estimated)</Label>
+                  <Input
+                    id="endTime"
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Location */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Meeting Location
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="locationSearch">Search Location *</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="locationSearch"
+                    placeholder="Search for a location..."
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                  {isSearching && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Location search results */}
+                {showLocationResults && locationResults.length > 0 && (
+                  <div className="border rounded-md bg-background shadow-lg max-h-60 overflow-y-auto">
+                    {locationResults.map((result) => (
+                      <button
+                        key={result.place_id}
+                        type="button"
+                        onClick={() => selectLocation(result)}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-muted border-b last:border-b-0"
+                      >
+                        <p className="font-medium truncate">
+                          {result.display_name.split(',')[0]}
+                        </p>
+                        <p className="text-muted-foreground text-xs truncate">
+                          {result.display_name}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected location display */}
+              {latitude && longitude && (
+                <div className="p-3 bg-muted rounded-md">
+                  <p className="font-medium">{locationName}</p>
+                  <p className="text-sm text-muted-foreground">{locationAddress}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Ride Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Route className="h-5 w-5" />
+                Ride Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="distance">
+                    Distance ({unitSystem === 'metric' ? 'km' : 'mi'})
+                  </Label>
+                  <Input
+                    id="distance"
+                    type="number"
+                    placeholder="e.g., 45"
+                    value={distance}
+                    onChange={(e) => setDistance(e.target.value)}
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="elevation">
+                    Elevation ({unitSystem === 'metric' ? 'm' : 'ft'})
+                  </Label>
+                  <Input
+                    id="elevation"
+                    type="number"
+                    placeholder="e.g., 320"
+                    value={elevation}
+                    onChange={(e) => setElevation(e.target.value)}
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pace *</Label>
+                <RadioGroup
+                  value={pace}
+                  onValueChange={setPace}
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {PACE_OPTIONS.map((option) => (
+                    <Label
+                      key={option.value}
+                      htmlFor={option.value}
+                      className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                        pace === option.value
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <RadioGroupItem value={option.value} id={option.value} />
+                      <div>
+                        <p className="font-medium">{option.label}</p>
+                        <p className="text-xs text-muted-foreground">{option.desc}</p>
+                      </div>
+                    </Label>
+                  ))}
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="terrain">Terrain</Label>
+                <Select value={terrain} onValueChange={setTerrain}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select terrain type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TERRAIN_OPTIONS.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="routeUrl">Route Link (Strava, Komoot, etc.)</Label>
+                <div className="relative">
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="routeUrl"
+                    type="url"
+                    placeholder="https://www.strava.com/routes/..."
+                    value={routeUrl}
+                    onChange={(e) => setRouteUrl(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Capacity & Pricing */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Capacity & Pricing
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxAttendees">Maximum Attendees</Label>
+                <Input
+                  id="maxAttendees"
+                  type="number"
+                  placeholder="Leave blank for unlimited"
+                  value={maxAttendees}
+                  onChange={(e) => setMaxAttendees(e.target.value)}
+                  min="1"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Label>Pricing</Label>
+                <RadioGroup
+                  value={isFree ? 'free' : 'paid'}
+                  onValueChange={(v) => setIsFree(v === 'free')}
+                  className="flex gap-4"
+                >
+                  <Label
+                    htmlFor="free"
+                    className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer flex-1 ${
+                      isFree ? 'border-primary bg-primary/5' : 'hover:bg-muted'
+                    }`}
+                  >
+                    <RadioGroupItem value="free" id="free" />
+                    <span>Free</span>
+                  </Label>
+                  <Label
+                    htmlFor="paid"
+                    className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer flex-1 ${
+                      !isFree ? 'border-primary bg-primary/5' : 'hover:bg-muted'
+                    }`}
+                  >
+                    <RadioGroupItem value="paid" id="paid" />
+                    <span>Paid</span>
+                  </Label>
+                </RadioGroup>
+
+                {!isFree && (
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Price (EUR)</Label>
+                    <div className="relative">
+                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="price"
+                        type="number"
+                        placeholder="0.00"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        min="0"
+                        step="0.01"
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Error message */}
+          {error && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+
+          {/* Submit */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Ride'
+              )}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );
