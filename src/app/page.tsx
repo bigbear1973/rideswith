@@ -1,25 +1,24 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Users, ArrowRight, Search, Route, Camera } from 'lucide-react';
+import { MapPin, Users, ArrowRight, Search, Route, Camera } from 'lucide-react';
+import { useUnits } from '@/components/providers/units-provider';
 
 // Curated Unsplash images for consistent cycling theme
 const IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80', // Group of cyclists on road
-  ridesNearYou: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80', // Cyclists in nature
-  casual: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=400&q=80', // Relaxed cycling
-  moderate: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&q=80', // Road cycling
-  fast: 'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&q=80', // Fast cycling
-  race: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=400&q=80', // Racing cyclists
-  organizer: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', // Cycling club/group
-  ride1: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80', // Morning ride
-  ride2: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80', // Coastal cycling
-  ride3: 'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80', // Urban cycling
+  hero: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80',
+  casual: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=400&q=80',
+  moderate: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&q=80',
+  fast: 'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&q=80',
+  race: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=400&q=80',
+  organizer: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
 };
 
-// Mock data for featured rides
+// Mock data for featured rides - distances in km
 const FEATURED_RIDES = [
   {
     id: '1',
@@ -28,7 +27,7 @@ const FEATURED_RIDES = [
     date: 'Sun, Feb 2',
     time: '8:00 AM',
     location: 'Phoenix Park',
-    distance: '45 km',
+    distanceKm: 45,
     pace: 'moderate',
     attendees: 23,
     image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80',
@@ -40,7 +39,7 @@ const FEATURED_RIDES = [
     date: 'Sat, Feb 1',
     time: '7:30 AM',
     location: 'Bray Seafront',
-    distance: '80 km',
+    distanceKm: 80,
     pace: 'fast',
     attendees: 15,
     image: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80',
@@ -52,7 +51,7 @@ const FEATURED_RIDES = [
     date: 'Sun, Feb 2',
     time: '9:30 AM',
     location: 'Dun Laoghaire Pier',
-    distance: '30 km',
+    distanceKm: 30,
     pace: 'casual',
     attendees: 31,
     image: 'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80',
@@ -66,7 +65,28 @@ const PACE_STYLES: Record<string, string> = {
   race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
+// Pace descriptions with speed ranges
+const PACE_CATEGORIES = [
+  { name: 'Casual', speedKmh: { min: 0, max: 20 }, image: IMAGES.casual, overlay: 'from-green-600/80' },
+  { name: 'Moderate', speedKmh: { min: 20, max: 28 }, image: IMAGES.moderate, overlay: 'from-blue-600/80' },
+  { name: 'Fast', speedKmh: { min: 28, max: 35 }, image: IMAGES.fast, overlay: 'from-amber-600/80' },
+  { name: 'Race', speedKmh: { min: 35, max: 100 }, image: IMAGES.race, overlay: 'from-red-600/80' },
+];
+
 export default function HomePage() {
+  const { formatDistance, formatSpeed } = useUnits();
+
+  // Format pace description based on unit system
+  const formatPaceDesc = (cat: typeof PACE_CATEGORIES[0]) => {
+    if (cat.speedKmh.min === 0) {
+      return `< ${formatSpeed(cat.speedKmh.max)}`;
+    }
+    if (cat.speedKmh.max === 100) {
+      return `> ${formatSpeed(cat.speedKmh.min)}`;
+    }
+    return `${formatSpeed(cat.speedKmh.min).replace(/\s\w+$/, '')}-${formatSpeed(cat.speedKmh.max)}`;
+  };
+
   return (
     <div className="flex flex-col">
       {/* Hero Section - Mobile-first */}
@@ -176,7 +196,7 @@ export default function HomePage() {
                         <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
                           {ride.pace}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{ride.distance}</span>
+                        <span className="text-xs text-muted-foreground">{formatDistance(ride.distanceKm)}</span>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Users className="h-3.5 w-3.5" />
@@ -205,12 +225,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl">
           <h2 className="text-xl font-bold sm:text-2xl mb-6">Explore by pace</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { name: 'Casual', desc: '< 20 km/h', image: IMAGES.casual, overlay: 'from-green-600/80' },
-              { name: 'Moderate', desc: '20-28 km/h', image: IMAGES.moderate, overlay: 'from-blue-600/80' },
-              { name: 'Fast', desc: '28-35 km/h', image: IMAGES.fast, overlay: 'from-amber-600/80' },
-              { name: 'Race', desc: '> 35 km/h', image: IMAGES.race, overlay: 'from-red-600/80' },
-            ].map((cat) => (
+            {PACE_CATEGORIES.map((cat) => (
               <Link
                 key={cat.name}
                 href={`/discover?pace=${cat.name.toLowerCase()}`}
@@ -225,7 +240,7 @@ export default function HomePage() {
                 <div className={`absolute inset-0 bg-gradient-to-t ${cat.overlay} to-transparent`} />
                 <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
                   <span className="font-semibold text-sm sm:text-base block">{cat.name}</span>
-                  <span className="text-xs opacity-90">{cat.desc}</span>
+                  <span className="text-xs opacity-90">{formatPaceDesc(cat)}</span>
                 </div>
               </Link>
             ))}
