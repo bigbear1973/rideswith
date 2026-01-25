@@ -26,6 +26,12 @@ interface LatestRide {
     slug: string;
   };
   attendeeCount: number;
+  brand: {
+    name: string;
+    logo: string | null;
+    backdrop: string | null;
+    primaryColor: string | null;
+  } | null;
 }
 
 // Curated Unsplash images for consistent cycling theme
@@ -194,6 +200,8 @@ export default function HomePage() {
                 const rideDate = new Date(ride.date);
                 const formattedDate = rideDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 const formattedTime = rideDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                // Use brand backdrop if available, otherwise fall back to default images
+                const imageUrl = ride.brand?.backdrop || RIDE_IMAGES[index % RIDE_IMAGES.length];
 
                 return (
                   <Link
@@ -204,11 +212,21 @@ export default function HomePage() {
                     <Card className="h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
                       <div className="aspect-video bg-muted relative">
                         <Image
-                          src={RIDE_IMAGES[index % RIDE_IMAGES.length]}
+                          src={imageUrl}
                           alt={ride.title}
                           fill
                           className="object-cover"
                         />
+                        {/* Brand logo overlay for branded rides */}
+                        {ride.brand?.logo && (
+                          <div className="absolute top-2 left-2 h-8 w-8 rounded bg-white p-1 shadow-md">
+                            <img
+                              src={ride.brand.logo}
+                              alt={ride.brand.name}
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                        )}
                       </div>
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">

@@ -18,6 +18,20 @@ export async function GET() {
             slug: true,
           },
         },
+        chapter: {
+          select: {
+            id: true,
+            name: true,
+            brand: {
+              select: {
+                name: true,
+                logo: true,
+                backdrop: true,
+                primaryColor: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             rsvps: {
@@ -41,6 +55,13 @@ export async function GET() {
       pace: ride.pace.toLowerCase(),
       organizer: ride.organizer,
       attendeeCount: ride._count.rsvps,
+      // Include brand info if this is a branded ride
+      brand: ride.chapter?.brand ? {
+        name: ride.chapter.brand.name,
+        logo: ride.chapter.brand.logo,
+        backdrop: ride.chapter.brand.backdrop,
+        primaryColor: ride.chapter.brand.primaryColor,
+      } : null,
     }));
 
     return NextResponse.json(response);
