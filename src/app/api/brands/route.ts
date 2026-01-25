@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
         domain: domain || null,
         description: brandAssets?.description || null,
         logo: brandAssets?.logo || null,
+        logoDark: brandAssets?.logoDark || null,
         logoIcon: brandAssets?.logoIcon || null,
         primaryColor: brandAssets?.primaryColor || null,
         secondaryColor: brandAssets?.secondaryColor || null,

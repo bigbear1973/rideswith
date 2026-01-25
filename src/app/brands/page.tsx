@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Users, Bike, Plus } from "lucide-react";
+import { Building2, MapPin, Users, Plus } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 async function getBrands() {
   const brands = await prisma.brand.findMany({
@@ -127,22 +128,12 @@ export default async function BrandsPage() {
                 <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-4">
-                      {brand.logo ? (
-                        <img
-                          src={brand.logo}
-                          alt={brand.name}
-                          className="h-12 w-12 object-contain rounded"
-                        />
-                      ) : (
-                        <div
-                          className="h-12 w-12 rounded flex items-center justify-center text-white font-bold text-lg"
-                          style={{
-                            backgroundColor: brand.primaryColor || "#00D26A",
-                          }}
-                        >
-                          {brand.name.charAt(0)}
-                        </div>
-                      )}
+                      <BrandLogo
+                        logo={brand.logo}
+                        logoDark={brand.logoDark}
+                        name={brand.name}
+                        primaryColor={brand.primaryColor}
+                      />
                       <div className="flex-1">
                         <CardTitle className="text-lg">{brand.name}</CardTitle>
                         {brand.domain && (

@@ -79,7 +79,8 @@ model Brand {
   description String?  @db.Text
 
   // Brand.dev populated fields
-  logo           String? // Full logo URL
+  logo           String? // Full logo URL (for light backgrounds)
+  logoDark       String? // Logo for dark backgrounds
   logoIcon       String? // Square icon version
   primaryColor   String? // Hex color
   secondaryColor String? // Hex color

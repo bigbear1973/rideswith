@@ -34,7 +34,8 @@ export interface BrandDevResponse {
 
 export interface BrandAssets {
   name?: string;
-  logo?: string;
+  logo?: string;       // Logo for light backgrounds
+  logoDark?: string;   // Logo for dark backgrounds
   logoIcon?: string;
   primaryColor?: string;
   secondaryColor?: string;
@@ -122,10 +123,24 @@ export async function fetchBrandAssets(
 
     const brand = data.brand;
 
-    // Find the best logo (prefer SVG or wide logo, then icon)
-    const logoImage = brand.logos?.find((l) => l.type === "logo") ||
-      brand.logos?.find((l) => l.type === "icon");
-    const iconImage = brand.logos?.find((l) => l.type === "icon");
+    // Find logos by mode
+    // "light" mode = dark logo for light backgrounds
+    // "dark" mode = light logo for dark backgrounds
+    // "has_opaque_background" = logo with its own background (usable on any)
+    const logos = brand.logos || [];
+
+    // For light backgrounds: prefer "light" mode logo, then opaque, then any
+    const lightLogo = logos.find((l) => l.type === "logo" && l.mode === "light") ||
+      logos.find((l) => l.type === "logo" && l.mode === "has_opaque_background") ||
+      logos.find((l) => l.type === "logo");
+
+    // For dark backgrounds: prefer "dark" mode logo, then opaque, then any
+    const darkLogo = logos.find((l) => l.type === "logo" && l.mode === "dark") ||
+      logos.find((l) => l.type === "logo" && l.mode === "has_opaque_background") ||
+      logos.find((l) => l.type === "icon" && l.mode === "has_opaque_background") ||
+      logos.find((l) => l.type === "icon");
+
+    const iconImage = logos.find((l) => l.type === "icon");
 
     // Get primary and secondary colors from the color array
     const primaryColor = brand.colors?.[0]?.hex;
@@ -134,7 +149,8 @@ export async function fetchBrandAssets(
     // Transform to our internal format
     return {
       name: brand.title,
-      logo: logoImage?.url,
+      logo: lightLogo?.url,
+      logoDark: darkLogo?.url,
       logoIcon: iconImage?.url,
       primaryColor,
       secondaryColor,

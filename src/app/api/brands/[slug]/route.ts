@@ -104,6 +104,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           where: { slug },
           data: {
             logo: brandAssets.logo || brand.logo,
+            logoDark: brandAssets.logoDark || brand.logoDark,
             logoIcon: brandAssets.logoIcon || brand.logoIcon,
             primaryColor: brandAssets.primaryColor || brand.primaryColor,
             secondaryColor: brandAssets.secondaryColor || brand.secondaryColor,
