@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -54,10 +54,29 @@ const TERRAIN_OPTIONS = [
   'Cycle Path Only',
 ];
 
+interface ChapterInfo {
+  id: string;
+  name: string;
+  slug: string;
+  city: string;
+  brand: {
+    name: string;
+    slug: string;
+    logo: string | null;
+    primaryColor: string | null;
+  };
+}
+
 export default function CreateRidePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const { unitSystem } = useUnits();
+
+  // Chapter context (if creating ride for a chapter)
+  const chapterId = searchParams.get('chapterId');
+  const [chapterInfo, setChapterInfo] = useState<ChapterInfo | null>(null);
+  const [loadingChapter, setLoadingChapter] = useState(!!chapterId);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -91,9 +110,34 @@ export default function CreateRidePage() {
   // Redirect to sign in if not authenticated
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin?callbackUrl=/create');
+      const callbackUrl = chapterId ? `/create?chapterId=${chapterId}` : '/create';
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
-  }, [status, router]);
+  }, [status, router, chapterId]);
+
+  // Load chapter info if chapterId is provided
+  useEffect(() => {
+    if (!chapterId) {
+      setLoadingChapter(false);
+      return;
+    }
+
+    async function loadChapter() {
+      try {
+        const res = await fetch(`/api/chapters/${chapterId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setChapterInfo(data);
+        }
+      } catch (err) {
+        console.error('Failed to load chapter:', err);
+      } finally {
+        setLoadingChapter(false);
+      }
+    }
+
+    loadChapter();
+  }, [chapterId]);
 
   // Location search with Nominatim
   const searchLocation = async (query: string) => {
@@ -203,6 +247,7 @@ export default function CreateRidePage() {
           routeUrl: routeUrl.trim() || null,
           isFree,
           price: !isFree && price ? parseFloat(price) : null,
+          chapterId: chapterId || null,
         }),
       });
 
@@ -221,8 +266,8 @@ export default function CreateRidePage() {
     }
   };
 
-  // Show loading while checking auth
-  if (status === 'loading') {
+  // Show loading while checking auth or loading chapter
+  if (status === 'loading' || loadingChapter) {
     return (
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -235,18 +280,56 @@ export default function CreateRidePage() {
     return null;
   }
 
+  // Determine back link based on context
+  const backLink = chapterInfo
+    ? `/brands/${chapterInfo.brand.slug}/${chapterInfo.slug}`
+    : '/discover';
+
   return (
     <div className="min-h-screen pb-8">
+      {/* Chapter Banner - shown when creating for a chapter */}
+      {chapterInfo && (
+        <div
+          className="py-4 text-white"
+          style={{ backgroundColor: chapterInfo.brand.primaryColor || '#00D26A' }}
+        >
+          <div className="container mx-auto px-4">
+            <Link
+              href={backLink}
+              className="inline-flex items-center gap-3 hover:opacity-90 transition-opacity"
+            >
+              {chapterInfo.brand.logo ? (
+                <img
+                  src={chapterInfo.brand.logo}
+                  alt={chapterInfo.brand.name}
+                  className="h-10 w-10 object-contain rounded-lg bg-white p-1"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                  {chapterInfo.brand.name.charAt(0)}
+                </div>
+              )}
+              <div>
+                <p className="font-semibold">{chapterInfo.brand.name} {chapterInfo.name}</p>
+                <p className="text-white/80 text-sm">{chapterInfo.city}</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="sticky top-14 z-30 bg-background border-b">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" asChild>
-              <Link href="/discover">
+              <Link href={backLink}>
                 <ChevronLeft className="h-5 w-5" />
               </Link>
             </Button>
-            <h1 className="text-lg font-semibold">Create a Ride</h1>
+            <h1 className="text-lg font-semibold">
+              {chapterInfo ? `Create Ride for ${chapterInfo.brand.name} ${chapterInfo.name}` : 'Create a Ride'}
+            </h1>
           </div>
         </div>
       </div>

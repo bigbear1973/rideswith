@@ -192,6 +192,7 @@ export async function POST(request: NextRequest) {
         currency: body.currency || 'EUR',
         status: 'PUBLISHED',
         organizerId: organizer.id,
+        chapterId: body.chapterId || null,
       },
       include: {
         organizer: {
@@ -209,6 +210,14 @@ export async function POST(request: NextRequest) {
       where: { id: organizer.id },
       data: { rideCount: { increment: 1 } },
     });
+
+    // Update chapter ride count if this is a chapter ride
+    if (body.chapterId) {
+      await prisma.chapter.update({
+        where: { id: body.chapterId },
+        data: { rideCount: { increment: 1 } },
+      });
+    }
 
     // Auto-RSVP the creator as going
     await prisma.rsvp.create({

@@ -233,7 +233,7 @@ export default function ChapterPage({ params }: PageProps) {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Upcoming Rides</h2>
               <Button asChild size="sm">
-                <Link href="/create">
+                <Link href={`/create?chapterId=${chapter.id}`}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Ride
                 </Link>
