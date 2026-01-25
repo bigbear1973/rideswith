@@ -417,56 +417,20 @@ export default async function RidePage({ params }: RidePageProps) {
               </CardContent>
             </Card>
 
-            {/* Brand Card - Mobile - shown for branded rides */}
-            {hasBranding && brand && chapter && (
-              <Card className="overflow-hidden">
-                <Link href={`/brands/${brand.slug}`} className="block group">
-                  {/* Backdrop image */}
-                  {brand.backdrop && (
-                    <div
-                      className="h-32 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${brand.backdrop})` }}
-                    />
-                  )}
-                  {/* Brand info below image */}
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      {brand.logo ? (
-                        <img
-                          src={brand.logo}
-                          alt={brand.name}
-                          className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
-                        />
-                      ) : (
-                        <div
-                          className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
-                          style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
-                        >
-                          {brand.name.charAt(0)}
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground">Presented by</p>
-                        <p className="font-semibold truncate">{brand.name}</p>
-                        {brand.slogan && (
-                          <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
-                        )}
                       </div>
-                      <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                    </div>
-                  </CardContent>
-                </Link>
-              </Card>
-            )}
-          </div>
 
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block">
             <div className="sticky top-24 space-y-4">
-              {/* Brand Card - shown for branded rides */}
-              {hasBranding && brand && chapter && (
+              {/* Brand Card - shown for branded rides (links to external brand site) */}
+              {hasBranding && brand && chapter && brand.domain && (
                 <Card className="overflow-hidden">
-                  <Link href={`/brands/${brand.slug}`} className="block group">
+                  <a
+                    href={`https://${brand.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
                     {/* Backdrop image */}
                     {brand.backdrop && (
                       <div
@@ -501,7 +465,7 @@ export default async function RidePage({ params }: RidePageProps) {
                         <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                       </div>
                     </CardContent>
-                  </Link>
+                  </a>
                 </Card>
               )}
 
