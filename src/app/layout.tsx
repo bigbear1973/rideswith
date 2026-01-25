@@ -23,6 +23,12 @@ export const metadata: Metadata = {
     'Discover cycling group rides near you, join with one click, and get routes on any GPS platform. For riders and organizers.',
   keywords: ['cycling', 'group rides', 'bike rides', 'cycling events', 'GPS routes'],
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith-production.up.railway.app'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'GroupRide',
+  },
   openGraph: {
     title: 'GroupRide - Find Your Next Cycling Group Ride',
     description: 'Discover cycling group rides near you, join with one click, and get routes on any GPS platform.',
@@ -33,10 +39,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+    { media: '(prefers-color-scheme: dark)', color: '#171717' },
   ],
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({

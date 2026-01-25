@@ -3,26 +3,39 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Menu, X, Sun, Moon, MapPin, PlusCircle } from 'lucide-react';
+import { Menu, Sun, Moon, MapPin, PlusCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useBrand } from '@/components/providers/brand-provider';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const navLinks = [
+  { href: '/discover', label: 'Discover', icon: MapPin },
+  { href: '/create', label: 'Create Ride', icon: PlusCircle },
+];
 
 export function Navbar() {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isDark, toggleDark, theme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { brand, isLoading } = useBrand();
 
-  const navLinks = [
-    { href: '/discover', label: 'Discover', icon: MapPin },
-    { href: '/create', label: 'Create Ride', icon: PlusCircle },
-  ];
-
   return (
-    <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50">
-      <nav className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between" aria-label="Main navigation">
+    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <nav className="mx-auto max-w-6xl px-4 h-14 sm:h-16 flex items-center justify-between" aria-label="Main navigation">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           {brand?.logoUrl && !isLoading ? (
             <Image
@@ -33,113 +46,106 @@ export function Navbar() {
               className="rounded"
             />
           ) : (
-            <div
-              className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold"
-              aria-hidden="true"
-            >
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
               GR
             </div>
           )}
-          <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+          <span className="font-bold text-base sm:text-lg group-hover:text-primary transition-colors">
             {brand?.name || 'GroupRide'}
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
+            const isActive = pathname === link.href;
             return (
-              <Link
+              <Button
                 key={link.href}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
-                  pathname === link.href
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
-                )}
+                variant={isActive ? 'secondary' : 'ghost'}
+                size="sm"
+                asChild
               >
-                <Icon className="w-4 h-4" aria-hidden="true" />
-                {link.label}
-              </Link>
+                <Link href={link.href} className="gap-2">
+                  <Icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              </Button>
             );
           })}
 
           {/* Theme Toggle */}
-          <button
-            onClick={toggleDark}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {isDark ? (
-              <Sun className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <Moon className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-2">
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="flex md:hidden items-center gap-2">
-          <button
-            onClick={toggleDark}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        {/* Mobile Navigation */}
+        <div className="flex md:hidden items-center gap-1">
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           >
-            {isDark ? (
-              <Sun className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <Moon className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-menu"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-foreground" />
-            ) : (
-              <Menu className="w-6 h-6 text-foreground" />
-            )}
-          </button>
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+
+          {/* Mobile Menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+              <SheetHeader>
+                <SheetTitle className="text-left">Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="mt-6 flex flex-col gap-2">
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  const isActive = pathname === link.href;
+                  return (
+                    <Button
+                      key={link.href}
+                      variant={isActive ? 'secondary' : 'ghost'}
+                      className="justify-start gap-3 h-12"
+                      asChild
+                    >
+                      <Link href={link.href}>
+                        <Icon className="h-5 w-5" />
+                        {link.label}
+                      </Link>
+                    </Button>
+                  );
+                })}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div
-          id="mobile-menu"
-          className="md:hidden border-t border-border bg-card"
-          role="menu"
-        >
-          <div className="px-4 py-4 space-y-2">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                    pathname === link.href
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  )}
-                  role="menuitem"
-                >
-                  <Icon className="w-5 h-5" aria-hidden="true" />
-                  {link.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </header>
   );
 }

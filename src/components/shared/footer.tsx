@@ -1,129 +1,110 @@
 import Link from 'next/link';
-import { MapPin, PlusCircle, Users, Shield, FileText, Info } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+const footerLinks = {
+  riders: [
+    { href: '/discover', label: 'Find Rides' },
+    { href: '/how-it-works', label: 'How It Works' },
+  ],
+  organizers: [
+    { href: '/create', label: 'Create a Ride' },
+    { href: '/organizers/create', label: 'Start a Club' },
+  ],
+  company: [
+    { href: '/about', label: 'About' },
+    { href: '/privacy', label: 'Privacy' },
+    { href: '/terms', label: 'Terms' },
+  ],
+};
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-card mt-auto" role="contentinfo">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="border-t bg-muted/30 mt-auto" role="contentinfo">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           {/* Brand */}
-          <div>
-            <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div
-                className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold"
-                aria-hidden="true"
-              >
+          <div className="col-span-2 sm:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
                 GR
               </div>
-              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                GroupRide
-              </span>
+              <span className="font-bold">GroupRide</span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Find and organize cycling group rides in your area. Built for riders, by riders.
+            <p className="text-sm text-muted-foreground">
+              Find your next group ride.
             </p>
           </div>
 
-          {/* Riders */}
-          <nav aria-labelledby="footer-riders-heading">
-            <h3 id="footer-riders-heading" className="font-semibold mb-4 text-foreground">
+          {/* For Riders */}
+          <nav aria-labelledby="footer-riders">
+            <h3 id="footer-riders" className="font-semibold text-sm mb-3">
               For Riders
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/discover"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <MapPin className="w-4 h-4" aria-hidden="true" />
-                  Find Rides
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/how-it-works"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Info className="w-4 h-4" aria-hidden="true" />
-                  How It Works
-                </Link>
-              </li>
+            <ul className="space-y-2">
+              {footerLinks.riders.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
-          {/* Organizers */}
-          <nav aria-labelledby="footer-organizers-heading">
-            <h3 id="footer-organizers-heading" className="font-semibold mb-4 text-foreground">
+          {/* For Organizers */}
+          <nav aria-labelledby="footer-organizers">
+            <h3 id="footer-organizers" className="font-semibold text-sm mb-3">
               For Organizers
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/create"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <PlusCircle className="w-4 h-4" aria-hidden="true" />
-                  Create a Ride
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/for-clubs"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Users className="w-4 h-4" aria-hidden="true" />
-                  For Clubs
-                </Link>
-              </li>
+            <ul className="space-y-2">
+              {footerLinks.organizers.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
-          {/* Legal */}
-          <nav aria-labelledby="footer-legal-heading">
-            <h3 id="footer-legal-heading" className="font-semibold mb-4 text-foreground">
-              Legal
+          {/* Company */}
+          <nav aria-labelledby="footer-company">
+            <h3 id="footer-company" className="font-semibold text-sm mb-3">
+              Company
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/about"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Info className="w-4 h-4" aria-hidden="true" />
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Shield className="w-4 h-4" aria-hidden="true" />
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <FileText className="w-4 h-4" aria-hidden="true" />
-                  Terms of Service
-                </Link>
-              </li>
+            <ul className="space-y-2">
+              {footerLinks.company.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
         </div>
 
+        <Separator className="my-8" />
+
         {/* Bottom Bar */}
-        <div className="border-t border-border mt-10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground">
             &copy; {currentYear} GroupRide. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Built with sustainability in mind
+            Made for cyclists, by cyclists
           </p>
         </div>
       </div>

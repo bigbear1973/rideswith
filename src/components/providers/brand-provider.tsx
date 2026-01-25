@@ -24,7 +24,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const [brand, setBrand] = useState<BrandInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-  const { setTheme, resetTheme } = useTheme();
+  const { setBrandColors, resetBrand } = useTheme();
 
   useEffect(() => {
     const organizerId = searchParams.get('org') || searchParams.get('organizer');
@@ -50,7 +50,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
 
           // Apply brand colors to theme
           if (data.data.primaryColor) {
-            setTheme({
+            setBrandColors({
               primary: data.data.primaryColor,
               secondary: data.data.secondaryColor || undefined,
               organizerName: data.data.name,
@@ -68,7 +68,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
 
   const clearBrand = () => {
     setBrand(null);
-    resetTheme();
+    resetBrand();
   };
 
   return (

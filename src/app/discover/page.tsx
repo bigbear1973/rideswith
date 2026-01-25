@@ -1,37 +1,99 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Filter, MapPin, Calendar, Clock, Users, ChevronDown, X } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Filter, MapPin, Calendar, Clock, Users, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const PACE_OPTIONS = [
-  { value: 'casual', label: 'Casual', description: '< 20 km/h', color: 'pace-casual' },
-  { value: 'moderate', label: 'Moderate', description: '20-28 km/h', color: 'pace-moderate' },
-  { value: 'fast', label: 'Fast', description: '28-35 km/h', color: 'pace-fast' },
-  { value: 'race', label: 'Race', description: '> 35 km/h', color: 'pace-race' },
+  { value: 'casual', label: 'Casual', desc: '< 20 km/h' },
+  { value: 'moderate', label: 'Moderate', desc: '20-28 km/h' },
+  { value: 'fast', label: 'Fast', desc: '28-35 km/h' },
+  { value: 'race', label: 'Race', desc: '> 35 km/h' },
 ];
 
 const DISTANCE_OPTIONS = [
-  { value: 'short', label: 'Short', description: '< 30 km' },
-  { value: 'medium', label: 'Medium', description: '30-60 km' },
-  { value: 'long', label: 'Long', description: '60-100 km' },
-  { value: 'epic', label: 'Epic', description: '> 100 km' },
+  { value: 'short', label: 'Short', desc: '< 30 km' },
+  { value: 'medium', label: 'Medium', desc: '30-60 km' },
+  { value: 'long', label: 'Long', desc: '60-100 km' },
+  { value: 'epic', label: 'Epic', desc: '> 100 km' },
+];
+
+const PACE_STYLES: Record<string, string> = {
+  casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  moderate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  fast: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+  race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+};
+
+// Mock rides data
+const MOCK_RIDES = [
+  {
+    id: '1',
+    title: 'Sunday Morning Social',
+    organizer: 'Dublin Cycling Club',
+    date: 'Sun, Feb 2',
+    time: '8:00 AM',
+    location: 'Phoenix Park',
+    distance: '45 km',
+    pace: 'moderate',
+    attendees: 23,
+  },
+  {
+    id: '2',
+    title: 'Weekend Warriors',
+    organizer: 'Wicklow Wheelers',
+    date: 'Sat, Feb 1',
+    time: '7:30 AM',
+    location: 'Bray Seafront',
+    distance: '80 km',
+    pace: 'fast',
+    attendees: 15,
+  },
+  {
+    id: '3',
+    title: 'Coffee & Pedals',
+    organizer: 'Cafe Cyclists',
+    date: 'Sun, Feb 2',
+    time: '9:30 AM',
+    location: 'Dun Laoghaire Pier',
+    distance: '30 km',
+    pace: 'casual',
+    attendees: 31,
+  },
 ];
 
 export default function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPaces, setSelectedPaces] = useState<string[]>([]);
   const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
 
   const togglePace = (pace: string) => {
-    setSelectedPaces(prev =>
-      prev.includes(pace) ? prev.filter(p => p !== pace) : [...prev, pace]
+    setSelectedPaces((prev) =>
+      prev.includes(pace) ? prev.filter((p) => p !== pace) : [...prev, pace]
     );
   };
 
   const toggleDistance = (distance: string) => {
-    setSelectedDistances(prev =>
-      prev.includes(distance) ? prev.filter(d => d !== distance) : [...prev, distance]
+    setSelectedDistances((prev) =>
+      prev.includes(distance) ? prev.filter((d) => d !== distance) : [...prev, distance]
     );
   };
 
@@ -41,286 +103,205 @@ export default function DiscoverPage() {
     setSearchQuery('');
   };
 
-  const hasActiveFilters = selectedPaces.length > 0 || selectedDistances.length > 0 || searchQuery;
+  const activeFilterCount = selectedPaces.length + selectedDistances.length;
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
-      {/* Header */}
-      <header className="border-b border-border bg-card px-4 py-6">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Discover Rides</h1>
-          <p className="text-muted-foreground">
-            Find group rides near you with smart filters for pace, distance, and terrain
-          </p>
-        </div>
-      </header>
-
-      {/* Search and Filter Bar */}
-      <div className="border-b border-border bg-card/50 px-4 py-4 sticky top-16 z-40 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
+      {/* Search Bar - Sticky on mobile */}
+      <div className="border-b bg-background/95 backdrop-blur sticky top-14 sm:top-16 z-40 px-4 py-3">
+        <div className="mx-auto max-w-6xl flex gap-2">
           {/* Search Input */}
           <div className="relative flex-1">
-            <label htmlFor="search-rides" className="sr-only">
-              Search by location or ride name
-            </label>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" aria-hidden="true" />
-            <input
-              id="search-rides"
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
               type="search"
-              placeholder="Search by location or ride name..."
+              placeholder="Search rides..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-9"
             />
           </div>
 
-          {/* Filter Toggle Button (Mobile) */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 bg-muted rounded-lg text-foreground"
-            aria-expanded={showFilters}
-            aria-controls="filter-panel"
-          >
-            <Filter className="w-5 h-5" aria-hidden="true" />
-            Filters
-            {hasActiveFilters && (
-              <span className="ml-1 px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-                {selectedPaces.length + selectedDistances.length}
-              </span>
-            )}
-          </button>
+          {/* Desktop Filters */}
+          <div className="hidden sm:flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  Pace
+                  {selectedPaces.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedPaces.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {PACE_OPTIONS.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={selectedPaces.includes(option.value)}
+                    onCheckedChange={() => togglePace(option.value)}
+                  >
+                    <span className="flex flex-col">
+                      <span>{option.label}</span>
+                      <span className="text-xs text-muted-foreground">{option.desc}</span>
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {/* Desktop Filter Pills */}
-          <div className="hidden sm:flex items-center gap-2">
-            {/* Pace Filter Dropdown */}
-            <div className="relative group">
-              <button
-                className="flex items-center gap-2 px-4 py-3 bg-muted rounded-lg text-foreground hover:bg-muted/80 transition-colors"
-                aria-haspopup="listbox"
-              >
-                Pace
-                {selectedPaces.length > 0 && (
-                  <span className="px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-                    {selectedPaces.length}
-                  </span>
-                )}
-                <ChevronDown className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <div className="p-2" role="listbox" aria-label="Pace options">
-                  {PACE_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => togglePace(option.value)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
-                        selectedPaces.includes(option.value)
-                          ? 'bg-primary/10 text-primary'
-                          : 'hover:bg-muted text-foreground'
-                      }`}
-                      role="option"
-                      aria-selected={selectedPaces.includes(option.value)}
-                    >
-                      <span className={`w-3 h-3 rounded-full ${option.color}`} aria-hidden="true" />
-                      <span className="flex-1">
-                        <span className="block font-medium">{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.description}</span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  Distance
+                  {selectedDistances.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedDistances.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {DISTANCE_OPTIONS.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={selectedDistances.includes(option.value)}
+                    onCheckedChange={() => toggleDistance(option.value)}
+                  >
+                    <span className="flex flex-col">
+                      <span>{option.label}</span>
+                      <span className="text-xs text-muted-foreground">{option.desc}</span>
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            {/* Distance Filter Dropdown */}
-            <div className="relative group">
-              <button
-                className="flex items-center gap-2 px-4 py-3 bg-muted rounded-lg text-foreground hover:bg-muted/80 transition-colors"
-                aria-haspopup="listbox"
-              >
-                Distance
-                {selectedDistances.length > 0 && (
-                  <span className="px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-                    {selectedDistances.length}
-                  </span>
-                )}
-                <ChevronDown className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <div className="p-2" role="listbox" aria-label="Distance options">
-                  {DISTANCE_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => toggleDistance(option.value)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
-                        selectedDistances.includes(option.value)
-                          ? 'bg-primary/10 text-primary'
-                          : 'hover:bg-muted text-foreground'
-                      }`}
-                      role="option"
-                      aria-selected={selectedDistances.includes(option.value)}
-                    >
-                      <span className="flex-1">
-                        <span className="block font-medium">{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.description}</span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear all filters"
-              >
-                <X className="w-4 h-4" aria-hidden="true" />
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-1" />
                 Clear
-              </button>
+              </Button>
             )}
           </div>
+
+          {/* Mobile Filter Button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="sm:hidden relative">
+                <Filter className="h-4 w-4" />
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[60vh]">
+              <SheetHeader>
+                <SheetTitle>Filters</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                {/* Pace */}
+                <div>
+                  <h3 className="font-medium mb-3">Pace</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {PACE_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={selectedPaces.includes(option.value) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => togglePace(option.value)}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Distance */}
+                <div>
+                  <h3 className="font-medium mb-3">Distance</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {DISTANCE_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={selectedDistances.includes(option.value) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => toggleDistance(option.value)}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {activeFilterCount > 0 && (
+                  <Button variant="outline" className="w-full" onClick={clearFilters}>
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
-      {/* Mobile Filters Panel */}
-      {showFilters && (
-        <div
-          id="filter-panel"
-          className="sm:hidden border-b border-border bg-card px-4 py-4"
-          role="region"
-          aria-label="Filter options"
-        >
-          <div className="space-y-4">
-            {/* Pace */}
-            <fieldset>
-              <legend className="font-medium mb-2 text-foreground">Pace</legend>
-              <div className="flex flex-wrap gap-2">
-                {PACE_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => togglePace(option.value)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      selectedPaces.includes(option.value)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-foreground'
-                    }`}
-                    aria-pressed={selectedPaces.includes(option.value)}
-                  >
-                    <span className={`w-2 h-2 rounded-full ${option.color}`} aria-hidden="true" />
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-
-            {/* Distance */}
-            <fieldset>
-              <legend className="font-medium mb-2 text-foreground">Distance</legend>
-              <div className="flex flex-wrap gap-2">
-                {DISTANCE_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => toggleDistance(option.value)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                      selectedDistances.includes(option.value)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-foreground'
-                    }`}
-                    aria-pressed={selectedDistances.includes(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Map Section */}
-        <div className="lg:flex-1 h-64 lg:h-auto bg-muted/30 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-border">
-          <div className="text-center p-8">
-            <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
-            <p className="text-muted-foreground">Interactive map loading...</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Add your MAPBOX_TOKEN to enable the map
-            </p>
+        {/* Map Placeholder */}
+        <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 bg-muted/50 flex items-center justify-center border-b lg:border-b-0 lg:border-r">
+          <div className="text-center p-4">
+            <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Map coming soon</p>
           </div>
         </div>
 
         {/* Ride List */}
-        <div className="lg:w-96 xl:w-[28rem] flex flex-col">
-          <div className="p-4 border-b border-border bg-card">
-            <h2 className="font-semibold text-foreground">Upcoming Rides</h2>
-            <p className="text-sm text-muted-foreground">0 rides found</p>
+        <div className="flex-1 lg:flex-none lg:w-96 xl:w-[420px] flex flex-col">
+          <div className="px-4 py-3 border-b bg-muted/30">
+            <h2 className="font-semibold">Upcoming Rides</h2>
+            <p className="text-sm text-muted-foreground">{MOCK_RIDES.length} rides found</p>
           </div>
 
-          <div className="flex-1 overflow-auto p-4">
-            {/* Empty State */}
-            <div className="text-center py-12">
-              <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
-              <h3 className="font-medium text-foreground mb-2">No rides found</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Try adjusting your filters or search in a different area
-              </p>
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Clear all filters
-                </button>
-              )}
+          <ScrollArea className="flex-1">
+            <div className="p-4 space-y-3">
+              {MOCK_RIDES.map((ride) => (
+                <Link key={ride.id} href={`/rides/${ride.id}`}>
+                  <Card className="overflow-hidden transition-shadow hover:shadow-md">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>{ride.date}</span>
+                        <span>·</span>
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{ride.time}</span>
+                      </div>
+                      <h3 className="font-semibold mb-1">{ride.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{ride.organizer}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="truncate">{ride.location}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
+                            {ride.pace}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{ride.distance}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Users className="h-3.5 w-3.5" />
+                          <span>{ride.attendees} going</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
             </div>
-
-            {/* Example Ride Card (placeholder) */}
-            <div className="hidden space-y-4">
-              <article className="bg-card border border-border rounded-xl p-4 card-hover">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-primary" aria-hidden="true" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">Sunday Morning Social</h3>
-                    <p className="text-sm text-muted-foreground">Cycling Club Name</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" aria-hidden="true" />
-                        Sun, Jan 26
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" aria-hidden="true" />
-                        8:00 AM
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-3">
-                      <span className="flex items-center gap-1 text-xs">
-                        <span className="w-2 h-2 rounded-full pace-moderate" aria-hidden="true" />
-                        Moderate
-                      </span>
-                      <span className="text-xs text-muted-foreground">45 km</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Users className="w-3 h-3" aria-hidden="true" />
-                        12 joined
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
+          </ScrollArea>
         </div>
       </div>
     </div>

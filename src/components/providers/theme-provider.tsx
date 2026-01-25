@@ -2,127 +2,111 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-interface BrandTheme {
-  primary: string;
-  primaryForeground: string;
-  secondary: string;
-  secondaryForeground: string;
-  accent: string;
+type Theme = 'light' | 'dark' | 'system';
+
+interface BrandColors {
+  primary?: string;
+  secondary?: string;
   organizerName?: string;
   logoUrl?: string;
 }
 
-const DEFAULT_THEME: BrandTheme = {
-  primary: '#0ea5e9', // Sky blue - cycling/outdoor feel
-  primaryForeground: '#ffffff',
-  secondary: '#1e293b', // Slate
-  secondaryForeground: '#f8fafc',
-  accent: '#22c55e', // Green - go/action
-};
-
 interface ThemeContextType {
-  theme: BrandTheme;
-  setTheme: (theme: Partial<BrandTheme>) => void;
-  resetTheme: () => void;
-  isDark: boolean;
-  toggleDark: () => void;
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  resolvedTheme: 'light' | 'dark';
+  brandColors: BrandColors | null;
+  setBrandColors: (colors: BrandColors | null) => void;
+  resetBrand: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function hexToHsl(hex: string): { h: number; s: number; l: number } {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!result) return { h: 0, s: 0, l: 0 };
-
-  let r = parseInt(result[1], 16) / 255;
-  let g = parseInt(result[2], 16) / 255;
-  let b = parseInt(result[3], 16) / 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
-    }
-  }
-
-  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
-}
-
-function getContrastColor(hex: string): string {
-  const { l } = hexToHsl(hex);
-  return l > 50 ? '#0f172a' : '#ffffff';
-}
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<BrandTheme>(DEFAULT_THEME);
-  const [isDark, setIsDark] = useState(true); // Default to dark for sustainability
+  const [theme, setThemeState] = useState<Theme>('system');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [brandColors, setBrandColorsState] = useState<BrandColors | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check system preference on mount
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDark(prefersDark);
-
-    // Check for saved preference
-    const saved = localStorage.getItem('theme-mode');
-    if (saved) {
-      setIsDark(saved === 'dark');
+    setMounted(true);
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme) {
+      setThemeState(savedTheme);
     }
   }, []);
 
   useEffect(() => {
-    // Apply theme to CSS variables
+    if (!mounted) return;
+
     const root = document.documentElement;
-    const primary = hexToHsl(theme.primary);
-    const secondary = hexToHsl(theme.secondary);
-    const accent = hexToHsl(theme.accent);
+    root.classList.remove('light', 'dark');
 
-    root.style.setProperty('--primary', `${primary.h} ${primary.s}% ${primary.l}%`);
-    root.style.setProperty('--primary-foreground', theme.primaryForeground);
-    root.style.setProperty('--secondary', `${secondary.h} ${secondary.s}% ${secondary.l}%`);
-    root.style.setProperty('--secondary-foreground', theme.secondaryForeground);
-    root.style.setProperty('--accent', `${accent.h} ${accent.s}% ${accent.l}%`);
-
-    // Set dark/light mode
-    if (isDark) {
-      root.classList.add('dark');
-      root.classList.remove('light');
+    let resolved: 'light' | 'dark';
+    if (theme === 'system') {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
     } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
+      resolved = theme;
     }
 
-    localStorage.setItem('theme-mode', isDark ? 'dark' : 'light');
-  }, [theme, isDark]);
+    root.classList.add(resolved);
+    setResolvedTheme(resolved);
+    localStorage.setItem('theme', theme);
+  }, [theme, mounted]);
 
-  const setTheme = (newTheme: Partial<BrandTheme>) => {
-    setThemeState(prev => {
-      const updated = { ...prev, ...newTheme };
-      // Auto-calculate foreground colors for accessibility
-      if (newTheme.primary) {
-        updated.primaryForeground = getContrastColor(newTheme.primary);
-      }
-      if (newTheme.secondary) {
-        updated.secondaryForeground = getContrastColor(newTheme.secondary);
-      }
-      return updated;
-    });
+  useEffect(() => {
+    if (!mounted || !brandColors?.primary) return;
+
+    const root = document.documentElement;
+    root.style.setProperty('--brand-primary', brandColors.primary);
+    if (brandColors.secondary) {
+      root.style.setProperty('--brand-secondary', brandColors.secondary);
+    }
+  }, [brandColors, mounted]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (!mounted || theme !== 'system') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      const root = document.documentElement;
+      root.classList.remove('light', 'dark');
+      const resolved = e.matches ? 'dark' : 'light';
+      root.classList.add(resolved);
+      setResolvedTheme(resolved);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme, mounted]);
+
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
   };
 
-  const resetTheme = () => setThemeState(DEFAULT_THEME);
+  const setBrandColors = (colors: BrandColors | null) => {
+    setBrandColorsState(colors);
+  };
 
-  const toggleDark = () => setIsDark(prev => !prev);
+  const resetBrand = () => {
+    setBrandColorsState(null);
+    const root = document.documentElement;
+    root.style.removeProperty('--brand-primary');
+    root.style.removeProperty('--brand-secondary');
+  };
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resetTheme, isDark, toggleDark }}>
+    <ThemeContext.Provider
+      value={{ theme, setTheme, resolvedTheme, brandColors, setBrandColors, resetBrand }}
+    >
       {children}
     </ThemeContext.Provider>
   );
