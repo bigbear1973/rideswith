@@ -18,11 +18,31 @@ import {
   Plus,
   ArrowLeft,
   Loader2,
+  History,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useUnits } from "@/components/providers/units-provider";
 
 interface PageProps {
   params: Promise<{ slug: string; chapter: string }>;
+}
+
+interface RideData {
+  id: string;
+  title: string;
+  date: string;
+  locationName: string;
+  distance: number | null;
+  pace: string;
+  organizer: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  _count: {
+    rsvps: number;
+  };
 }
 
 interface ChapterData {
@@ -51,22 +71,8 @@ interface ChapterData {
       slug: string | null;
     };
   }>;
-  rides: Array<{
-    id: string;
-    title: string;
-    date: string;
-    locationName: string;
-    distance: number | null;
-    pace: string;
-    organizer: {
-      id: string;
-      name: string;
-      slug: string;
-    };
-    _count: {
-      rsvps: number;
-    };
-  }>;
+  rides: RideData[];
+  pastRides?: RideData[];
 }
 
 const PACE_STYLES: Record<string, string> = {
@@ -80,6 +86,8 @@ export default function ChapterPage({ params }: PageProps) {
   const [chapter, setChapter] = useState<ChapterData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPastRides, setShowPastRides] = useState(false);
+  const [loadingPastRides, setLoadingPastRides] = useState(false);
   const { formatDistance } = useUnits();
 
   useEffect(() => {
@@ -125,6 +133,31 @@ export default function ChapterPage({ params }: PageProps) {
 
     loadChapter();
   }, [params]);
+
+  // Load past rides when toggled
+  const loadPastRides = async () => {
+    if (!chapter || chapter.pastRides) return;
+
+    setLoadingPastRides(true);
+    try {
+      const res = await fetch(`/api/chapters/${chapter.id}?includePastRides=true`);
+      if (res.ok) {
+        const data = await res.json();
+        setChapter((prev) => prev ? { ...prev, pastRides: data.pastRides } : null);
+      }
+    } catch (err) {
+      console.error("Error loading past rides:", err);
+    } finally {
+      setLoadingPastRides(false);
+    }
+  };
+
+  const handleTogglePastRides = () => {
+    if (!showPastRides && !chapter?.pastRides) {
+      loadPastRides();
+    }
+    setShowPastRides(!showPastRides);
+  };
 
   if (loading) {
     return (
@@ -305,6 +338,82 @@ export default function ChapterPage({ params }: PageProps) {
                     </Card>
                   </Link>
                 ))}
+              </div>
+            )}
+
+            {/* Past Rides Section */}
+            {chapter.rideCount > chapter.rides.length && (
+              <div className="mt-8">
+                <button
+                  onClick={handleTogglePastRides}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full"
+                >
+                  <History className="h-4 w-4" />
+                  <span className="font-medium">Past Rides</span>
+                  {showPastRides ? (
+                    <ChevronUp className="h-4 w-4 ml-auto" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 ml-auto" />
+                  )}
+                </button>
+
+                {showPastRides && (
+                  <div className="mt-4 space-y-4">
+                    {loadingPastRides ? (
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : chapter.pastRides && chapter.pastRides.length > 0 ? (
+                      chapter.pastRides.map((ride) => (
+                        <Link key={ride.id} href={`/rides/${ride.id}`}>
+                          <Card className="hover:shadow-md transition-shadow cursor-pointer opacity-75 hover:opacity-100">
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-lg">
+                                    {ride.title}
+                                  </h3>
+                                  <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      {format(new Date(ride.date), "EEE, MMM d, yyyy")}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-4 w-4" />
+                                      {ride.locationName}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                  <Badge
+                                    className={
+                                      PACE_STYLES[ride.pace.toLowerCase()] || ""
+                                    }
+                                  >
+                                    {ride.pace}
+                                  </Badge>
+                                  {ride.distance && (
+                                    <span className="text-sm text-muted-foreground">
+                                      {formatDistance(ride.distance)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 mt-3 pt-3 border-t text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                {ride._count.rsvps} attended
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No past rides found
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

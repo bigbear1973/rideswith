@@ -8,9 +8,15 @@ interface RouteParams {
 }
 
 // GET /api/chapters/[id] - Get a single chapter with rides
+// Query params:
+//   - includePastRides=true - Include past rides in response
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const includePastRides = searchParams.get("includePastRides") === "true";
+
+    const now = new Date();
 
     const chapter = await prisma.chapter.findUnique({
       where: { id },
@@ -32,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         rides: {
           where: {
             status: "PUBLISHED",
-            date: { gte: new Date() },
+            date: { gte: now },
           },
           include: {
             organizer: {
@@ -62,7 +68,43 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    return NextResponse.json(chapter);
+    // Fetch past rides separately if requested
+    let pastRides: typeof chapter.rides = [];
+    if (includePastRides) {
+      pastRides = await prisma.ride.findMany({
+        where: {
+          chapterId: id,
+          status: "PUBLISHED",
+          date: { lt: now },
+        },
+        include: {
+          organizer: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          _count: {
+            select: {
+              rsvps: {
+                where: { status: "GOING" },
+              },
+            },
+          },
+        },
+        orderBy: {
+          date: "desc",
+        },
+        take: 20,
+      });
+    }
+
+    return NextResponse.json({
+      ...chapter,
+      pastRides,
+    });
+
   } catch (error) {
     console.error("GET /api/chapters/[id] error:", error);
     return NextResponse.json(
