@@ -133,6 +133,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       updateData.domain = body.domain;
     }
 
+    // Social links (allow clearing by setting to empty string)
+    if (body.instagram !== undefined) updateData.instagram = body.instagram || null;
+    if (body.twitter !== undefined) updateData.twitter = body.twitter || null;
+    if (body.facebook !== undefined) updateData.facebook = body.facebook || null;
+    if (body.strava !== undefined) updateData.strava = body.strava || null;
+    if (body.youtube !== undefined) updateData.youtube = body.youtube || null;
+
     const updatedBrand = await prisma.brand.update({
       where: { slug },
       data: updateData,

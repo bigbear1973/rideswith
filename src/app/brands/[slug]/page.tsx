@@ -17,6 +17,10 @@ import {
   ExternalLink,
   BadgeCheck,
   Edit,
+  Instagram,
+  Twitter,
+  Facebook,
+  Youtube,
 } from "lucide-react";
 
 interface PageProps {
@@ -109,18 +113,82 @@ export default async function BrandPage({ params }: PageProps) {
               <h1 className="text-4xl md:text-5xl font-bold mb-2">
                 {brand.name}
               </h1>
-              {brand.domain && (
-                <a
-                  href={`https://${brand.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-white/80 hover:text-white"
-                >
-                  <Globe className="h-4 w-4" />
-                  {brand.domain}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-4">
+                {brand.domain && (
+                  <a
+                    href={`https://${brand.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-white/80 hover:text-white"
+                  >
+                    <Globe className="h-4 w-4" />
+                    {brand.domain}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+                {/* Social Links */}
+                {(brand.instagram || brand.twitter || brand.facebook || brand.strava || brand.youtube) && (
+                  <div className="flex items-center gap-3">
+                    {brand.instagram && (
+                      <a
+                        href={brand.instagram.startsWith('http') ? brand.instagram : `https://instagram.com/${brand.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="Instagram"
+                      >
+                        <Instagram className="h-5 w-5" />
+                      </a>
+                    )}
+                    {brand.twitter && (
+                      <a
+                        href={brand.twitter.startsWith('http') ? brand.twitter : `https://x.com/${brand.twitter.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="X / Twitter"
+                      >
+                        <Twitter className="h-5 w-5" />
+                      </a>
+                    )}
+                    {brand.facebook && (
+                      <a
+                        href={brand.facebook.startsWith('http') ? brand.facebook : `https://facebook.com/${brand.facebook}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="Facebook"
+                      >
+                        <Facebook className="h-5 w-5" />
+                      </a>
+                    )}
+                    {brand.strava && (
+                      <a
+                        href={brand.strava}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="Strava Club"
+                      >
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                        </svg>
+                      </a>
+                    )}
+                    {brand.youtube && (
+                      <a
+                        href={brand.youtube}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white/70 hover:text-white transition-colors"
+                        title="YouTube"
+                      >
+                        <Youtube className="h-5 w-5" />
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             {isOwner && (
               <Button

@@ -242,9 +242,9 @@ export default async function RidePage({ params }: RidePageProps) {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-6 lg:py-8">
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+        <div className={hasBranding && brand && chapter && brand.domain ? "lg:grid lg:grid-cols-3 lg:gap-8" : ""}>
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className={hasBranding && brand && chapter && brand.domain ? "lg:col-span-2 space-y-6" : "space-y-6 max-w-3xl"}>
             {/* Back link - Desktop */}
             <Link
               href={hasBranding && brand && chapter ? `/brands/${brand.slug}/${chapter.slug}` : '/discover'}
@@ -301,11 +301,8 @@ export default async function RidePage({ params }: RidePageProps) {
             {/* Community Route Links */}
             <CommunityRoutes rideId={id} />
 
-            {/* Cake & Coffee Stop - Post-ride social section */}
-            <CakeAndCoffee rideId={id} rideDate={ride.date} isOrganizer={!!canEdit} />
-
-            {/* Mobile Ride Info - hidden on desktop where it shows in sidebar */}
-            <Card className="lg:hidden">
+            {/* Ride Info */}
+            <Card>
               <CardContent className="p-4 space-y-3">
                 <h3 className="font-semibold">Ride Info</h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -419,13 +416,16 @@ export default async function RidePage({ params }: RidePageProps) {
                 <CopyRideInfo rideInfo={rideInfoText} />
               </CardContent>
             </Card>
+
+            {/* Cake & Coffee Stop - Post-ride social section */}
+            <CakeAndCoffee rideId={id} rideDate={ride.date} isOrganizer={!!canEdit} />
           </div>
 
-          {/* Sidebar - Desktop */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24 space-y-4">
-              {/* Brand Card - shown for branded rides (links to external brand site) */}
-              {hasBranding && brand && chapter && brand.domain && (
+          {/* Sidebar - Desktop (only shows for branded rides) */}
+          {hasBranding && brand && chapter && brand.domain && (
+            <div className="hidden lg:block">
+              <div className="sticky top-24 space-y-4">
+                {/* Brand Card - links to external brand site */}
                 <Card className="overflow-hidden">
                   <a
                     href={`https://${brand.domain}`}
@@ -469,125 +469,9 @@ export default async function RidePage({ params }: RidePageProps) {
                     </CardContent>
                   </a>
                 </Card>
-              )}
-
-              {/* Ride Stats Card */}
-              <Card>
-                <CardContent className="p-4 space-y-3">
-                  <h3 className="font-semibold">Ride Info</h3>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {ride.distance && (
-                      <div className="flex items-center gap-2">
-                        <Route className="h-4 w-4 text-muted-foreground" />
-                        <span>{ride.distance} km</span>
-                      </div>
-                    )}
-                    {ride.elevation && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">↗</span>
-                        <span>{ride.elevation} m</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{formattedStartTime}</span>
-                    </div>
-                    {ride.maxAttendees && (
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>Max {ride.maxAttendees}</span>
-                      </div>
-                    )}
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Pace</span>
-                      <Badge variant="secondary" className={PACE_STYLES[pace]}>
-                        {pace}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{PACE_DESCRIPTIONS[pace]}</p>
-                  </div>
-                  {ride.terrain && (
-                    <div className="space-y-1">
-                      <span className="text-sm text-muted-foreground">Terrain</span>
-                      <p className="text-sm">{ride.terrain}</p>
-                    </div>
-                  )}
-
-                  {/* Description */}
-                  {ride.description && (
-                    <>
-                      <Separator />
-                      <div className="space-y-1">
-                        <span className="text-sm text-muted-foreground">Details</span>
-                        <div className="text-sm">
-                          {ride.description.split('\n').map((paragraph, i) => (
-                            <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">
-                              {paragraph}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Hosted by */}
-                  <Separator />
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Hosted by</span>
-                    <Link href={`/organizers/${ride.organizer.id}`} className="text-sm font-medium hover:underline flex items-center gap-1">
-                      {ride.organizer.name}
-                      <ArrowUpRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-
-                  {/* Attendees */}
-                  <Separator />
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Attendees ({totalAttendees})
-                      </span>
-                      {totalAttendees > 5 && (
-                        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs">
-                          See all
-                        </Button>
-                      )}
-                    </div>
-                    {attendees.length > 0 ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex -space-x-2">
-                          {attendees.slice(0, 5).map((attendee) => (
-                            <Avatar key={attendee.id} className="h-8 w-8 border-2 border-background">
-                              <AvatarFallback className="text-xs">{attendee.initials}</AvatarFallback>
-                            </Avatar>
-                          ))}
-                          {totalAttendees > 5 && (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium">
-                              +{totalAttendees - 5}
-                            </div>
-                          )}
-                        </div>
-                        {ride.maxAttendees && (
-                          <span className="text-xs text-muted-foreground">
-                            {ride.maxAttendees - totalAttendees} spots left
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">No attendees yet. Be the first!</p>
-                    )}
-                  </div>
-
-                  {/* Copy ride info */}
-                  <Separator />
-                  <CopyRideInfo rideInfo={rideInfoText} />
-                </CardContent>
-              </Card>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

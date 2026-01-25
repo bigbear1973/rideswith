@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatsBanner } from '@/components/ui/stats-banner';
-import { ColoredSection } from '@/components/ui/colored-section';
 import { MapPin, Users, ArrowRight, Bike, Loader2 } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 
@@ -40,14 +39,6 @@ interface BrandBackdrop {
   slug: string;
 }
 
-// Curated Unsplash images for consistent cycling theme
-const IMAGES = {
-  casual: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=400&q=80',
-  moderate: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&q=80',
-  fast: 'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&q=80',
-  race: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=400&q=80',
-};
-
 // Fallback hero images when no brands registered
 const FALLBACK_HERO_IMAGES = [
   'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80', // Two cyclists on beach road
@@ -69,16 +60,8 @@ const PACE_STYLES: Record<string, string> = {
   race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
-// Pace descriptions with speed ranges
-const PACE_CATEGORIES = [
-  { name: 'Casual', speedKmh: { min: 0, max: 20 }, image: IMAGES.casual, desc: 'Relaxed rides for everyone' },
-  { name: 'Moderate', speedKmh: { min: 20, max: 28 }, image: IMAGES.moderate, desc: 'Steady fitness building' },
-  { name: 'Fast', speedKmh: { min: 28, max: 35 }, image: IMAGES.fast, desc: 'Pushing the limits' },
-  { name: 'Race', speedKmh: { min: 35, max: 100 }, image: IMAGES.race, desc: 'Competitive training' },
-];
-
 export default function HomePage() {
-  const { formatDistance, formatSpeed } = useUnits();
+  const { formatDistance } = useUnits();
   const [latestRides, setLatestRides] = useState<LatestRide[]>([]);
   const [isLoadingRides, setIsLoadingRides] = useState(true);
   const [brandBackdrops, setBrandBackdrops] = useState<BrandBackdrop[]>([]);
@@ -133,17 +116,6 @@ export default function HomePage() {
     }
     fetchLatestRides();
   }, []);
-
-  // Format pace description based on unit system
-  const formatPaceDesc = (cat: typeof PACE_CATEGORIES[0]) => {
-    if (cat.speedKmh.min === 0) {
-      return `< ${formatSpeed(cat.speedKmh.max)}`;
-    }
-    if (cat.speedKmh.max === 100) {
-      return `> ${formatSpeed(cat.speedKmh.min)}`;
-    }
-    return `${formatSpeed(cat.speedKmh.min).replace(/\s\w+$/, '')}-${formatSpeed(cat.speedKmh.max)}`;
-  };
 
   return (
     <div className="flex flex-col">
@@ -351,34 +323,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Explore by Pace - Cyan section */}
-      <ColoredSection color="cyan">
-        <h2 className="text-2xl font-bold sm:text-3xl mb-8 text-center">Find your pace</h2>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-          {PACE_CATEGORIES.map((cat) => (
-            <Link
-              key={cat.name}
-              href={`/discover?pace=${cat.name.toLowerCase()}`}
-              className="group"
-            >
-              <div className="bg-white rounded-lg p-4 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl">
-                <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
-                  <Image
-                    src={cat.image}
-                    alt={`${cat.name} pace cycling`}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <h3 className="font-bold text-lg text-gray-900">{cat.name}</h3>
-                <p className="text-sm text-gray-600">{formatPaceDesc(cat)}</p>
-                <p className="text-xs text-gray-600 mt-1">{cat.desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </ColoredSection>
 
       {/* Final CTA */}
       <StatsBanner

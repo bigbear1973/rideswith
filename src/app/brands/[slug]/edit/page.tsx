@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
 
 interface Brand {
   id: string;
@@ -35,6 +35,11 @@ interface Brand {
   primaryColor: string | null;
   secondaryColor: string | null;
   createdById: string | null;
+  instagram: string | null;
+  twitter: string | null;
+  facebook: string | null;
+  strava: string | null;
+  youtube: string | null;
 }
 
 export default function EditBrandPage() {
@@ -55,6 +60,11 @@ export default function EditBrandPage() {
     name: '',
     domain: '',
     description: '',
+    instagram: '',
+    twitter: '',
+    facebook: '',
+    strava: '',
+    youtube: '',
   });
 
   useEffect(() => {
@@ -74,6 +84,11 @@ export default function EditBrandPage() {
             name: data.name || '',
             domain: data.domain || '',
             description: data.description || '',
+            instagram: data.instagram || '',
+            twitter: data.twitter || '',
+            facebook: data.facebook || '',
+            strava: data.strava || '',
+            youtube: data.youtube || '',
           });
 
           // Check ownership
@@ -309,6 +324,83 @@ export default function EditBrandPage() {
                   placeholder="Tell us about this brand..."
                   rows={3}
                 />
+              </div>
+
+              {/* Social Links */}
+              <div className="space-y-4">
+                <Label className="text-base font-semibold">Social Links</Label>
+                <p className="text-sm text-muted-foreground -mt-2">
+                  Add links to your brand&apos;s social profiles
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram" className="flex items-center gap-2">
+                      <Instagram className="h-4 w-4" />
+                      Instagram
+                    </Label>
+                    <Input
+                      id="instagram"
+                      value={formData.instagram}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      placeholder="@handle or URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter" className="flex items-center gap-2">
+                      <Twitter className="h-4 w-4" />
+                      X / Twitter
+                    </Label>
+                    <Input
+                      id="twitter"
+                      value={formData.twitter}
+                      onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
+                      placeholder="@handle or URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="facebook" className="flex items-center gap-2">
+                      <Facebook className="h-4 w-4" />
+                      Facebook
+                    </Label>
+                    <Input
+                      id="facebook"
+                      value={formData.facebook}
+                      onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                      placeholder="Page URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="strava" className="flex items-center gap-2">
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                      </svg>
+                      Strava Club
+                    </Label>
+                    <Input
+                      id="strava"
+                      value={formData.strava}
+                      onChange={(e) => setFormData({ ...formData, strava: e.target.value })}
+                      placeholder="Club URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="youtube" className="flex items-center gap-2">
+                      <Youtube className="h-4 w-4" />
+                      YouTube
+                    </Label>
+                    <Input
+                      id="youtube"
+                      value={formData.youtube}
+                      onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                      placeholder="Channel URL"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Error/Success Messages */}

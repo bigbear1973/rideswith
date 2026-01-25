@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 import { MapPin, Navigation, ExternalLink } from 'lucide-react';
 import {
   DropdownMenu,
@@ -9,11 +9,41 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+// Clean SVG icons matching Lucide style
+const AppleMapsIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+    <circle cx="12" cy="9" r="2.5" />
+  </svg>
+);
+
+const GoogleMapsIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 1.74.5 3.37 1.41 4.84.95 1.54 2.2 2.86 3.16 4.4.47.75.81 1.45 1.17 2.26L12 24l1.26-3.5c.36-.81.7-1.51 1.17-2.26.96-1.54 2.21-2.86 3.16-4.4A6.98 6.98 0 0 0 19 9c0-3.87-3.13-7-7-7z" />
+    <circle cx="12" cy="9" r="3" />
+  </svg>
+);
+
+const WazeIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="8.5" cy="10" r="1" fill="currentColor" />
+    <circle cx="15.5" cy="10" r="1" fill="currentColor" />
+    <path d="M8 15c1.5 1.5 6.5 1.5 8 0" />
+  </svg>
+);
+
 interface LocationLinkProps {
   locationName: string;
   locationAddress: string;
   latitude: number;
   longitude: number;
+}
+
+interface MapLink {
+  name: string;
+  icon: ReactNode;
+  url: string;
 }
 
 export function LocationLink({
@@ -24,28 +54,23 @@ export function LocationLink({
 }: LocationLinkProps) {
   const [open, setOpen] = useState(false);
 
-  // Encode the address for URL use
-  const encodedAddress = encodeURIComponent(`${locationName}, ${locationAddress}`);
   const coords = `${latitude},${longitude}`;
 
-  // Map app URLs
-  const mapLinks = [
+  // Map app URLs with clean icons
+  const mapLinks: MapLink[] = [
     {
       name: 'Apple Maps',
-      icon: '🍎',
-      // Apple Maps URL scheme - works on iOS, falls back to web on other platforms
+      icon: <AppleMapsIcon />,
       url: `https://maps.apple.com/?daddr=${coords}&dirflg=d`,
     },
     {
       name: 'Google Maps',
-      icon: '📍',
-      // Google Maps universal link
+      icon: <GoogleMapsIcon />,
       url: `https://www.google.com/maps/dir/?api=1&destination=${coords}`,
     },
     {
       name: 'Waze',
-      icon: '🚗',
-      // Waze universal link - opens app if installed
+      icon: <WazeIcon />,
       url: `https://waze.com/ul?ll=${coords}&navigate=yes`,
     },
   ];
@@ -84,7 +109,7 @@ export function LocationLink({
             onClick={() => handleSelect(link.url)}
             className="cursor-pointer"
           >
-            <span className="mr-2">{link.icon}</span>
+            <span className="mr-2 text-muted-foreground">{link.icon}</span>
             {link.name}
             <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
           </DropdownMenuItem>

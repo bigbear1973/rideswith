@@ -91,6 +91,13 @@ model Brand {
   backdrop       String? // Wide banner image URL
   slogan         String? // Brand tagline
 
+  // Social links (manually entered)
+  instagram String? // Instagram handle or URL
+  twitter   String? // Twitter/X handle or URL
+  facebook  String? // Facebook page URL
+  strava    String? // Strava club URL
+  youtube   String? // YouTube channel URL
+
   // Ownership
   createdById String?
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
