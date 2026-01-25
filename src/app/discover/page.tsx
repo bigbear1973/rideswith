@@ -84,6 +84,13 @@ interface Ride {
     name: string;
     slug: string;
   };
+  brand: {
+    name: string;
+    slug: string;
+    logo: string | null;
+    logoIcon: string | null;
+    primaryColor: string | null;
+  } | null;
   attendeeCount: number;
 }
 
@@ -574,6 +581,19 @@ export default function DiscoverPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
+                            {/* Brand logo for branded rides */}
+                            {ride.brand?.logo && (
+                              <div
+                                className="h-6 w-6 rounded flex-shrink-0 p-0.5"
+                                style={{ backgroundColor: ride.brand.primaryColor || '#f3f4f6' }}
+                              >
+                                <img
+                                  src={ride.brand.logoIcon || ride.brand.logo}
+                                  alt={ride.brand.name}
+                                  className="h-full w-full object-contain"
+                                />
+                              </div>
+                            )}
                             <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
                               {ride.pace}
                             </Badge>

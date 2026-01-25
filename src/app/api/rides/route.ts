@@ -33,6 +33,22 @@ export async function GET(request: NextRequest) {
             slug: true,
           },
         },
+        chapter: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            brand: {
+              select: {
+                name: true,
+                slug: true,
+                logo: true,
+                logoIcon: true,
+                primaryColor: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             rsvps: {
@@ -92,6 +108,7 @@ export async function GET(request: NextRequest) {
       price: ride.price,
       routeUrl: ride.routeUrl,
       organizer: ride.organizer,
+      brand: ride.chapter?.brand || null,
       attendeeCount: ride._count.rsvps,
     }));
 
