@@ -166,7 +166,7 @@ Natural language / voice input to auto-fill ride details:
 ### 3. Wire Up Database
 - [x] `/discover` - Fetch rides from DB instead of mock data
 - [x] `/rides/[id]` - Fetch ride details from DB
-- [ ] Homepage - Fetch featured rides from DB
+- [x] Homepage - Fetch latest rides from DB (via /api/rides/latest)
 
 ---
 
@@ -197,12 +197,13 @@ Natural language / voice input to auto-fill ride details:
 - [x] Enable create ride form
 - [ ] Build organizer profile page
 - [x] Wire pages to database (discover, rides)
-- [ ] Wire homepage to database
+- [x] Wire homepage to database (latest rides from /api/rides/latest)
 
 ### Phase 4: Backend APIs
 - [x] GET/POST /api/rides - List and create rides
 - [x] GET/PUT/DELETE /api/rides/[id] - Individual ride operations
 - [x] GET /api/rides/past - Past rides for archive
+- [x] GET /api/rides/latest - Latest 3 rides for homepage
 - [x] GET/PUT /api/profile - User profile management
 - [x] GET /api/profile/check-slug - Slug availability check
 - [ ] GET/POST /api/rsvps - Manage attendance
@@ -251,8 +252,8 @@ Natural language / voice input to auto-fill ride details:
 - Edit/delete rides for organizers
 - Past rides archive
 
-**Mock Data (not wired to DB):**
-- Homepage rides (5 hardcoded)
+**Recently Wired to DB:**
+- Homepage "Latest rides" section (fetches from /api/rides/latest)
 
 **Broken (404s):**
 - /organizers/create
@@ -273,8 +274,12 @@ Natural language / voice input to auto-fill ride details:
 - Edit ride functionality with delete confirmation
 - Modern date/time pickers (shadcn calendar + popover)
 - Past rides archive (/discover/past) with time range and pace filters
+- Rebrand from GroupRide to RidesWith
+- Homepage "Latest rides" section now fetches from database
+- Fixed dark mode text visibility on feature cards
+- Consolidated ride details/attendees into sidebar info card
 
-**Next Priority:** Build organizer profile page, add RSVP functionality, wire homepage to database.
+**Next Priority:** Build organizer profile page, add RSVP functionality.
 
 ---
 
@@ -293,11 +298,14 @@ Natural language / voice input to auto-fill ride details:
 - [x] Build /profile page with user details
 - [x] Each user should have a unique URL (/u/username)
 - [x] Allow users to edit their personalized URL/slug
+- [x] Rebrand from GroupRide to RidesWith (all files, emails, UI)
+- [x] Wire homepage "Latest rides" to database (/api/rides/latest)
+- [x] Fix dark mode text visibility on homepage feature cards
+- [x] Consolidate ride details/attendees into sidebar info card
 
 ### High Priority (Next Up)
 - [ ] Build organizer profile page (/organizers/[id])
 - [ ] Add RSVP functionality (going/maybe/not going)
-- [ ] Wire homepage to fetch featured rides from database
 
 ### Medium Priority
 - [ ] Create /organizers/create page (organizer signup)
