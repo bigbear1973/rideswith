@@ -66,13 +66,13 @@ Key elements to adopt from https://www.c40.org/:
 - Generous padding and whitespace between sections
 - Stats displayed prominently with large numbers
 
-**Components to Implement:**
-- [ ] Stats banner (green background, big numbers) - e.g., "500+ rides", "10,000+ km ridden"
-- [ ] Split hero sections with illustration/photo + text
-- [ ] Feature cards on colored background (pace categories, ride types)
-- [ ] Scrolling marquee of organizer/city names
-- [ ] Bold section headers with supporting text
-- [ ] Outlined buttons with hover fills (like "LEARN MORE", "FIND OUT MORE")
+**Components Implemented:**
+- [x] Stats banner (green background, big numbers) - `src/components/ui/stats-banner.tsx`
+- [x] Split hero sections with illustration/photo + text - `src/components/ui/split-hero.tsx`
+- [x] Feature cards on colored background - `src/components/ui/feature-card.tsx`
+- [x] Colored section bands (green/cyan/black) - `src/components/ui/colored-section.tsx`
+- [x] C40 button variants (outlined, uppercase, hover fills) - `src/components/ui/button.tsx`
+- [ ] Scrolling marquee of organizer/city names (future)
 
 **Button Styles:**
 - Outlined/bordered buttons (not filled)
@@ -176,6 +176,7 @@ Natural language / voice input to auto-fill ride details:
 - [x] Settings page (units, language, timezone)
 - [x] Auth pages (signin, verify, error)
 - [x] Unit switcher (km/mi) with context
+- [x] C40.org-inspired redesign (green/cyan/black, bold typography, outlined buttons)
 
 ### Phase 3: Fix Basics (IN PROGRESS)
 - [ ] Create missing pages (profile, organizers/create, privacy, terms)
@@ -245,5 +246,10 @@ Natural language / voice input to auto-fill ride details:
 - Create ride form (full implementation with location search)
 - GET/POST /api/rides endpoints
 - Auto-creates organizer for first-time ride creators
+- C40.org-inspired site redesign (green/cyan/black color scheme, bold typography)
+- New UI components: StatsBanner, ColoredSection, FeatureCard, SplitHero
+- C40 button variants (outlined, uppercase, hover fills)
+- Homepage redesign with stats banners, colored sections, feature grids
+- Discover page styling updates
 
 **Next Priority:** Wire discover page and ride detail page to database, fix remaining 404s.
