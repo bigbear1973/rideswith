@@ -416,11 +416,95 @@ export default async function RidePage({ params }: RidePageProps) {
                 <CopyRideInfo rideInfo={rideInfoText} />
               </CardContent>
             </Card>
+
+            {/* Brand Card - Mobile - shown for branded rides */}
+            {hasBranding && brand && chapter && (
+              <Card className="overflow-hidden">
+                <Link href={`/brands/${brand.slug}`} className="block group">
+                  {/* Backdrop image */}
+                  {brand.backdrop && (
+                    <div
+                      className="h-32 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${brand.backdrop})` }}
+                    />
+                  )}
+                  {/* Brand info below image */}
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      {brand.logo ? (
+                        <img
+                          src={brand.logo}
+                          alt={brand.name}
+                          className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
+                        />
+                      ) : (
+                        <div
+                          className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
+                          style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
+                        >
+                          {brand.name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Presented by</p>
+                        <p className="font-semibold truncate">{brand.name}</p>
+                        {brand.slogan && (
+                          <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
+                        )}
+                      </div>
+                      <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    </div>
+                  </CardContent>
+                </Link>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block">
             <div className="sticky top-24 space-y-4">
+              {/* Brand Card - shown for branded rides */}
+              {hasBranding && brand && chapter && (
+                <Card className="overflow-hidden">
+                  <Link href={`/brands/${brand.slug}`} className="block group">
+                    {/* Backdrop image */}
+                    {brand.backdrop && (
+                      <div
+                        className="h-32 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${brand.backdrop})` }}
+                      />
+                    )}
+                    {/* Brand info below image */}
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        {brand.logo ? (
+                          <img
+                            src={brand.logo}
+                            alt={brand.name}
+                            className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
+                          />
+                        ) : (
+                          <div
+                            className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
+                            style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
+                          >
+                            {brand.name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground">Presented by</p>
+                          <p className="font-semibold truncate">{brand.name}</p>
+                          {brand.slogan && (
+                            <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
+                          )}
+                        </div>
+                        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
+              )}
+
               {/* Ride Stats Card */}
               <Card>
                 <CardContent className="p-4 space-y-3">
@@ -531,58 +615,6 @@ export default async function RidePage({ params }: RidePageProps) {
         </div>
       </div>
 
-      {/* Brand Promotional Banner - shown for branded rides */}
-      {hasBranding && brand && chapter && (
-        <div className="mt-8 border-t">
-          <Link
-            href={`/brands/${brand.slug}`}
-            className="block group"
-          >
-            <div
-              className="relative py-12 overflow-hidden"
-              style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
-            >
-              {/* Backdrop image */}
-              {brand.backdrop && (
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-opacity"
-                  style={{ backgroundImage: `url(${brand.backdrop})` }}
-                />
-              )}
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-transparent" />
-
-              <div className="relative mx-auto max-w-6xl px-4 flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  {brand.logo ? (
-                    <img
-                      src={brand.logo}
-                      alt={brand.name}
-                      className="h-16 w-16 object-contain rounded-xl bg-white p-2 shadow-lg"
-                    />
-                  ) : (
-                    <div className="h-16 w-16 rounded-xl bg-white/20 flex items-center justify-center text-2xl font-bold shadow-lg text-white">
-                      {brand.name.charAt(0)}
-                    </div>
-                  )}
-                  <div className="text-white">
-                    <p className="text-sm font-medium opacity-80">Presented by</p>
-                    <p className="text-2xl font-bold">{brand.name}</p>
-                    {brand.slogan && (
-                      <p className="text-sm italic opacity-90 mt-1">{brand.slogan}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="hidden sm:flex items-center gap-2 text-white">
-                  <span className="text-sm font-medium">Explore {brand.name}</span>
-                  <ArrowUpRight className="h-5 w-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
