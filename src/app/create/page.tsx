@@ -29,6 +29,7 @@ import {
   Euro,
 } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
+import { DatePicker, TimePicker } from '@/components/ui/date-time-picker';
 
 interface LocationResult {
   place_id: number;
@@ -61,7 +62,7 @@ export default function CreateRidePage() {
   // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
+  const [rideDate, setRideDate] = useState<Date | undefined>(undefined);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [locationName, setLocationName] = useState('');
@@ -154,7 +155,7 @@ export default function CreateRidePage() {
       setError('Please enter a ride title');
       return;
     }
-    if (!date) {
+    if (!rideDate) {
       setError('Please select a date');
       return;
     }
@@ -171,8 +172,16 @@ export default function CreateRidePage() {
 
     try {
       // Combine date and time into ISO string
-      const dateTime = new Date(`${date}T${startTime}`);
-      const endDateTime = endTime ? new Date(`${date}T${endTime}`) : null;
+      const [hours, minutes] = startTime.split(':').map(Number);
+      const dateTime = new Date(rideDate);
+      dateTime.setHours(hours, minutes, 0, 0);
+
+      let endDateTime: Date | null = null;
+      if (endTime) {
+        const [endHours, endMinutes] = endTime.split(':').map(Number);
+        endDateTime = new Date(rideDate);
+        endDateTime.setHours(endHours, endMinutes, 0, 0);
+      }
 
       const response = await fetch('/api/rides', {
         method: 'POST',
@@ -285,33 +294,30 @@ export default function CreateRidePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                <Label>Date *</Label>
+                <DatePicker
+                  date={rideDate}
+                  setDate={setRideDate}
+                  placeholder="Select ride date"
+                  minDate={new Date()}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startTime">Start Time *</Label>
-                  <Input
-                    id="startTime"
-                    type="time"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
+                  <Label>Start Time *</Label>
+                  <TimePicker
+                    time={startTime}
+                    setTime={setStartTime}
+                    placeholder="Select time"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endTime">End Time (estimated)</Label>
-                  <Input
-                    id="endTime"
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
+                  <Label>End Time (estimated)</Label>
+                  <TimePicker
+                    time={endTime}
+                    setTime={setEndTime}
+                    placeholder="Select time"
                   />
                 </div>
               </div>
