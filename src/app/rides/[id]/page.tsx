@@ -177,34 +177,12 @@ export default async function RidePage({ params }: RidePageProps) {
               </div>
               <p className="text-muted-foreground">
                 Hosted by{' '}
-                <Link href={`/organizers/${ride.organizer.id}`} className="text-foreground hover:underline">
+                <Link href={`/organizers/${ride.organizer.id}`} className="text-foreground hover:underline inline-flex items-center gap-1">
                   {ride.organizer.name}
+                  <ArrowUpRight className="h-3 w-3" />
                 </Link>
               </p>
             </div>
-
-            {/* Organizer Card */}
-            <Card>
-              <CardContent className="p-4">
-                <Link href={`/organizers/${ride.organizer.id}`} className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {ride.organizer.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{ride.organizer.name}</span>
-                      <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>{ride.organizer.rideCount} rides</span>
-                      <span>{ride.organizer.memberCount} members</span>
-                    </div>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
 
             {/* Date & Time Card */}
             <Card>
