@@ -252,7 +252,7 @@ export default function ChapterPage({ params }: PageProps) {
                     {chapter.name}.
                   </p>
                   <Button asChild>
-                    <Link href="/create">Create a Ride</Link>
+                    <Link href={`/create?chapterId=${chapter.id}`}>Create a Ride</Link>
                   </Button>
                 </CardContent>
               </Card>
