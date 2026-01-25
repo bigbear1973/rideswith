@@ -24,7 +24,7 @@ function parseRouteUrl(url: string): { platform: string; embedUrl: string; tourI
         return {
           platform: 'Komoot',
           tourId: tourMatch[1],
-          embedUrl: `https://www.komoot.com/tour/${tourMatch[1]}/embed?share_token=&profile=1&gallery=1`,
+          embedUrl: `https://www.komoot.com/tour/${tourMatch[1]}/embed?profile=1`,
         };
       }
       if (collectionMatch) {
