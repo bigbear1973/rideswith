@@ -6,13 +6,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
   Calendar,
   Clock,
-  MapPin,
   Users,
   Route,
   ChevronLeft,
@@ -287,25 +286,12 @@ export default async function RidePage({ params }: RidePageProps) {
                   </div>
                 </div>
                 <Separator />
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${ride.latitude},${ride.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 group hover:bg-muted/50 -mx-4 px-4 py-2 rounded-lg transition-colors"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium group-hover:text-primary transition-colors">{ride.locationName}</p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {ride.locationAddress.split(',').slice(0, 3).join(',')}
-                    </p>
-                  </div>
-                  <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    ↗
-                  </span>
-                </a>
+                <LocationLink
+                  locationName={ride.locationName}
+                  locationAddress={ride.locationAddress}
+                  latitude={ride.latitude}
+                  longitude={ride.longitude}
+                />
               </CardContent>
             </Card>
 
