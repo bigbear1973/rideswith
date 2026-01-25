@@ -283,7 +283,7 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-medium flex items-center gap-2">
               <Camera className="h-4 w-4" />
-              Photos ({photos.length})
+              Media ({photos.length})
             </h3>
             {session?.user && (
               <label className="cursor-pointer">
