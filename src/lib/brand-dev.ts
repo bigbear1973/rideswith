@@ -134,11 +134,10 @@ export async function fetchBrandAssets(
       logos.find((l) => l.type === "logo" && l.mode === "has_opaque_background") ||
       logos.find((l) => l.type === "logo");
 
-    // For dark backgrounds: prefer "dark" mode logo, then opaque, then any
-    const darkLogo = logos.find((l) => l.type === "logo" && l.mode === "dark") ||
-      logos.find((l) => l.type === "logo" && l.mode === "has_opaque_background") ||
-      logos.find((l) => l.type === "icon" && l.mode === "has_opaque_background") ||
-      logos.find((l) => l.type === "icon");
+    // For dark backgrounds: only use a dedicated dark mode logo if available
+    // Don't fall back to opaque background images as they may be photos, not logos
+    // If no dark logo exists, the UI component will fall back to the light logo
+    const darkLogo = logos.find((l) => l.type === "logo" && l.mode === "dark");
 
     const iconImage = logos.find((l) => l.type === "icon");
 

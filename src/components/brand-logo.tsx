@@ -12,16 +12,21 @@ interface BrandLogoProps {
 
 export function BrandLogo({ logo, logoDark, name, primaryColor, className = "h-12 w-12" }: BrandLogoProps) {
   const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   // Use dark logo when in dark mode if available, otherwise fall back to regular logo
-  const displayLogo = resolvedTheme === 'dark' && logoDark ? logoDark : logo;
+  const displayLogo = isDark && logoDark ? logoDark : logo;
+
+  // If we're in dark mode but using the light logo (no dark version available),
+  // add a light background to make it visible
+  const needsLightBackground = isDark && !logoDark && logo;
 
   if (displayLogo) {
     return (
       <img
         src={displayLogo}
         alt={name}
-        className={`${className} object-contain rounded`}
+        className={`${className} object-contain rounded ${needsLightBackground ? 'bg-white p-1' : ''}`}
       />
     );
   }
