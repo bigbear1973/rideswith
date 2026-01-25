@@ -17,6 +17,8 @@ import {
   Users,
   Route,
   History,
+  Building2,
+  Plus,
 } from 'lucide-react';
 
 const PACE_STYLES: Record<string, string> = {
@@ -56,6 +58,14 @@ export default async function ProfilePage() {
         include: {
           organizer: true,
         },
+      },
+      brands: {
+        include: {
+          _count: {
+            select: { chapters: true },
+          },
+        },
+        orderBy: { name: 'asc' },
       },
     },
   });
@@ -258,6 +268,59 @@ export default async function ProfilePage() {
                           {rsvp.ride.pace.toLowerCase()}
                         </Badge>
                       </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* My Brands */}
+        <Card className="mt-8">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              My Brands ({user.brands.length})
+            </CardTitle>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/brands/create">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Brand
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {user.brands.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Building2 className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <p>No brands yet</p>
+                <p className="text-sm mt-1">Create a brand to manage chapters and rides.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {user.brands.map((brand) => (
+                  <Link key={brand.id} href={`/brands/${brand.slug}`}>
+                    <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                      <Avatar className="h-10 w-10">
+                        {brand.logo && (
+                          <AvatarImage src={brand.logo} alt={brand.name} />
+                        )}
+                        <AvatarFallback>
+                          {brand.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{brand.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {brand._count.chapters} chapter{brand._count.chapters !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" asChild onClick={(e) => e.stopPropagation()}>
+                        <Link href={`/brands/${brand.slug}/edit`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
                     </div>
                   </Link>
                 ))}

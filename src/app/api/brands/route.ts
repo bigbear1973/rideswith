@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
         primaryColor: brandAssets?.primaryColor || null,
         secondaryColor: brandAssets?.secondaryColor || null,
         ...(brandAssets?.fonts && { fonts: brandAssets.fonts }),
+        createdById: session.user.id,
       },
     });
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fetchBrandAssets, isValidDomain } from "@/lib/brand-dev";
 
@@ -14,6 +15,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const brand = await prisma.brand.findUnique({
       where: { slug },
       include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            slug: true,
+          },
+        },
         chapters: {
           include: {
             members: {
@@ -60,9 +69,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PUT /api/brands/[slug] - Update brand (refresh from Brand.dev)
+// PUT /api/brands/[slug] - Update brand (owner only)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { slug } = await params;
     const body = await request.json();
 
@@ -72,6 +86,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!brand) {
       return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+    }
+
+    // Check ownership
+    if (brand.createdById !== session.user.id) {
+      return NextResponse.json(
+        { error: "You don't have permission to edit this brand" },
+        { status: 403 }
+      );
     }
 
     // If refreshing from Brand.dev
@@ -118,6 +140,46 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     console.error("PUT /api/brands/[slug] error:", error);
     return NextResponse.json(
       { error: "Failed to update brand" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/brands/[slug] - Delete brand (owner only)
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { slug } = await params;
+
+    const brand = await prisma.brand.findUnique({
+      where: { slug },
+    });
+
+    if (!brand) {
+      return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+    }
+
+    // Check ownership
+    if (brand.createdById !== session.user.id) {
+      return NextResponse.json(
+        { error: "You don't have permission to delete this brand" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.brand.delete({
+      where: { slug },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE /api/brands/[slug] error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete brand" },
       { status: 500 }
     );
   }

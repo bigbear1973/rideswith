@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import {
   Globe,
   ExternalLink,
   BadgeCheck,
+  Edit,
 } from "lucide-react";
 
 interface PageProps {
@@ -25,6 +27,12 @@ async function getBrand(slug: string) {
   const brand = await prisma.brand.findUnique({
     where: { slug },
     include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       chapters: {
         include: {
           members: {
@@ -63,12 +71,13 @@ async function getBrand(slug: string) {
 
 export default async function BrandPage({ params }: PageProps) {
   const { slug } = await params;
-  const brand = await getBrand(slug);
+  const [brand, session] = await Promise.all([getBrand(slug), auth()]);
 
   if (!brand) {
     notFound();
   }
 
+  const isOwner = session?.user?.id === brand.createdBy?.id;
   const totalMembers = brand.chapters.reduce((sum, c) => sum + c.memberCount, 0);
   const totalUpcomingRides = brand.chapters.reduce(
     (sum, c) => sum + c._count.rides,
@@ -96,7 +105,7 @@ export default async function BrandPage({ params }: PageProps) {
                 {brand.name.charAt(0)}
               </div>
             )}
-            <div>
+            <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold mb-2">
                 {brand.name}
               </h1>
@@ -113,6 +122,19 @@ export default async function BrandPage({ params }: PageProps) {
                 </a>
               )}
             </div>
+            {isOwner && (
+              <Button
+                asChild
+                variant="secondary"
+                size="sm"
+                className="ml-auto"
+              >
+                <Link href={`/brands/${brand.slug}/edit`}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Brand
+                </Link>
+              </Button>
+            )}
           </div>
           {brand.description && (
             <p className="mt-4 text-lg opacity-90 max-w-3xl">

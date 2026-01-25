@@ -1,0 +1,383 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
+
+interface Brand {
+  id: string;
+  name: string;
+  slug: string;
+  domain: string | null;
+  description: string | null;
+  logo: string | null;
+  logoIcon: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  createdById: string | null;
+}
+
+export default function EditBrandPage() {
+  const router = useRouter();
+  const params = useParams();
+  const slug = params.slug as string;
+  const { data: session, status } = useSession();
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const [brand, setBrand] = useState<Brand | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    domain: '',
+    description: '',
+  });
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push(`/auth/signin?callbackUrl=/brands/${slug}/edit`);
+    }
+  }, [status, router, slug]);
+
+  useEffect(() => {
+    async function fetchBrand() {
+      try {
+        const response = await fetch(`/api/brands/${slug}`);
+        if (response.ok) {
+          const data = await response.json();
+          setBrand(data);
+          setFormData({
+            name: data.name || '',
+            domain: data.domain || '',
+            description: data.description || '',
+          });
+
+          // Check ownership
+          if (data.createdById !== session?.user?.id) {
+            setError("You don't have permission to edit this brand");
+          }
+        } else {
+          setError('Brand not found');
+        }
+      } catch {
+        setError('Failed to load brand');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (session?.user && slug) {
+      fetchBrand();
+    }
+  }, [session, slug]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await fetch(`/api/brands/${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update brand');
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        router.push(`/brands/${slug}`);
+      }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update brand');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRefreshBranding = async () => {
+    if (!brand?.domain) return;
+
+    setIsRefreshing(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/brands/${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshBranding: true }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to refresh branding');
+      }
+
+      const updatedBrand = await response.json();
+      setBrand(updatedBrand);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh branding');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/brands/${slug}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete brand');
+      }
+
+      router.push('/profile');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete brand');
+      setIsDeleting(false);
+    }
+  };
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!brand || brand.createdById !== session?.user?.id) {
+    return (
+      <div className="min-h-screen pb-8">
+        <div className="mx-auto max-w-2xl px-4 py-8">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error || "You don't have permission to edit this brand"}
+            </AlertDescription>
+          </Alert>
+          <Button variant="outline" className="mt-4" asChild>
+            <Link href="/profile">Back to profile</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-8">
+      <div className="mx-auto max-w-2xl px-4 py-8">
+        <Link
+          href={`/brands/${slug}`}
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back to brand
+        </Link>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Edit Brand</CardTitle>
+            <CardDescription>
+              Update your brand information and branding assets
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Brand Preview */}
+              <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/50">
+                {brand.logo ? (
+                  <Image
+                    src={brand.logo}
+                    alt={brand.name}
+                    width={64}
+                    height={64}
+                    className="rounded-lg"
+                  />
+                ) : (
+                  <div
+                    className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
+                    style={{ backgroundColor: brand.primaryColor || '#6366f1' }}
+                  >
+                    {brand.name.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="font-medium">{brand.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    rideswith.com/brands/{brand.slug}
+                  </p>
+                  {brand.primaryColor && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <div
+                        className="w-4 h-4 rounded-full border"
+                        style={{ backgroundColor: brand.primaryColor }}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {brand.primaryColor}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {brand.domain && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshBranding}
+                    disabled={isRefreshing}
+                  >
+                    {isRefreshing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    <span className="ml-2 hidden sm:inline">Refresh from Brand.dev</span>
+                  </Button>
+                )}
+              </div>
+
+              {/* Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name">Brand Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Brand name"
+                  required
+                />
+              </div>
+
+              {/* Domain */}
+              <div className="space-y-2">
+                <Label htmlFor="domain">Domain (for Brand.dev)</Label>
+                <Input
+                  id="domain"
+                  value={formData.domain}
+                  onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                  placeholder="example.com"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Enter the brand&apos;s domain to auto-fetch logo and colors from Brand.dev
+                </p>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Tell us about this brand..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Error/Success Messages */}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {success && (
+                <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <AlertDescription className="text-green-700 dark:text-green-300">
+                    Brand updated successfully!
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-between">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="destructive" disabled={isDeleting}>
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 mr-2" />
+                      )}
+                      Delete Brand
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Brand</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete &quot;{brand.name}&quot;? This will also delete all associated chapters. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push(`/brands/${slug}`)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
