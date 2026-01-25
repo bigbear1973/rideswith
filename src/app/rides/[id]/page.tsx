@@ -32,10 +32,10 @@ const PACE_STYLES: Record<string, string> = {
 };
 
 const PACE_DESCRIPTIONS: Record<string, string> = {
-  casual: '< 20 km/h average',
-  moderate: '20-28 km/h average',
-  fast: '28-35 km/h average',
-  race: '> 35 km/h average',
+  casual: '< 20 km/h (12 mph)',
+  moderate: '20-28 km/h (12-17 mph)',
+  fast: '28-35 km/h (17-22 mph)',
+  race: '> 35 km/h (22+ mph)',
 };
 
 export default async function RidePage({ params }: RidePageProps) {
@@ -151,7 +151,9 @@ export default async function RidePage({ params }: RidePageProps) {
   });
 
   // Build ride info text for copying
-  const rideUrl = `https://rideswith.com/rides/${id}`;
+  const rideUrl = `https://rideswith-production.up.railway.app/rides/${id}`;
+  // Shorten address: take first 2-3 parts (e.g., "Phoenix Park, Dublin" instead of full address)
+  const shortAddress = ride.locationAddress.split(',').slice(0, 2).join(',').trim();
   const rideInfoText = [
     `${ride.title}`,
     ``,
@@ -159,7 +161,7 @@ export default async function RidePage({ params }: RidePageProps) {
     `${formattedStartTime}${formattedEndTime ? ` - ${formattedEndTime}` : ''}`,
     ``,
     `${ride.locationName}`,
-    ride.locationAddress,
+    shortAddress,
     ``,
     ride.distance ? `Distance: ${ride.distance} km` : null,
     ride.elevation ? `Elevation: ${ride.elevation} m` : null,
