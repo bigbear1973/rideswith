@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
               logoIcon: brandAssets.logoIcon || brand.logoIcon,
               primaryColor: brandAssets.primaryColor || brand.primaryColor,
               secondaryColor: brandAssets.secondaryColor || brand.secondaryColor,
+              backdrop: brandAssets.backdrop || brand.backdrop,
+              slogan: brandAssets.slogan || brand.slogan,
               ...(brandAssets.fonts && { fonts: brandAssets.fonts }),
               description: brandAssets.description || brand.description,
             },
@@ -48,7 +50,8 @@ export async function POST(request: NextRequest) {
             brand: brand.name,
             status: "updated",
             logo: brandAssets.logo,
-            logoDark: brandAssets.logoDark,
+            backdrop: brandAssets.backdrop,
+            slogan: brandAssets.slogan,
           });
         } else {
           results.push({

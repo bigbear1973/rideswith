@@ -108,6 +108,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             logoIcon: brandAssets.logoIcon || brand.logoIcon,
             primaryColor: brandAssets.primaryColor || brand.primaryColor,
             secondaryColor: brandAssets.secondaryColor || brand.secondaryColor,
+            backdrop: brandAssets.backdrop || brand.backdrop,
+            slogan: brandAssets.slogan || brand.slogan,
             ...(brandAssets.fonts && { fonts: brandAssets.fonts }),
             description: brandAssets.description || brand.description,
           },

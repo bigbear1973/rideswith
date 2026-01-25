@@ -82,6 +82,9 @@ export default async function RidePage({ params }: RidePageProps) {
               logoIcon: true,
               primaryColor: true,
               secondaryColor: true,
+              backdrop: true,
+              slogan: true,
+              domain: true,
             },
           },
         },
@@ -173,10 +176,20 @@ export default async function RidePage({ params }: RidePageProps) {
       {/* Brand Header - shown for branded rides */}
       {hasBranding && brand && chapter && (
         <div
-          className="py-6 text-white"
+          className="relative py-8 text-white overflow-hidden"
           style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
         >
-          <div className="mx-auto max-w-6xl px-4">
+          {/* Backdrop image */}
+          {brand.backdrop && (
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-30"
+              style={{ backgroundImage: `url(${brand.backdrop})` }}
+            />
+          )}
+          {/* Gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+
+          <div className="relative mx-auto max-w-6xl px-4">
             <Link
               href={`/brands/${brand.slug}/${chapter.slug}`}
               className="inline-flex items-center gap-4 hover:opacity-90 transition-opacity"
@@ -185,18 +198,21 @@ export default async function RidePage({ params }: RidePageProps) {
                 <img
                   src={brand.logo}
                   alt={brand.name}
-                  className="h-12 w-12 object-contain rounded-lg bg-white p-1.5"
+                  className="h-14 w-14 object-contain rounded-lg bg-white p-1.5 shadow-lg"
                 />
               ) : (
-                <div className="h-12 w-12 rounded-lg bg-white/20 flex items-center justify-center text-lg font-bold">
+                <div className="h-14 w-14 rounded-lg bg-white/20 flex items-center justify-center text-xl font-bold shadow-lg">
                   {brand.name.charAt(0)}
                 </div>
               )}
               <div>
-                <p className="font-semibold text-lg">
+                <p className="font-bold text-xl">
                   {brand.name} {chapter.name}
                 </p>
-                <p className="text-white/80 text-sm flex items-center gap-1">
+                {brand.slogan && (
+                  <p className="text-white/90 text-sm italic">{brand.slogan}</p>
+                )}
+                <p className="text-white/70 text-sm flex items-center gap-1 mt-0.5">
                   {chapter.city}
                   <ArrowUpRight className="h-3 w-3" />
                 </p>
@@ -514,6 +530,59 @@ export default async function RidePage({ params }: RidePageProps) {
           </div>
         </div>
       </div>
+
+      {/* Brand Promotional Banner - shown for branded rides */}
+      {hasBranding && brand && chapter && (
+        <div className="mt-8 border-t">
+          <Link
+            href={`/brands/${brand.slug}`}
+            className="block group"
+          >
+            <div
+              className="relative py-12 overflow-hidden"
+              style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
+            >
+              {/* Backdrop image */}
+              {brand.backdrop && (
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-opacity"
+                  style={{ backgroundImage: `url(${brand.backdrop})` }}
+                />
+              )}
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-transparent" />
+
+              <div className="relative mx-auto max-w-6xl px-4 flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  {brand.logo ? (
+                    <img
+                      src={brand.logo}
+                      alt={brand.name}
+                      className="h-16 w-16 object-contain rounded-xl bg-white p-2 shadow-lg"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-xl bg-white/20 flex items-center justify-center text-2xl font-bold shadow-lg text-white">
+                      {brand.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="text-white">
+                    <p className="text-sm font-medium opacity-80">Presented by</p>
+                    <p className="text-2xl font-bold">{brand.name}</p>
+                    {brand.slogan && (
+                      <p className="text-sm italic opacity-90 mt-1">{brand.slogan}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-2 text-white">
+                  <span className="text-sm font-medium">Explore {brand.name}</span>
+                  <ArrowUpRight className="h-5 w-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

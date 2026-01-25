@@ -101,6 +101,8 @@ export async function POST(request: NextRequest) {
         logoIcon: brandAssets?.logoIcon || null,
         primaryColor: brandAssets?.primaryColor || null,
         secondaryColor: brandAssets?.secondaryColor || null,
+        backdrop: brandAssets?.backdrop || null,
+        slogan: brandAssets?.slogan || null,
         ...(brandAssets?.fonts && { fonts: brandAssets.fonts }),
         createdById: session.user.id,
       },

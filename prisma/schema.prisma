@@ -85,6 +85,8 @@ model Brand {
   primaryColor   String? // Hex color
   secondaryColor String? // Hex color
   fonts          Json?   // Font family info from Brand.dev
+  backdrop       String? // Wide banner image URL
+  slogan         String? // Brand tagline
 
   // Ownership
   createdById String?

@@ -44,6 +44,8 @@ export interface BrandAssets {
     body?: string;
   };
   description?: string;
+  backdrop?: string;   // Wide banner image
+  slogan?: string;     // Brand tagline
 }
 
 const BRAND_DEV_API_URL = "https://api.brand.dev/v1";
@@ -145,6 +147,9 @@ export async function fetchBrandAssets(
     const primaryColor = brand.colors?.[0]?.hex;
     const secondaryColor = brand.colors?.[1]?.hex;
 
+    // Get the first backdrop image (wide banner)
+    const backdrop = brand.backdrops?.[0]?.url;
+
     // Transform to our internal format
     return {
       name: brand.title,
@@ -154,6 +159,8 @@ export async function fetchBrandAssets(
       primaryColor,
       secondaryColor,
       description: brand.description,
+      backdrop,
+      slogan: brand.slogan,
     };
   } catch (error) {
     console.error("Error fetching brand assets:", error);
