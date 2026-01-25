@@ -106,7 +106,7 @@ Brand (e.g., Straede)
 - `/brands/[slug]/create-chapter` - Start a chapter
 
 ### Database Models
-- **Brand** - name, slug, domain, logo, colors (from Brand.dev)
+- **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev)
 - **Chapter** - brand reference, city, slug, member counts
 - **ChapterMember** - user, chapter, role (LEAD or AMBASSADOR)
 - **Ride** - optional `chapterId` for brand-affiliated rides
@@ -125,9 +125,16 @@ Chapter members (Leads and Ambassadors) display a blue verified checkmark:
 
 ### Brand.dev Integration (IMPLEMENTED)
 `src/lib/brand-dev.ts` provides:
-- `fetchBrandAssets(domain)` - Fetches logo, colors, fonts from domain
+- `fetchBrandAssets(domain)` - Fetches logo, colors, fonts, backdrop, slogan from domain
 - Auto-populates brand profile when domain is entered
 - Can refresh brand assets via PUT `/api/brands/[slug]` with `refreshBranding: true`
+
+### Chapter-Linked Rides (IMPLEMENTED)
+When creating a ride from a chapter page:
+- `/create?chapterId=xxx` - Links the ride to a chapter
+- Ride detail page shows brand backdrop image and slogan in header
+- Promotional banner at bottom links back to the brand/chapter
+- Chapter ride counts are automatically incremented
 
 ---
 
@@ -314,10 +321,14 @@ Natural language / voice input to auto-fill ride details:
 
 **Recently Completed:**
 - Brand & Chapter system with hierarchical organization
-- Brand.dev integration for auto-fetching brand assets
+- Brand.dev integration for auto-fetching brand assets (logo, logoDark, backdrop, slogan)
 - Verified badge component for brand ambassadors
 - Brand pages (/brands, /brands/[slug], /brands/[slug]/[chapter])
 - Brand/chapter creation flows
+- Chapter-linked ride creation (/create?chapterId=xxx)
+- Ride detail pages show brand backdrop/slogan for chapter rides
+- Mobile menu auto-closes when link is clicked
+- Mobile menu includes user account options (profile, settings, sign out)
 - Discover page wired to database (was mock data)
 - Fixed distance dropdown filter (was not applying filter)
 - Fixed z-index issues (nav menu, filters appearing behind Leaflet map)
@@ -331,7 +342,7 @@ Natural language / voice input to auto-fill ride details:
 - Fixed dark mode text visibility on feature cards
 - Consolidated ride details/attendees into sidebar info card
 
-**Next Priority:** Wire ride creation to chapters, add RSVP functionality, show verified badges on ride cards.
+**Next Priority:** Add RSVP functionality, show verified badges on ride cards.
 
 ---
 
@@ -355,13 +366,19 @@ Natural language / voice input to auto-fill ride details:
 - [x] Fix dark mode text visibility on homepage feature cards
 - [x] Consolidate ride details/attendees into sidebar info card
 - [x] Brand & Chapter system (Brand, Chapter, ChapterMember models)
-- [x] Brand.dev integration for auto-fetching brand assets
+- [x] Brand.dev integration for auto-fetching brand assets (logo, logoDark, backdrop, slogan)
 - [x] Brand pages (/brands, /brands/[slug], /brands/[slug]/[chapter])
 - [x] Verified badge component for brand ambassadors
 - [x] Brand/chapter creation flows
+- [x] Chapter-linked ride creation (/create?chapterId=xxx)
+- [x] Ride detail pages show brand backdrop/slogan for chapter rides
+- [x] Mobile menu auto-closes on link click
+- [x] Mobile menu includes user account options
 
 ### High Priority (Next Up)
-- [ ] Wire ride creation to optionally associate with a chapter
+- [x] Wire ride creation to optionally associate with a chapter
+- [x] Mobile menu auto-close on link click
+- [x] Mobile menu user account options (profile, settings, sign out)
 - [ ] Show verified badges on ride cards for chapter members
 - [ ] Add RSVP functionality (going/maybe/not going)
 
