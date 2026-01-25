@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
@@ -314,6 +314,9 @@ export default async function RidePage({ params }: RidePageProps) {
 
             {/* Community Route Links */}
             <CommunityRoutes rideId={id} />
+
+            {/* Cake & Coffee Stop - Post-ride social section */}
+            <CakeAndCoffee rideId={id} rideDate={ride.date} isOrganizer={!!canEdit} />
 
             {/* Mobile Ride Info - hidden on desktop where it shows in sidebar */}
             <Card className="lg:hidden">

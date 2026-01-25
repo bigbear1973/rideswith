@@ -31,6 +31,8 @@ model User {
   rsvps         Rsvp[]
   brands        Brand[]
   rideRoutes    RideRoute[]
+  rideComments  RideComment[]
+  ridePhotos    RidePhoto[]
 }
 
 model Account {
@@ -243,6 +245,8 @@ model Ride {
 
   rsvps      Rsvp[]
   routes     RideRoute[]  // Community-contributed route links
+  comments   RideComment[] // Post-ride comments
+  photos     RidePhoto[]   // Post-ride photos
 }
 
 // Community-contributed route links (Komoot, RideWithGPS, Garmin, Strava, etc.)
@@ -292,4 +296,43 @@ enum RsvpStatus {
   GOING
   MAYBE
   NOT_GOING
+}
+
+// ============================================
+// Cake & Coffee Stop - Post-ride social features
+// ============================================
+
+model RideComment {
+  id        String   @id @default(cuid())
+  rideId    String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rideId, createdAt])
+}
+
+model RidePhoto {
+  id          String   @id @default(cuid())
+  rideId      String
+  userId      String
+
+  // Cloudinary fields
+  publicId    String   // Cloudinary public ID for transformations
+  url         String   // Original URL
+  thumbnailUrl String? // Pre-generated thumbnail URL
+  width       Int?
+  height      Int?
+
+  caption     String?
+  createdAt   DateTime @default(now())
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rideId, createdAt])
 }
