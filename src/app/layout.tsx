@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'GroupRide - Find Your Next Cycling Group Ride',
+  title: 'RidesWith - Find Your Next Cycling Group Ride',
   description:
     'Discover cycling group rides near you, join with one click, and get routes on any GPS platform. For riders and organizers.',
   keywords: ['cycling', 'group rides', 'bike rides', 'cycling events', 'GPS routes'],
@@ -27,10 +27,10 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'GroupRide',
+    title: 'RidesWith',
   },
   openGraph: {
-    title: 'GroupRide - Find Your Next Cycling Group Ride',
+    title: 'RidesWith - Find Your Next Cycling Group Ride',
     description: 'Discover cycling group rides near you, join with one click, and get routes on any GPS platform.',
     type: 'website',
   },

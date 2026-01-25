@@ -79,7 +79,7 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
-            Customize your GroupRide experience
+            Customize your RidesWith experience
           </p>
         </div>
 

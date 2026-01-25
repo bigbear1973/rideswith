@@ -51,9 +51,9 @@ export default function SignInPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto mb-4">
-            GR
+            RW
           </div>
-          <CardTitle className="text-2xl">Welcome to GroupRide</CardTitle>
+          <CardTitle className="text-2xl">Welcome to RidesWith</CardTitle>
           <CardDescription>
             Enter your email to sign in or create an account
           </CardDescription>

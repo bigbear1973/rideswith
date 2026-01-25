@@ -29,9 +29,9 @@ export function Footer() {
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-3">
               <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
-                GR
+                RW
               </div>
-              <span className="font-bold">GroupRide</span>
+              <span className="font-bold">RidesWith</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Find your next group ride.
@@ -101,7 +101,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
-            &copy; {currentYear} GroupRide. All rights reserved.
+            &copy; {currentYear} RidesWith. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
             Made for cyclists, by cyclists

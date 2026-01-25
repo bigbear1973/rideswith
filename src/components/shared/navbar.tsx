@@ -50,11 +50,11 @@ export function Navbar() {
             />
           ) : (
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-              GR
+              RW
             </div>
           )}
           <span className="font-bold text-base sm:text-lg group-hover:text-primary transition-colors">
-            {brand?.name || 'GroupRide'}
+            {brand?.name || 'RidesWith'}
           </span>
         </Link>
 

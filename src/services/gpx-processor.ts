@@ -135,7 +135,7 @@ export function generateGpx(
   metadata?: { name?: string; description?: string }
 ): string {
   const header = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="GroupRide"
+<gpx version="1.1" creator="RidesWith"
   xmlns="http://www.topografix.com/GPX/1/1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">

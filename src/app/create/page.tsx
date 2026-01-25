@@ -108,7 +108,7 @@ export default function CreateRidePage() {
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
         {
           headers: {
-            'User-Agent': 'GroupRide App',
+            'User-Agent': 'RidesWith/1.0',
           },
         }
       );

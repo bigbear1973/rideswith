@@ -1,6 +1,6 @@
 {
-  "name": "GroupRide",
-  "short_name": "GroupRide",
+  "name": "RidesWith",
+  "short_name": "RidesWith",
   "description": "Find and organize cycling group rides near you",
   "start_url": "/",
   "display": "standalone",

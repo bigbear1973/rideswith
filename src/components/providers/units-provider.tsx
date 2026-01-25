@@ -24,7 +24,7 @@ interface UnitsContextType {
 
 const UnitsContext = createContext<UnitsContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'groupride-units';
+const STORAGE_KEY = 'rideswith-units';
 
 interface StoredPreferences {
   unitSystem: UnitSystem;

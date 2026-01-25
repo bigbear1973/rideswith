@@ -1,4 +1,4 @@
-# GroupRide (RidesWith)
+# RidesWith
 
 Cycling group ride discovery and management platform.
 

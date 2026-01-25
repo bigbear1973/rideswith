@@ -21,7 +21,7 @@ export function FeatureCard({
       className={cn(
         "rounded-lg p-6 transition-transform hover:-translate-y-1",
         variant === "light"
-          ? "bg-white text-foreground shadow-lg"
+          ? "bg-white text-gray-900 shadow-lg"
           : "bg-black/90 text-white",
         className
       )}
@@ -45,7 +45,7 @@ export function FeatureCard({
       <p
         className={cn(
           "text-sm leading-relaxed",
-          variant === "light" ? "text-muted-foreground" : "text-white/80"
+          variant === "light" ? "text-gray-600" : "text-white/80"
         )}
       >
         {description}

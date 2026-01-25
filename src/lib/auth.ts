@@ -31,14 +31,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error('Email service not configured');
         }
 
-        const fromEmail = process.env.EMAIL_FROM || 'GroupRide <onboarding@resend.dev>';
+        const fromEmail = process.env.EMAIL_FROM || 'RidesWith <onboarding@resend.dev>';
         console.log('[Auth] Sending from:', fromEmail);
 
         try {
           const result = await resend.emails.send({
             from: fromEmail,
             to: email,
-            subject: 'Sign in to GroupRide',
+            subject: 'Sign in to RidesWith',
             html: `
               <!DOCTYPE html>
               <html>
@@ -49,12 +49,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                 <div style="max-width: 500px; margin: 40px auto; padding: 20px;">
                   <div style="background-color: #ffffff; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <h1 style="color: #16a34a; margin: 0 0 20px 0; font-size: 28px;">🚴 GroupRide</h1>
+                    <h1 style="color: #16a34a; margin: 0 0 20px 0; font-size: 28px;">🚴 RidesWith</h1>
                     <p style="color: #333; font-size: 16px; margin: 0 0 30px 0;">
                       Click the button below to sign in to your account.
                     </p>
                     <a href="${url}" style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                      Sign in to GroupRide
+                      Sign in to RidesWith
                     </a>
                     <p style="color: #888; font-size: 14px; margin: 30px 0 0 0;">
                       If you didn't request this email, you can safely ignore it.

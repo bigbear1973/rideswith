@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,24 @@ import { Badge } from '@/components/ui/badge';
 import { StatsBanner } from '@/components/ui/stats-banner';
 import { ColoredSection } from '@/components/ui/colored-section';
 import { FeatureCard } from '@/components/ui/feature-card';
-import { MapPin, Users, ArrowRight, Search, Route, Camera, Bike, Clock, Heart } from 'lucide-react';
+import { MapPin, Users, ArrowRight, Search, Route, Camera, Bike, Clock, Heart, Loader2 } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
+
+// Type for latest rides from API
+interface LatestRide {
+  id: string;
+  title: string;
+  date: string;
+  locationName: string;
+  distance: number | null;
+  pace: string;
+  organizer: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  attendeeCount: number;
+}
 
 // Curated Unsplash images for consistent cycling theme
 const IMAGES = {
@@ -21,44 +38,11 @@ const IMAGES = {
   organizer: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
 };
 
-// Mock data for featured rides - distances in km
-const FEATURED_RIDES = [
-  {
-    id: '1',
-    title: 'Sunday Morning Social',
-    organizer: 'Dublin Cycling Club',
-    date: 'Sun, Feb 2',
-    time: '8:00 AM',
-    location: 'Phoenix Park',
-    distanceKm: 45,
-    pace: 'moderate',
-    attendees: 23,
-    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80',
-  },
-  {
-    id: '2',
-    title: 'Weekend Warriors',
-    organizer: 'Wicklow Wheelers',
-    date: 'Sat, Feb 1',
-    time: '7:30 AM',
-    location: 'Bray Seafront',
-    distanceKm: 80,
-    pace: 'fast',
-    attendees: 15,
-    image: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80',
-  },
-  {
-    id: '3',
-    title: 'Coffee & Pedals',
-    organizer: 'Cafe Cyclists',
-    date: 'Sun, Feb 2',
-    time: '9:30 AM',
-    location: 'Dun Laoghaire Pier',
-    distanceKm: 30,
-    pace: 'casual',
-    attendees: 31,
-    image: 'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80',
-  },
+// Default images for rides without images
+const RIDE_IMAGES = [
+  'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80',
+  'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80',
+  'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80',
 ];
 
 const PACE_STYLES: Record<string, string> = {
@@ -78,6 +62,25 @@ const PACE_CATEGORIES = [
 
 export default function HomePage() {
   const { formatDistance, formatSpeed } = useUnits();
+  const [latestRides, setLatestRides] = useState<LatestRide[]>([]);
+  const [isLoadingRides, setIsLoadingRides] = useState(true);
+
+  useEffect(() => {
+    async function fetchLatestRides() {
+      try {
+        const res = await fetch('/api/rides/latest');
+        if (res.ok) {
+          const data = await res.json();
+          setLatestRides(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch latest rides:', error);
+      } finally {
+        setIsLoadingRides(false);
+      }
+    }
+    fetchLatestRides();
+  }, []);
 
   // Format pace description based on unit system
   const formatPaceDesc = (cat: typeof PACE_CATEGORIES[0]) => {
@@ -106,7 +109,7 @@ export default function HomePage() {
               </h1>
               <p className="text-lg leading-relaxed text-muted-foreground md:text-xl">
                 Whatever your pace, from casual coffee rides to competitive training,
-                there are thousands of cyclists who share it on GroupRide.
+                there are thousands of cyclists who share it on RidesWith.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button variant="c40" size="lg" asChild>
@@ -148,14 +151,14 @@ export default function HomePage() {
         ]}
       />
 
-      {/* Rides Near You */}
+      {/* Latest Rides */}
       <section className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold sm:text-3xl">Rides near you</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">Latest rides</h2>
               <p className="text-muted-foreground mt-2">
-                Discover group rides happening in your area
+                Recently added group rides
               </p>
             </div>
             <Button variant="c40" size="lg" asChild className="hidden sm:flex">
@@ -166,52 +169,80 @@ export default function HomePage() {
             </Button>
           </div>
 
+          {/* Loading state */}
+          {isLoadingRides && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!isLoadingRides && latestRides.length === 0 && (
+            <div className="text-center py-12">
+              <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4">No rides yet. Be the first to create one!</p>
+              <Button variant="c40" asChild>
+                <Link href="/create">CREATE A RIDE</Link>
+              </Button>
+            </div>
+          )}
+
           {/* Horizontal scroll on mobile, grid on desktop */}
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible snap-x snap-mandatory sm:snap-none">
-            {FEATURED_RIDES.map((ride) => (
-              <Link
-                key={ride.id}
-                href={`/rides/${ride.id}`}
-                className="flex-shrink-0 w-[280px] sm:w-auto snap-start"
-              >
-                <Card className="h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
-                  <div className="aspect-video bg-muted relative">
-                    <Image
-                      src={ride.image}
-                      alt={ride.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                      <span>{ride.date}</span>
-                      <span>·</span>
-                      <span>{ride.time}</span>
-                    </div>
-                    <h3 className="font-bold line-clamp-2 mb-1">{ride.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{ride.organizer}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                      <MapPin className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">{ride.location}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
-                          {ride.pace}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{formatDistance(ride.distanceKm)}</span>
+          {!isLoadingRides && latestRides.length > 0 && (
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible snap-x snap-mandatory sm:snap-none">
+              {latestRides.map((ride, index) => {
+                const rideDate = new Date(ride.date);
+                const formattedDate = rideDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const formattedTime = rideDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+                return (
+                  <Link
+                    key={ride.id}
+                    href={`/rides/${ride.id}`}
+                    className="flex-shrink-0 w-[280px] sm:w-auto snap-start"
+                  >
+                    <Card className="h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
+                      <div className="aspect-video bg-muted relative">
+                        <Image
+                          src={RIDE_IMAGES[index % RIDE_IMAGES.length]}
+                          alt={ride.title}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Users className="h-3.5 w-3.5" />
-                        <span>{ride.attendees}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                          <span>{formattedDate}</span>
+                          <span>·</span>
+                          <span>{formattedTime}</span>
+                        </div>
+                        <h3 className="font-bold line-clamp-2 mb-1">{ride.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">{ride.organizer.name}</p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">{ride.locationName}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
+                              {ride.pace}
+                            </Badge>
+                            {ride.distance && (
+                              <span className="text-xs text-muted-foreground">{formatDistance(ride.distance)}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{ride.attendeeCount}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
 
           <div className="mt-6 sm:hidden">
             <Button variant="c40" className="w-full" asChild>
@@ -243,9 +274,9 @@ export default function HomePage() {
                     className="object-cover transition-transform group-hover:scale-105"
                   />
                 </div>
-                <h3 className="font-bold text-lg text-foreground">{cat.name}</h3>
-                <p className="text-sm text-muted-foreground">{formatPaceDesc(cat)}</p>
-                <p className="text-xs text-muted-foreground mt-1">{cat.desc}</p>
+                <h3 className="font-bold text-lg text-gray-900">{cat.name}</h3>
+                <p className="text-sm text-gray-600">{formatPaceDesc(cat)}</p>
+                <p className="text-xs text-gray-600 mt-1">{cat.desc}</p>
               </div>
             </Link>
           ))}
@@ -255,9 +286,9 @@ export default function HomePage() {
       {/* How It Works */}
       <section className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-4">How GroupRide works</h2>
+          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-4">How RidesWith works</h2>
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Join thousands of cyclists who use GroupRide to find their community
+            Join thousands of cyclists who use RidesWith to find their community
           </p>
           <div className="grid gap-6 sm:grid-cols-3">
             <FeatureCard
@@ -310,10 +341,10 @@ export default function HomePage() {
         </div>
       </ColoredSection>
 
-      {/* Why GroupRide */}
+      {/* Why RidesWith */}
       <section className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-12">Why cyclists choose GroupRide</h2>
+          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-12">Why cyclists choose RidesWith</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon={MapPin}

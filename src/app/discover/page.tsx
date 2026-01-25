@@ -190,7 +190,7 @@ export default function DiscoverPage() {
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
         {
           headers: {
-            'User-Agent': 'GroupRide/1.0',
+            'User-Agent': 'RidesWith/1.0',
           },
         }
       );
