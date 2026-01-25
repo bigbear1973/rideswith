@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { RideMap } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 import {
   Calendar,
   Clock,
@@ -18,6 +19,7 @@ import {
   Share2,
   ChevronLeft,
   ArrowUpRight,
+  Edit,
 } from 'lucide-react';
 
 interface RidePageProps {
@@ -40,6 +42,7 @@ const PACE_DESCRIPTIONS: Record<string, string> = {
 
 export default async function RidePage({ params }: RidePageProps) {
   const { id } = await params;
+  const session = await auth();
 
   if (!id) {
     notFound();
@@ -56,6 +59,14 @@ export default async function RidePage({ params }: RidePageProps) {
           slug: true,
           memberCount: true,
           rideCount: true,
+          members: {
+            where: {
+              role: { in: ['OWNER', 'ADMIN'] },
+            },
+            select: {
+              userId: true,
+            },
+          },
         },
       },
       rsvps: {
@@ -88,6 +99,11 @@ export default async function RidePage({ params }: RidePageProps) {
   const totalAttendees = ride._count.rsvps;
   const pace = ride.pace.toLowerCase();
 
+  // Check if current user can edit this ride
+  const canEdit = session?.user?.id && ride.organizer.members.some(
+    (member) => member.userId === session?.user?.id
+  );
+
   // Format date and time
   const formattedDate = format(ride.date, 'EEEE, MMMM d, yyyy');
   const formattedStartTime = format(ride.date, 'h:mm a');
@@ -119,7 +135,15 @@ export default async function RidePage({ params }: RidePageProps) {
               <ChevronLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <span className="font-medium truncate">{ride.title}</span>
+          <span className="font-medium truncate flex-1">{ride.title}</span>
+          {canEdit && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/rides/${id}/edit`}>
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -138,9 +162,19 @@ export default async function RidePage({ params }: RidePageProps) {
 
             {/* Title Section */}
             <div>
-              <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl mb-3">
-                {ride.title}
-              </h1>
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl mb-3">
+                  {ride.title}
+                </h1>
+                {canEdit && (
+                  <Button variant="outline" size="sm" asChild className="hidden lg:flex">
+                    <Link href={`/rides/${id}/edit`}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Link>
+                  </Button>
+                )}
+              </div>
               <p className="text-muted-foreground">
                 Hosted by{' '}
                 <Link href={`/organizers/${ride.organizer.id}`} className="text-foreground hover:underline">

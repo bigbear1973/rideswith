@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Filter, MapPin, Calendar, Clock, Users, X, Loader2, Navigation } from 'lucide-react';
+import { format } from 'date-fns';
+import { MapPin, Calendar, Clock, Users, X, Loader2, Navigation, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,10 +40,10 @@ const PACE_OPTIONS = [
 ];
 
 const DISTANCE_OPTIONS = [
-  { value: 'short', label: 'Short', desc: '< 30 km' },
-  { value: 'medium', label: 'Medium', desc: '30-60 km' },
-  { value: 'long', label: 'Long', desc: '60-100 km' },
-  { value: 'epic', label: 'Epic', desc: '> 100 km' },
+  { value: 'short', label: 'Short', desc: '< 30 km', min: 0, max: 30 },
+  { value: 'medium', label: 'Medium', desc: '30-60 km', min: 30, max: 60 },
+  { value: 'long', label: 'Long', desc: '60-100 km', min: 60, max: 100 },
+  { value: 'epic', label: 'Epic', desc: '> 100 km', min: 100, max: Infinity },
 ];
 
 const RADIUS_OPTIONS = [
@@ -60,74 +61,31 @@ const PACE_STYLES: Record<string, string> = {
   race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
-// Mock rides data with coordinates (distances in km)
-const ALL_RIDES = [
-  {
-    id: '1',
-    title: 'Sunday Morning Social',
-    organizer: 'Dublin Cycling Club',
-    date: 'Sun, Feb 2',
-    time: '8:00 AM',
-    location: 'Phoenix Park, Dublin',
-    lat: 53.3559,
-    lng: -6.3298,
-    distanceKm: 45,
-    pace: 'moderate',
-    attendees: 23,
-  },
-  {
-    id: '2',
-    title: 'Weekend Warriors',
-    organizer: 'Wicklow Wheelers',
-    date: 'Sat, Feb 1',
-    time: '7:30 AM',
-    location: 'Bray Seafront',
-    lat: 53.2008,
-    lng: -6.0987,
-    distanceKm: 80,
-    pace: 'fast',
-    attendees: 15,
-  },
-  {
-    id: '3',
-    title: 'Coffee & Pedals',
-    organizer: 'Cafe Cyclists',
-    date: 'Sun, Feb 2',
-    time: '9:30 AM',
-    location: 'Dun Laoghaire Pier',
-    lat: 53.2945,
-    lng: -6.1356,
-    distanceKm: 30,
-    pace: 'casual',
-    attendees: 31,
-  },
-  {
-    id: '4',
-    title: 'Cork City Loop',
-    organizer: 'Cork Cycling Club',
-    date: 'Sat, Feb 8',
-    time: '9:00 AM',
-    location: 'Fitzgerald Park, Cork',
-    lat: 51.8969,
-    lng: -8.4863,
-    distanceKm: 55,
-    pace: 'moderate',
-    attendees: 18,
-  },
-  {
-    id: '5',
-    title: 'Galway Bay Spin',
-    organizer: 'Galway Tri Club',
-    date: 'Sun, Feb 9',
-    time: '8:30 AM',
-    location: 'Salthill Promenade',
-    lat: 53.2590,
-    lng: -9.0817,
-    distanceKm: 60,
-    pace: 'fast',
-    attendees: 12,
-  },
-];
+interface Ride {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  endTime: string | null;
+  locationName: string;
+  locationAddress: string;
+  latitude: number;
+  longitude: number;
+  distance: number | null;
+  elevation: number | null;
+  pace: string;
+  terrain: string | null;
+  maxAttendees: number | null;
+  isFree: boolean;
+  price: number | null;
+  routeUrl: string | null;
+  organizer: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  attendeeCount: number;
+}
 
 // Haversine formula to calculate distance between two points
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -151,6 +109,8 @@ interface SearchResult {
 }
 
 export default function DiscoverPage() {
+  const [rides, setRides] = useState<Ride[]>([]);
+  const [isLoadingRides, setIsLoadingRides] = useState(true);
   const [locationQuery, setLocationQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -162,22 +122,58 @@ export default function DiscoverPage() {
   const [locationName, setLocationName] = useState('Dublin, Ireland');
   const { formatDistance, unitSystem } = useUnits();
 
-  // Filter rides based on location and radius
-  const filteredRides = ALL_RIDES.filter((ride) => {
+  // Fetch rides from database
+  useEffect(() => {
+    async function fetchRides() {
+      setIsLoadingRides(true);
+      try {
+        const response = await fetch('/api/rides');
+        if (response.ok) {
+          const data = await response.json();
+          setRides(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch rides:', error);
+      } finally {
+        setIsLoadingRides(false);
+      }
+    }
+    fetchRides();
+  }, []);
+
+  // Filter rides based on location, radius, pace, and distance
+  const filteredRides = rides.filter((ride) => {
+    // Check distance from center (search radius)
     const distanceFromCenter = getDistanceKm(
       mapCenter.lat,
       mapCenter.lng,
-      ride.lat,
-      ride.lng
+      ride.latitude,
+      ride.longitude
     );
     const withinRadius = distanceFromCenter <= parseInt(searchRadius);
+
+    // Check pace filter
     const matchesPace = selectedPaces.length === 0 || selectedPaces.includes(ride.pace);
-    return withinRadius && matchesPace;
+
+    // Check ride distance filter
+    let matchesDistance = true;
+    if (selectedDistances.length > 0 && ride.distance !== null) {
+      matchesDistance = selectedDistances.some((distanceKey) => {
+        const option = DISTANCE_OPTIONS.find((opt) => opt.value === distanceKey);
+        if (!option) return false;
+        return ride.distance !== null && ride.distance >= option.min && ride.distance < option.max;
+      });
+    } else if (selectedDistances.length > 0 && ride.distance === null) {
+      // If distance filter is set but ride has no distance, exclude it
+      matchesDistance = false;
+    }
+
+    return withinRadius && matchesPace && matchesDistance;
   });
 
   const mapMarkers = filteredRides.map((ride) => ({
     id: ride.id,
-    position: { lat: ride.lat, lng: ride.lng },
+    position: { lat: ride.latitude, lng: ride.longitude },
     title: ride.title,
   }));
 
@@ -275,10 +271,21 @@ export default function DiscoverPage() {
     return `${km} km`;
   };
 
+  // Format date for display
+  const formatRideDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return format(date, 'EEE, MMM d');
+  };
+
+  const formatRideTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return format(date, 'h:mm a');
+  };
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
-      {/* Search Bar - Sticky on mobile */}
-      <div className="border-b bg-background/95 backdrop-blur sticky top-14 sm:top-16 z-40 px-4 py-3">
+      {/* Search Bar - Sticky on mobile, with high z-index to stay above map */}
+      <div className="border-b bg-background/95 backdrop-blur sticky top-14 sm:top-16 z-[1000] px-4 py-3">
         <div className="mx-auto max-w-6xl space-y-2">
           {/* Location Search Row */}
           <div className="flex gap-2">
@@ -298,7 +305,7 @@ export default function DiscoverPage() {
 
               {/* Search Results Dropdown */}
               {showResults && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-lg z-[1100] max-h-64 overflow-y-auto">
                   {searchResults.map((result, index) => (
                     <button
                       key={index}
@@ -326,7 +333,7 @@ export default function DiscoverPage() {
               <SelectTrigger className="w-28 sm:w-32">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[1100]">
                 {RADIUS_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {formatRadius(option.value)}
@@ -355,7 +362,7 @@ export default function DiscoverPage() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuContent align="start" className="w-48 z-[1100]">
                   {PACE_OPTIONS.map((option) => (
                     <DropdownMenuCheckboxItem
                       key={option.value}
@@ -386,7 +393,7 @@ export default function DiscoverPage() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuContent align="start" className="w-48 z-[1100]">
                   {DISTANCE_OPTIONS.map((option) => (
                     <DropdownMenuCheckboxItem
                       key={option.value}
@@ -419,7 +426,7 @@ export default function DiscoverPage() {
             {/* Mobile Filter Button */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="sm:hidden relative">
+                <Button variant="outline" size="icon" className="sm:hidden relative z-[1000]">
                   <Filter className="h-4 w-4" />
                   {activeFilterCount > 0 && (
                     <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
@@ -428,7 +435,7 @@ export default function DiscoverPage() {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[60vh]">
+              <SheetContent side="bottom" className="h-[60vh] z-[1200]">
                 <SheetHeader>
                   <SheetTitle>Filters</SheetTitle>
                 </SheetHeader>
@@ -482,7 +489,7 @@ export default function DiscoverPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Map */}
-        <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 border-b lg:border-b-0 lg:border-r">
+        <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 border-b lg:border-b-0 lg:border-r relative">
           <Map
             center={mapCenter}
             zoom={10}
@@ -496,13 +503,18 @@ export default function DiscoverPage() {
           <div className="px-4 py-4 border-b bg-primary">
             <h2 className="font-bold text-primary-foreground text-lg">Upcoming Rides</h2>
             <p className="text-sm text-primary-foreground/80">
-              {filteredRides.length} ride{filteredRides.length !== 1 ? 's' : ''} within {formatRadius(searchRadius)}
+              {isLoadingRides ? 'Loading...' : `${filteredRides.length} ride${filteredRides.length !== 1 ? 's' : ''} within ${formatRadius(searchRadius)}`}
             </p>
           </div>
 
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-3">
-              {filteredRides.length === 0 ? (
+              {isLoadingRides ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Loader2 className="h-10 w-10 mx-auto mb-3 animate-spin" />
+                  <p className="font-medium">Loading rides...</p>
+                </div>
+              ) : filteredRides.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <MapPin className="h-10 w-10 mx-auto mb-3 opacity-50" />
                   <p className="font-medium">No rides found</p>
@@ -515,27 +527,29 @@ export default function DiscoverPage() {
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          <span>{ride.date}</span>
+                          <span>{formatRideDate(ride.date)}</span>
                           <span>·</span>
                           <Clock className="h-3.5 w-3.5" />
-                          <span>{ride.time}</span>
+                          <span>{formatRideTime(ride.date)}</span>
                         </div>
                         <h3 className="font-semibold mb-1">{ride.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{ride.organizer}</p>
+                        <p className="text-sm text-muted-foreground mb-2">{ride.organizer.name}</p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                           <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span className="truncate">{ride.location}</span>
+                          <span className="truncate">{ride.locationName}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
                               {ride.pace}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">{formatDistance(ride.distanceKm)}</span>
+                            {ride.distance && (
+                              <span className="text-xs text-muted-foreground">{formatDistance(ride.distance)}</span>
+                            )}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Users className="h-3.5 w-3.5" />
-                            <span>{ride.attendees} going</span>
+                            <span>{ride.attendeeCount} going</span>
                           </div>
                         </div>
                       </CardContent>
