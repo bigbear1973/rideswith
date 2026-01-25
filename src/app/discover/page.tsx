@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Map } from '@/components/maps';
 
 const PACE_OPTIONS = [
   { value: 'casual', label: 'Casual', desc: '< 20 km/h' },
@@ -43,7 +44,7 @@ const PACE_STYLES: Record<string, string> = {
   race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
-// Mock rides data
+// Mock rides data with coordinates
 const MOCK_RIDES = [
   {
     id: '1',
@@ -52,6 +53,8 @@ const MOCK_RIDES = [
     date: 'Sun, Feb 2',
     time: '8:00 AM',
     location: 'Phoenix Park',
+    lat: 53.3559,
+    lng: -6.3298,
     distance: '45 km',
     pace: 'moderate',
     attendees: 23,
@@ -63,6 +66,8 @@ const MOCK_RIDES = [
     date: 'Sat, Feb 1',
     time: '7:30 AM',
     location: 'Bray Seafront',
+    lat: 53.2008,
+    lng: -6.0987,
     distance: '80 km',
     pace: 'fast',
     attendees: 15,
@@ -74,11 +79,25 @@ const MOCK_RIDES = [
     date: 'Sun, Feb 2',
     time: '9:30 AM',
     location: 'Dun Laoghaire Pier',
+    lat: 53.2945,
+    lng: -6.1356,
     distance: '30 km',
     pace: 'casual',
     attendees: 31,
   },
 ];
+
+// Calculate center of all rides for map
+const mapCenter = {
+  lat: MOCK_RIDES.reduce((sum, r) => sum + r.lat, 0) / MOCK_RIDES.length,
+  lng: MOCK_RIDES.reduce((sum, r) => sum + r.lng, 0) / MOCK_RIDES.length,
+};
+
+const mapMarkers = MOCK_RIDES.map((ride) => ({
+  id: ride.id,
+  position: { lat: ride.lat, lng: ride.lng },
+  title: ride.title,
+}));
 
 export default function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -250,12 +269,14 @@ export default function DiscoverPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Map Placeholder */}
-        <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 bg-muted/50 flex items-center justify-center border-b lg:border-b-0 lg:border-r">
-          <div className="text-center p-4">
-            <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Map coming soon</p>
-          </div>
+        {/* Map */}
+        <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 border-b lg:border-b-0 lg:border-r">
+          <Map
+            center={mapCenter}
+            zoom={11}
+            markers={mapMarkers}
+            className="h-full w-full"
+          />
         </div>
 
         {/* Ride List */}
