@@ -27,6 +27,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   organizers    OrganizerMember[]
+  chapters      ChapterMember[]
   rsvps         Rsvp[]
 }
 
@@ -63,6 +64,76 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ============================================
+// Brand & Chapter Models (hierarchical organization)
+// ============================================
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   // "Straede"
+  slug        String   @unique // "straede"
+  domain      String?  // "straede.cc" (for Brand.dev lookup)
+  description String?  @db.Text
+
+  // Brand.dev populated fields
+  logo           String? // Full logo URL
+  logoIcon       String? // Square icon version
+  primaryColor   String? // Hex color
+  secondaryColor String? // Hex color
+  fonts          Json?   // Font family info from Brand.dev
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  chapters Chapter[]
+}
+
+model Chapter {
+  id      String @id @default(cuid())
+  brandId String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  name String // "Leipzig"
+  slug String // "leipzig"
+  city String // City name for display/search
+
+  // Optional branding overrides (inherits from Brand if null)
+  customLogo   String?
+  customColors Json? // { primaryColor, secondaryColor }
+
+  // Stats (managed counters)
+  memberCount Int @default(0)
+  rideCount   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  members ChapterMember[]
+  rides   Ride[]
+
+  @@unique([brandId, slug])
+}
+
+model ChapterMember {
+  id        String      @id @default(cuid())
+  chapterId String
+  chapter   Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      ChapterRole @default(AMBASSADOR)
+  joinedAt  DateTime    @default(now())
+
+  @@unique([chapterId, userId])
+}
+
+enum ChapterRole {
+  LEAD
+  AMBASSADOR
 }
 
 // ============================================
@@ -156,7 +227,12 @@ model Ride {
   // Relations
   organizerId String
   organizer   Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  rsvps       Rsvp[]
+
+  // Optional chapter association (for brand-affiliated rides)
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  rsvps Rsvp[]
 }
 
 enum RidePace {

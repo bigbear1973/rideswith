@@ -17,8 +17,9 @@ Cycling group ride discovery and management platform.
 
 - `src/lib/auth.ts` - Auth.js config with custom Resend email provider
 - `src/lib/prisma.ts` - Prisma client singleton
+- `src/lib/brand-dev.ts` - Brand.dev API integration for auto-fetching brand assets
 - `src/components/providers/units-provider.tsx` - km/mi unit preference context
-- `prisma/schema.prisma` - Database schema (User, Organizer, Ride, Rsvp models)
+- `prisma/schema.prisma` - Database schema (User, Organizer, Ride, Rsvp, Brand, Chapter models)
 - `railway.json` - Railway deployment config
 
 ## Commands
@@ -38,6 +39,7 @@ npm run db:studio    # Open Prisma Studio
 - `AUTH_URL` - https://rideswith-production.up.railway.app
 - `RESEND_API_KEY` - For magic link emails
 - `EMAIL_FROM` - Sender address (using resend.dev for now)
+- `BRAND_DEV_API_KEY` - For auto-fetching brand logos/colors from Brand.dev
 
 ## Design Notes
 
@@ -82,14 +84,54 @@ Key elements to adopt from https://www.c40.org/:
 
 ---
 
-## Planned Integrations
+## Brand & Chapter System
 
-### Brand.dev (https://www.brand.dev/)
-Use Brand.dev API to auto-fetch organizer branding:
-- Logo, colors, fonts from company domain
-- Auto-populate organizer profile when creating
-- Apply brand colors to organizer's ride pages
-- Environment variable: `BRAND_DEV_API_KEY`
+Brands (like Straede, Rapha) can have multiple city-based chapters. Each chapter has ambassadors who organize rides with the brand's styling applied.
+
+### Hierarchy
+```
+Brand (e.g., Straede)
+├── Brand Profile (logo, colors from Brand.dev)
+└── Chapters (city-level)
+    ├── Straede Leipzig
+    ├── Straede Berlin
+    └── Each has: Lead + Ambassadors (verified badges)
+```
+
+### URL Structure
+- `/brands` - Browse all brands
+- `/brands/[slug]` - Brand profile (e.g., /brands/straede)
+- `/brands/[slug]/[chapter]` - Chapter page (e.g., /brands/straede/leipzig)
+- `/brands/create` - Register a new brand
+- `/brands/[slug]/create-chapter` - Start a chapter
+
+### Database Models
+- **Brand** - name, slug, domain, logo, colors (from Brand.dev)
+- **Chapter** - brand reference, city, slug, member counts
+- **ChapterMember** - user, chapter, role (LEAD or AMBASSADOR)
+- **Ride** - optional `chapterId` for brand-affiliated rides
+
+### API Endpoints
+- `GET/POST /api/brands` - List and create brands
+- `GET/PUT /api/brands/[slug]` - Brand details, refresh from Brand.dev
+- `GET/POST /api/chapters` - List and create chapters
+- `GET/PUT/POST /api/chapters/[id]` - Chapter details, update, add members
+
+### Verified Badges
+Chapter members (Leads and Ambassadors) display a blue verified checkmark:
+- On their profile pages
+- On ride cards they organize
+- In attendee lists
+
+### Brand.dev Integration (IMPLEMENTED)
+`src/lib/brand-dev.ts` provides:
+- `fetchBrandAssets(domain)` - Fetches logo, colors, fonts from domain
+- Auto-populates brand profile when domain is entered
+- Can refresh brand assets via PUT `/api/brands/[slug]` with `refreshBranding: true`
+
+---
+
+## Planned Integrations
 
 ### AI-Assisted Ride Creation
 Natural language / voice input to auto-fill ride details:
@@ -120,6 +162,11 @@ Natural language / voice input to auto-fill ride details:
 | `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (fetches from DB) |
 | `/rides/[id]/edit` | `src/app/rides/[id]/edit/page.tsx` | Edit/delete rides |
 | `/organizers/[id]` | `src/app/organizers/[id]/page.tsx` | Placeholder only |
+| `/brands` | `src/app/brands/page.tsx` | Brand communities listing |
+| `/brands/create` | `src/app/brands/create/page.tsx` | Register new brand |
+| `/brands/[slug]` | `src/app/brands/[slug]/page.tsx` | Brand profile with chapters |
+| `/brands/[slug]/[chapter]` | `src/app/brands/[slug]/[chapter]/page.tsx` | Chapter page with rides |
+| `/brands/[slug]/create-chapter` | `src/app/brands/[slug]/create-chapter/page.tsx` | Start a chapter |
 
 ### Broken Links (404s)
 | Link | Referenced In | Priority |
@@ -266,6 +313,11 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (rsvps, organizers)
 
 **Recently Completed:**
+- Brand & Chapter system with hierarchical organization
+- Brand.dev integration for auto-fetching brand assets
+- Verified badge component for brand ambassadors
+- Brand pages (/brands, /brands/[slug], /brands/[slug]/[chapter])
+- Brand/chapter creation flows
 - Discover page wired to database (was mock data)
 - Fixed distance dropdown filter (was not applying filter)
 - Fixed z-index issues (nav menu, filters appearing behind Leaflet map)
@@ -279,7 +331,7 @@ Natural language / voice input to auto-fill ride details:
 - Fixed dark mode text visibility on feature cards
 - Consolidated ride details/attendees into sidebar info card
 
-**Next Priority:** Build organizer profile page, add RSVP functionality.
+**Next Priority:** Wire ride creation to chapters, add RSVP functionality, show verified badges on ride cards.
 
 ---
 
@@ -302,13 +354,19 @@ Natural language / voice input to auto-fill ride details:
 - [x] Wire homepage "Latest rides" to database (/api/rides/latest)
 - [x] Fix dark mode text visibility on homepage feature cards
 - [x] Consolidate ride details/attendees into sidebar info card
+- [x] Brand & Chapter system (Brand, Chapter, ChapterMember models)
+- [x] Brand.dev integration for auto-fetching brand assets
+- [x] Brand pages (/brands, /brands/[slug], /brands/[slug]/[chapter])
+- [x] Verified badge component for brand ambassadors
+- [x] Brand/chapter creation flows
 
 ### High Priority (Next Up)
-- [ ] Build organizer profile page (/organizers/[id])
+- [ ] Wire ride creation to optionally associate with a chapter
+- [ ] Show verified badges on ride cards for chapter members
 - [ ] Add RSVP functionality (going/maybe/not going)
 
 ### Medium Priority
-- [ ] Create /organizers/create page (organizer signup)
+- [ ] Build organizer profile page (/organizers/[id])
 - [ ] Create /privacy page (privacy policy)
 - [ ] Create /terms page (terms of service)
 

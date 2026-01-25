@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Menu, Sun, Moon, MapPin, PlusCircle } from 'lucide-react';
+import { Menu, Sun, Moon, MapPin, PlusCircle, Building2 } from 'lucide-react';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useBrand } from '@/components/providers/brand-provider';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ import {
 
 const navLinks = [
   { href: '/discover', label: 'Discover', icon: MapPin },
+  { href: '/brands', label: 'Brands', icon: Building2 },
   { href: '/create', label: 'Create Ride', icon: PlusCircle },
 ];
 
