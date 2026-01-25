@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Menu, Sun, Moon, MapPin, PlusCircle } from 'lucide-react';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useBrand } from '@/components/providers/brand-provider';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
+import { UnitSelector } from './unit-selector';
 import {
   Sheet,
   SheetContent,
@@ -29,8 +31,9 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const { brand, isLoading } = useBrand();
+  const { data: session } = useSession();
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -75,6 +78,9 @@ export function Navbar() {
             );
           })}
 
+          {/* Unit Selector - show for guests */}
+          {!session && <UnitSelector />}
+
           {/* Theme Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -102,7 +108,10 @@ export function Navbar() {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="flex md:hidden items-center gap-1">
+        <div className="flex md:hidden items-center gap-2">
+          {/* Unit Selector - show for guests */}
+          {!session && <UnitSelector />}
+
           {/* Theme Toggle */}
           <Button
             variant="ghost"

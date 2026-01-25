@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Map } from '@/components/maps';
+import { useUnits } from '@/components/providers/units-provider';
 
 const PACE_OPTIONS = [
   { value: 'casual', label: 'Casual', desc: '< 20 km/h' },
@@ -44,7 +45,7 @@ const PACE_STYLES: Record<string, string> = {
   race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
-// Mock rides data with coordinates
+// Mock rides data with coordinates (distances in km)
 const MOCK_RIDES = [
   {
     id: '1',
@@ -55,7 +56,7 @@ const MOCK_RIDES = [
     location: 'Phoenix Park',
     lat: 53.3559,
     lng: -6.3298,
-    distance: '45 km',
+    distanceKm: 45,
     pace: 'moderate',
     attendees: 23,
   },
@@ -68,7 +69,7 @@ const MOCK_RIDES = [
     location: 'Bray Seafront',
     lat: 53.2008,
     lng: -6.0987,
-    distance: '80 km',
+    distanceKm: 80,
     pace: 'fast',
     attendees: 15,
   },
@@ -81,7 +82,7 @@ const MOCK_RIDES = [
     location: 'Dun Laoghaire Pier',
     lat: 53.2945,
     lng: -6.1356,
-    distance: '30 km',
+    distanceKm: 30,
     pace: 'casual',
     attendees: 31,
   },
@@ -103,6 +104,7 @@ export default function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPaces, setSelectedPaces] = useState<string[]>([]);
   const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
+  const { formatDistance } = useUnits();
 
   const togglePace = (pace: string) => {
     setSelectedPaces((prev) =>
@@ -310,7 +312,7 @@ export default function DiscoverPage() {
                           <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
                             {ride.pace}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">{ride.distance}</span>
+                          <span className="text-xs text-muted-foreground">{formatDistance(ride.distanceKm)}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Users className="h-3.5 w-3.5" />
