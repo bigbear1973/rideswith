@@ -40,6 +40,10 @@ npm run db:studio    # Open Prisma Studio
 - `RESEND_API_KEY` - For magic link emails
 - `EMAIL_FROM` - Sender address (using resend.dev for now)
 - `BRAND_DEV_API_KEY` - For auto-fetching brand logos/colors from Brand.dev
+- `CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name (server-side)
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name (client-side)
+- `CLOUDINARY_API_KEY` - Cloudinary API key (for deletions)
+- `CLOUDINARY_API_SECRET` - Cloudinary API secret (for deletions)
 
 ## Design Notes
 
@@ -135,6 +139,54 @@ When creating a ride from a chapter page:
 - Ride detail page shows brand backdrop image and slogan in header
 - Promotional banner at bottom links back to the brand/chapter
 - Chapter ride counts are automatically incremented
+
+### Past Rides on Chapter Pages (IMPLEMENTED)
+- Chapter pages show collapsible "Past Rides" section
+- Past rides load on-demand when expanded (API: `?includePastRides=true`)
+- Shows up to 20 most recent past rides
+- Displays with slightly faded styling to distinguish from upcoming rides
+
+---
+
+## Cake & Coffee Stop (Post-Ride Social)
+
+Post-ride social features that unlock after a ride's date has passed.
+
+### Features
+- **Comments**: Users can post comments about the ride experience
+- **Media Gallery**: Upload photos and videos from the ride
+- **Lightbox**: Click to view full-size photos or play videos
+
+### Implementation
+- Component: `src/components/rides/cake-and-coffee.tsx`
+- API endpoints:
+  - `GET/POST/DELETE /api/rides/[id]/comments` - Manage comments
+  - `GET/POST/DELETE /api/rides/[id]/photos` - Manage photos/videos
+
+### Cloudinary Integration
+- **Upload**: Client-side unsigned upload to Cloudinary
+- **Upload preset**: `ride_photos` (must be configured as unsigned in Cloudinary dashboard)
+- **Folder**: `ride-photos`
+- **Thumbnails**: Auto-generated at 400x300 for gallery grid
+- **Video thumbnails**: Cloudinary generates frame from video
+
+### Database Models
+```prisma
+model RideComment {
+  id, rideId, userId, content, createdAt, updatedAt
+  @@index([rideId, createdAt])
+}
+
+model RidePhoto {
+  id, rideId, userId, publicId, url, thumbnailUrl, width, height, isVideo, caption, createdAt
+  @@index([rideId, createdAt])
+}
+```
+
+### Permissions
+- Any signed-in user can post comments and upload media
+- Users can delete their own content
+- Ride organizers (OWNER/ADMIN of organizer) can delete any content
 
 ---
 
@@ -277,7 +329,7 @@ Natural language / voice input to auto-fill ride details:
 
 ### Phase 7: Enhanced Features
 - [ ] GPX route upload + map visualization
-- [ ] Photo upload for rides
+- [x] Photo/video upload for rides (Cloudinary integration)
 - [ ] Recurring rides
 - [ ] Ride series/events
 - [ ] Email notifications (ride reminders, updates)
@@ -320,6 +372,11 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (rsvps, organizers)
 
 **Recently Completed:**
+- "Cake & Coffee Stop" post-ride social features (comments + photo/video uploads)
+- Cloudinary integration for photo/video uploads (unsigned upload preset)
+- Video support with play icon overlays and lightbox player
+- Past rides section on brand chapter pages (collapsible, loads on demand)
+- Homepage cleanup (removed unused sections)
 - Brand & Chapter system with hierarchical organization
 - Brand.dev integration for auto-fetching brand assets (logo, logoDark, backdrop, slogan)
 - Verified badge component for brand ambassadors
@@ -330,17 +387,8 @@ Natural language / voice input to auto-fill ride details:
 - Mobile menu auto-closes when link is clicked
 - Mobile menu includes user account options (profile, settings, sign out)
 - Discover page wired to database (was mock data)
-- Fixed distance dropdown filter (was not applying filter)
-- Fixed z-index issues (nav menu, filters appearing behind Leaflet map)
 - User profile system (/profile, /profile/edit, /u/[slug])
-- Profile includes ride history, stats, custom URL slugs
-- Edit ride functionality with delete confirmation
-- Modern date/time pickers (shadcn calendar + popover)
 - Past rides archive (/discover/past) with time range and pace filters
-- Rebrand from GroupRide to RidesWith
-- Homepage "Latest rides" section now fetches from database
-- Fixed dark mode text visibility on feature cards
-- Consolidated ride details/attendees into sidebar info card
 
 **Next Priority:** Add RSVP functionality, show verified badges on ride cards.
 
@@ -349,46 +397,34 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
-- [x] Fix discover page: distance dropdown doesn't filter rides
-- [x] Fix discover page: Pace/Distance filter buttons hidden behind map on mobile (z-index)
-- [x] Fix nav menu dropdown appearing behind map (Leaflet z-index issue)
-- [x] Fix: newly created rides not showing on discover page/map (wired to DB)
-- [x] Wire discover page to fetch rides from database
-- [x] Add edit ride functionality after creation
-- [x] Modernize date/time picker on create ride page
-- [x] Add ride history to user profile page
-- [x] Hide rides older than 14 days from discover, add past rides archive view
-- [x] Build /profile page with user details
-- [x] Each user should have a unique URL (/u/username)
-- [x] Allow users to edit their personalized URL/slug
-- [x] Rebrand from GroupRide to RidesWith (all files, emails, UI)
-- [x] Wire homepage "Latest rides" to database (/api/rides/latest)
-- [x] Fix dark mode text visibility on homepage feature cards
-- [x] Consolidate ride details/attendees into sidebar info card
-- [x] Brand & Chapter system (Brand, Chapter, ChapterMember models)
-- [x] Brand.dev integration for auto-fetching brand assets (logo, logoDark, backdrop, slogan)
-- [x] Brand pages (/brands, /brands/[slug], /brands/[slug]/[chapter])
-- [x] Verified badge component for brand ambassadors
-- [x] Brand/chapter creation flows
+- [x] "Cake & Coffee Stop" - post-ride comments and photo/video uploads
+- [x] Cloudinary integration for media uploads (unsigned preset)
+- [x] Video support with thumbnails, play icons, and lightbox player
+- [x] Past rides section on brand chapter pages (collapsible, on-demand loading)
+- [x] Homepage cleanup (removed "How it works", "Organize rides?", "Why cyclists choose")
+- [x] Brand & Chapter system with hierarchical organization
+- [x] Brand.dev integration for auto-fetching brand assets
 - [x] Chapter-linked ride creation (/create?chapterId=xxx)
 - [x] Ride detail pages show brand backdrop/slogan for chapter rides
-- [x] Mobile menu auto-closes on link click
-- [x] Mobile menu includes user account options
+- [x] Mobile menu improvements (auto-close, user account options)
+- [x] User profile system (/profile, /profile/edit, /u/[slug])
+- [x] Past rides archive (/discover/past) with filters
 
 ### High Priority (Next Up)
-- [x] Wire ride creation to optionally associate with a chapter
-- [x] Mobile menu auto-close on link click
-- [x] Mobile menu user account options (profile, settings, sign out)
-- [ ] Show verified badges on ride cards for chapter members
 - [ ] Add RSVP functionality (going/maybe/not going)
+- [ ] Show verified badges on ride cards for chapter members
+- [ ] Attendee list on ride detail page
 
 ### Medium Priority
 - [ ] Build organizer profile page (/organizers/[id])
 - [ ] Create /privacy page (privacy policy)
 - [ ] Create /terms page (terms of service)
+- [ ] GPX route upload + map visualization
+- [ ] Email notifications (ride reminders, updates)
 
-### Leaflet Z-Index (RESOLVED)
-Fixed by adding higher z-index values to UI elements:
-- Navbar: z-[1000]
-- Dropdown menus: z-[1100]
-- Mobile sheet: z-[1200]
+### Low Priority
+- [ ] Recurring rides
+- [ ] Ride series/events
+- [ ] Advanced search (location radius, date range)
+- [ ] Follow organizers
+- [ ] Social sharing
