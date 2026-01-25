@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -38,6 +39,9 @@ export function Navbar() {
   const { setTheme, resolvedTheme } = useTheme();
   const { brand, isLoading } = useBrand();
   const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-[1000]">
@@ -128,7 +132,7 @@ export function Navbar() {
           </Button>
 
           {/* Mobile Menu */}
-          <Sheet>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
@@ -174,7 +178,7 @@ export function Navbar() {
                       className="justify-start gap-3 h-12"
                       asChild
                     >
-                      <Link href={link.href}>
+                      <Link href={link.href} onClick={closeMobileMenu}>
                         <Icon className="h-5 w-5" />
                         {link.label}
                       </Link>
@@ -191,7 +195,7 @@ export function Navbar() {
                       className="justify-start gap-3 h-12"
                       asChild
                     >
-                      <Link href="/profile">
+                      <Link href="/profile" onClick={closeMobileMenu}>
                         <User className="h-5 w-5" />
                         Profile
                       </Link>
@@ -201,7 +205,7 @@ export function Navbar() {
                       className="justify-start gap-3 h-12"
                       asChild
                     >
-                      <Link href="/settings">
+                      <Link href="/settings" onClick={closeMobileMenu}>
                         <Settings className="h-5 w-5" />
                         Settings
                       </Link>
@@ -209,7 +213,10 @@ export function Navbar() {
                     <Button
                       variant="ghost"
                       className="justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => signOut({ callbackUrl: '/' })}
+                      onClick={() => {
+                        closeMobileMenu();
+                        signOut({ callbackUrl: '/' });
+                      }}
                     >
                       <LogOut className="h-5 w-5" />
                       Sign out
@@ -222,7 +229,7 @@ export function Navbar() {
                       className="justify-start gap-3 h-12"
                       asChild
                     >
-                      <Link href="/auth/signin">
+                      <Link href="/auth/signin" onClick={closeMobileMenu}>
                         <User className="h-5 w-5" />
                         Sign In
                       </Link>
