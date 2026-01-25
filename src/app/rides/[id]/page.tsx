@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
@@ -289,7 +289,7 @@ export default async function RidePage({ params }: RidePageProps) {
                   href={`https://www.google.com/maps/search/?api=1&query=${ride.latitude},${ride.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-4 group hover:bg-muted/50 -mx-4 px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-4 group hover:bg-muted/50 -mx-4 px-4 py-2 rounded-lg transition-colors"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -297,16 +297,18 @@ export default async function RidePage({ params }: RidePageProps) {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium group-hover:text-primary transition-colors">{ride.locationName}</p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {/* Show shortened address - extract city/region from full address */}
                       {ride.locationAddress.split(',').slice(0, 3).join(',')}
                     </p>
-                    <p className="text-xs text-primary mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Open in Maps ↗
-                    </p>
                   </div>
+                  <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    ↗
+                  </span>
                 </a>
               </CardContent>
             </Card>
+
+            {/* Route Embed - show if routeUrl is provided */}
+            {ride.routeUrl && <RouteEmbed routeUrl={ride.routeUrl} />}
 
             {/* Mobile Ride Info - hidden on desktop where it shows in sidebar */}
             <Card className="lg:hidden">
