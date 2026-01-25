@@ -1,40 +1,25 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Get cloud name from env (supports both server and client-side naming)
+const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+// Configure Cloudinary (only if credentials are available)
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 export { cloudinary };
 
-// Generate a signature for client-side uploads
-export function generateUploadSignature(folder: string = 'ride-photos') {
-  const timestamp = Math.round(new Date().getTime() / 1000);
-
-  const paramsToSign = {
-    timestamp,
-    folder,
-    upload_preset: 'ride_photos', // Create this preset in Cloudinary dashboard
-  };
-
-  const signature = cloudinary.utils.api_sign_request(
-    paramsToSign,
-    process.env.CLOUDINARY_API_SECRET!
-  );
-
-  return {
-    timestamp,
-    signature,
-    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-    apiKey: process.env.CLOUDINARY_API_KEY,
-    folder,
-  };
-}
-
-// Delete an image from Cloudinary
+// Delete an image from Cloudinary (requires full API credentials)
 export async function deleteImage(publicId: string) {
+  if (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    console.warn('Cloudinary API credentials not configured, skipping delete');
+    return { result: 'skipped' };
+  }
   try {
     const result = await cloudinary.uploader.destroy(publicId);
     return result;
@@ -44,33 +29,21 @@ export async function deleteImage(publicId: string) {
   }
 }
 
-// Generate optimized image URLs
-export function getOptimizedUrl(publicId: string, options: {
-  width?: number;
-  height?: number;
-  quality?: string | number;
-  format?: string;
-} = {}) {
-  const { width, height, quality = 'auto', format = 'auto' } = options;
-
-  const transformations: string[] = [`q_${quality}`, `f_${format}`];
-
-  if (width) transformations.push(`w_${width}`);
-  if (height) transformations.push(`h_${height}`);
-  if (width || height) transformations.push('c_fill');
-
-  return cloudinary.url(publicId, {
-    transformation: transformations.join(','),
-    secure: true,
-  });
-}
-
-// Get thumbnail URL (400x300)
+// Generate thumbnail URL manually (doesn't require cloudinary SDK config)
 export function getThumbnailUrl(publicId: string) {
-  return getOptimizedUrl(publicId, { width: 400, height: 300 });
+  if (!CLOUD_NAME) {
+    console.error('No Cloudinary cloud name configured');
+    return '';
+  }
+  // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/{public_id}
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_fill,w_400,h_300,q_auto,f_auto/${publicId}`;
 }
 
 // Get full-size optimized URL (max 1600px wide)
 export function getFullSizeUrl(publicId: string) {
-  return getOptimizedUrl(publicId, { width: 1600 });
+  if (!CLOUD_NAME) {
+    console.error('No Cloudinary cloud name configured');
+    return '';
+  }
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/c_limit,w_1600,q_auto,f_auto/${publicId}`;
 }
