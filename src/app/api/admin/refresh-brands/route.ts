@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
             where: { id: brand.id },
             data: {
               logo: brandAssets.logo || brand.logo,
-              logoDark: brandAssets.logoDark || brand.logoDark,
+              // Explicitly set logoDark - use null if no dedicated dark logo exists
+              logoDark: brandAssets.logoDark ?? null,
               logoIcon: brandAssets.logoIcon || brand.logoIcon,
               primaryColor: brandAssets.primaryColor || brand.primaryColor,
               secondaryColor: brandAssets.secondaryColor || brand.secondaryColor,
