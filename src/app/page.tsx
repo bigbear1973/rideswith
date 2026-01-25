@@ -1,8 +1,23 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Users, ArrowRight, Search, Route, Camera } from 'lucide-react';
+
+// Curated Unsplash images for consistent cycling theme
+const IMAGES = {
+  hero: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80', // Group of cyclists on road
+  ridesNearYou: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80', // Cyclists in nature
+  casual: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=400&q=80', // Relaxed cycling
+  moderate: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&q=80', // Road cycling
+  fast: 'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&q=80', // Fast cycling
+  race: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=400&q=80', // Racing cyclists
+  organizer: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', // Cycling club/group
+  ride1: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80', // Morning ride
+  ride2: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80', // Coastal cycling
+  ride3: 'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80', // Urban cycling
+};
 
 // Mock data for featured rides
 const FEATURED_RIDES = [
@@ -16,6 +31,7 @@ const FEATURED_RIDES = [
     distance: '45 km',
     pace: 'moderate',
     attendees: 23,
+    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80',
   },
   {
     id: '2',
@@ -27,6 +43,7 @@ const FEATURED_RIDES = [
     distance: '80 km',
     pace: 'fast',
     attendees: 15,
+    image: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80',
   },
   {
     id: '3',
@@ -38,6 +55,7 @@ const FEATURED_RIDES = [
     distance: '30 km',
     pace: 'casual',
     attendees: 31,
+    image: 'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80',
   },
 ];
 
@@ -88,11 +106,17 @@ export default function HomePage() {
 
             {/* Hero visual - Hidden on mobile */}
             <div className="hidden lg:flex flex-1 justify-center">
-              <div className="relative w-80 h-80">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-2xl" />
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/10 rounded-2xl" />
-                <div className="absolute inset-8 bg-muted rounded-2xl flex items-center justify-center">
-                  <span className="text-6xl">🚴</span>
+              <div className="relative w-96 h-80">
+                <div className="absolute top-4 right-4 w-48 h-48 bg-primary/10 rounded-2xl" />
+                <div className="absolute bottom-4 left-4 w-48 h-48 bg-accent/10 rounded-2xl" />
+                <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src={IMAGES.hero}
+                    alt="Group of cyclists riding together"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
               </div>
             </div>
@@ -127,8 +151,13 @@ export default function HomePage() {
                 className="flex-shrink-0 w-[280px] sm:w-auto snap-start"
               >
                 <Card className="h-full overflow-hidden transition-shadow hover:shadow-md">
-                  <div className="aspect-video bg-muted flex items-center justify-center">
-                    <Calendar className="h-10 w-10 text-muted-foreground/40" />
+                  <div className="aspect-video bg-muted relative">
+                    <Image
+                      src={ride.image}
+                      alt={ride.title}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
@@ -177,19 +206,27 @@ export default function HomePage() {
           <h2 className="text-xl font-bold sm:text-2xl mb-6">Explore by pace</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { name: 'Casual', icon: '☕', desc: '< 20 km/h', color: 'bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800' },
-              { name: 'Moderate', icon: '🚴', desc: '20-28 km/h', color: 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900 border-blue-200 dark:border-blue-800' },
-              { name: 'Fast', icon: '💨', desc: '28-35 km/h', color: 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950 dark:hover:bg-amber-900 border-amber-200 dark:border-amber-800' },
-              { name: 'Race', icon: '🏁', desc: '> 35 km/h', color: 'bg-red-50 hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900 border-red-200 dark:border-red-800' },
+              { name: 'Casual', desc: '< 20 km/h', image: IMAGES.casual, overlay: 'from-green-600/80' },
+              { name: 'Moderate', desc: '20-28 km/h', image: IMAGES.moderate, overlay: 'from-blue-600/80' },
+              { name: 'Fast', desc: '28-35 km/h', image: IMAGES.fast, overlay: 'from-amber-600/80' },
+              { name: 'Race', desc: '> 35 km/h', image: IMAGES.race, overlay: 'from-red-600/80' },
             ].map((cat) => (
               <Link
                 key={cat.name}
                 href={`/discover?pace=${cat.name.toLowerCase()}`}
-                className={`flex flex-col items-center p-4 rounded-xl border transition-colors ${cat.color}`}
+                className="group relative aspect-[4/3] rounded-xl overflow-hidden"
               >
-                <span className="text-2xl sm:text-3xl mb-2">{cat.icon}</span>
-                <span className="font-medium text-sm sm:text-base">{cat.name}</span>
-                <span className="text-xs text-muted-foreground">{cat.desc}</span>
+                <Image
+                  src={cat.image}
+                  alt={`${cat.name} pace cycling`}
+                  fill
+                  className="object-cover transition-transform group-hover:scale-105"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t ${cat.overlay} to-transparent`} />
+                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                  <span className="font-semibold text-sm sm:text-base block">{cat.name}</span>
+                  <span className="text-xs opacity-90">{cat.desc}</span>
+                </div>
               </Link>
             ))}
           </div>
@@ -238,11 +275,14 @@ export default function HomePage() {
                   </Button>
                 </div>
               </div>
-              <div className="hidden md:flex flex-1 bg-muted items-center justify-center p-8">
-                <div className="text-center">
-                  <span className="text-5xl">🏆</span>
-                  <p className="mt-2 text-sm text-muted-foreground">Join 100+ cycling clubs</p>
-                </div>
+              <div className="hidden md:block flex-1 relative min-h-[200px]">
+                <Image
+                  src={IMAGES.organizer}
+                  alt="Cycling club group"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
               </div>
             </div>
           </Card>

@@ -33,13 +33,13 @@ interface MapProps {
   onClick?: (lat: number, lng: number) => void;
 }
 
-// Component to handle map center changes
-function MapController({ center }: { center: { lat: number; lng: number } }) {
+// Component to handle map center and zoom changes
+function MapController({ center, zoom }: { center: { lat: number; lng: number }; zoom: number }) {
   const map = useMap();
 
   useEffect(() => {
-    map.setView([center.lat, center.lng]);
-  }, [map, center.lat, center.lng]);
+    map.setView([center.lat, center.lng], zoom);
+  }, [map, center.lat, center.lng, zoom]);
 
   return null;
 }
@@ -77,7 +77,7 @@ export function Map({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapController center={center} />
+        <MapController center={center} zoom={zoom} />
 
         {markers.length > 0 ? (
           markers.map((marker) => (
