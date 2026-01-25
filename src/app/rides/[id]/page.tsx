@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { RideMap, CopyRideInfo } from '@/components/rides';
+import { CopyRideInfo } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
@@ -307,9 +307,6 @@ export default async function RidePage({ params }: RidePageProps) {
                 </a>
               </CardContent>
             </Card>
-
-            {/* Map */}
-            <RideMap location={{ lat: ride.latitude, lng: ride.longitude, name: ride.locationName, address: ride.locationAddress }} />
 
             {/* Mobile Ride Info - hidden on desktop where it shows in sidebar */}
             <Card className="lg:hidden">
