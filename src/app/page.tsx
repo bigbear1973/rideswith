@@ -34,15 +34,28 @@ interface LatestRide {
   } | null;
 }
 
+// Type for brand backdrop images
+interface BrandBackdrop {
+  backdrop: string;
+  name: string;
+  slug: string;
+}
+
 // Curated Unsplash images for consistent cycling theme
 const IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80',
   casual: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=400&q=80',
   moderate: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&q=80',
   fast: 'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&q=80',
   race: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=400&q=80',
   organizer: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
 };
+
+// Fallback hero images when no brands registered
+const FALLBACK_HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80', // Two cyclists on beach road
+  'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=800&q=80', // Road cycling group
+  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', // Cycling club
+];
 
 // Default images for rides without images
 const RIDE_IMAGES = [
@@ -70,6 +83,41 @@ export default function HomePage() {
   const { formatDistance, formatSpeed } = useUnits();
   const [latestRides, setLatestRides] = useState<LatestRide[]>([]);
   const [isLoadingRides, setIsLoadingRides] = useState(true);
+  const [brandBackdrops, setBrandBackdrops] = useState<BrandBackdrop[]>([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+
+  // Fetch brand backdrops for hero rotation
+  useEffect(() => {
+    async function fetchBrandBackdrops() {
+      try {
+        const res = await fetch('/api/brands/backdrops');
+        if (res.ok) {
+          const data = await res.json();
+          setBrandBackdrops(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch brand backdrops:', error);
+      }
+    }
+    fetchBrandBackdrops();
+  }, []);
+
+  // Rotate hero image every 5 seconds
+  useEffect(() => {
+    const imageCount = brandBackdrops.length > 0 ? brandBackdrops.length : FALLBACK_HERO_IMAGES.length;
+    if (imageCount <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev + 1) % imageCount);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [brandBackdrops.length]);
+
+  // Get current hero image
+  const currentHeroImage = brandBackdrops.length > 0
+    ? brandBackdrops[currentHeroIndex]?.backdrop
+    : FALLBACK_HERO_IMAGES[currentHeroIndex % FALLBACK_HERO_IMAGES.length];
 
   useEffect(() => {
     async function fetchLatestRides() {
@@ -131,16 +179,38 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Hero visual */}
+            {/* Hero visual - rotating brand imagery */}
             <div className="hidden md:flex items-center justify-center">
               <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src={IMAGES.hero}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={currentHeroImage}
                   alt="Group of cyclists riding together"
-                  fill
-                  className="object-cover"
-                  priority
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
                 />
+                {/* Brand attribution for brand images */}
+                {brandBackdrops.length > 0 && brandBackdrops[currentHeroIndex] && (
+                  <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    {brandBackdrops[currentHeroIndex].name}
+                  </div>
+                )}
+                {/* Dot indicators */}
+                {(brandBackdrops.length > 1 || (brandBackdrops.length === 0 && FALLBACK_HERO_IMAGES.length > 1)) && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {(brandBackdrops.length > 0 ? brandBackdrops : FALLBACK_HERO_IMAGES).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentHeroIndex(idx)}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          idx === currentHeroIndex
+                            ? 'bg-white scale-110'
+                            : 'bg-white/50 hover:bg-white/75'
+                        }`}
+                        aria-label={`Show image ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
