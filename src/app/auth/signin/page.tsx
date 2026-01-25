@@ -26,12 +26,20 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError('Something went wrong. Please try again.');
+        console.error('Sign in error:', result.error);
+        if (result.error === 'Configuration') {
+          setError('Email service is not configured properly. Please contact support.');
+        } else if (result.error === 'EmailSignin') {
+          setError('Failed to send email. Please check your email address and try again.');
+        } else {
+          setError('Something went wrong. Please try again.');
+        }
       } else {
         // Redirect to verify page
         window.location.href = '/auth/verify';
       }
-    } catch {
+    } catch (err) {
+      console.error('Sign in exception:', err);
       setError('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);

@@ -8,7 +8,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Resend({
       apiKey: process.env.RESEND_API_KEY,
-      from: process.env.EMAIL_FROM || 'GroupRide <noreply@groupride.com>',
+      from: process.env.EMAIL_FROM || 'GroupRide <onboarding@resend.dev>',
     }),
   ],
   pages: {
@@ -24,4 +24,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  debug: process.env.NODE_ENV === 'development',
 });
