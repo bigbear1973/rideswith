@@ -174,52 +174,50 @@ export default async function RidePage({ params }: RidePageProps) {
   return (
     <div className="min-h-screen pb-8">
       {/* Brand Header - shown for branded rides */}
-      {hasBranding && brand && chapter && (
-        <div
-          className="relative py-8 text-white overflow-hidden"
-          style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
+      {hasBranding && brand && chapter && brand.domain && (
+        <a
+          href={`https://${brand.domain}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block group"
         >
-          {/* Backdrop image */}
+          {/* Backdrop image - full width, no overlay */}
           {brand.backdrop && (
             <div
-              className="absolute inset-0 bg-cover bg-center opacity-30"
+              className="h-40 md:h-48 bg-cover bg-center"
               style={{ backgroundImage: `url(${brand.backdrop})` }}
             />
           )}
-          {/* Gradient overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
-
-          <div className="relative mx-auto max-w-6xl px-4">
-            <Link
-              href={`/brands/${brand.slug}/${chapter.slug}`}
-              className="inline-flex items-center gap-4 hover:opacity-90 transition-opacity"
-            >
-              {brand.logo ? (
-                <img
-                  src={brand.logo}
-                  alt={brand.name}
-                  className="h-14 w-14 object-contain rounded-lg bg-white p-1.5 shadow-lg"
-                />
-              ) : (
-                <div className="h-14 w-14 rounded-lg bg-white/20 flex items-center justify-center text-xl font-bold shadow-lg">
-                  {brand.name.charAt(0)}
-                </div>
-              )}
-              <div>
-                <p className="font-bold text-xl">
-                  {brand.name} {chapter.name}
-                </p>
-                {brand.slogan && (
-                  <p className="text-white/90 text-sm italic">{brand.slogan}</p>
+          {/* Brand info below image */}
+          <div
+            className="py-4"
+            style={{ backgroundColor: brand.primaryColor || '#1a1a1a' }}
+          >
+            <div className="mx-auto max-w-6xl px-4">
+              <div className="flex items-center gap-4">
+                {brand.logo ? (
+                  <img
+                    src={brand.logo}
+                    alt={brand.name}
+                    className="h-12 w-12 object-contain rounded-lg bg-white p-1.5"
+                  />
+                ) : (
+                  <div className="h-12 w-12 rounded-lg bg-white/20 flex items-center justify-center text-lg font-bold text-white">
+                    {brand.name.charAt(0)}
+                  </div>
                 )}
-                <p className="text-white/70 text-sm flex items-center gap-1 mt-0.5">
-                  {chapter.city}
-                  <ArrowUpRight className="h-3 w-3" />
-                </p>
+                <div className="flex-1 min-w-0 text-white">
+                  <p className="text-xs opacity-70">Presented by</p>
+                  <p className="font-semibold">{brand.name}</p>
+                  {brand.slogan && (
+                    <p className="text-sm opacity-80 italic">{brand.slogan}</p>
+                  )}
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-white opacity-70 group-hover:opacity-100 transition-opacity" />
               </div>
-            </Link>
+            </div>
           </div>
-        </div>
+        </a>
       )}
 
       {/* Mobile Header */}
@@ -256,27 +254,18 @@ export default async function RidePage({ params }: RidePageProps) {
             </Link>
 
             {/* Title Section */}
-            <div>
-              <div className="flex items-start justify-between gap-4">
-                <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl mb-3">
-                  {ride.title}
-                </h1>
-                {canEdit && (
-                  <Button variant="outline" size="sm" asChild className="hidden lg:flex">
-                    <Link href={`/rides/${id}/edit`}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Link>
-                  </Button>
-                )}
-              </div>
-              <p className="text-muted-foreground">
-                Hosted by{' '}
-                <Link href={`/organizers/${ride.organizer.id}`} className="text-foreground hover:underline inline-flex items-center gap-1">
-                  {ride.organizer.name}
-                  <ArrowUpRight className="h-3 w-3" />
-                </Link>
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
+                {ride.title}
+              </h1>
+              {canEdit && (
+                <Button variant="outline" size="sm" asChild className="hidden lg:flex">
+                  <Link href={`/rides/${id}/edit`}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Link>
+                </Button>
+              )}
             </div>
 
             {/* Date & Time Card */}
@@ -373,6 +362,16 @@ export default async function RidePage({ params }: RidePageProps) {
                   </>
                 )}
 
+                {/* Hosted by */}
+                <Separator />
+                <div className="space-y-1">
+                  <span className="text-sm text-muted-foreground">Hosted by</span>
+                  <Link href={`/organizers/${ride.organizer.id}`} className="text-sm font-medium hover:underline flex items-center gap-1">
+                    {ride.organizer.name}
+                    <ArrowUpRight className="h-3 w-3" />
+                  </Link>
+                </div>
+
                 {/* Attendees */}
                 <Separator />
                 <div className="space-y-2">
@@ -416,8 +415,7 @@ export default async function RidePage({ params }: RidePageProps) {
                 <CopyRideInfo rideInfo={rideInfoText} />
               </CardContent>
             </Card>
-
-                      </div>
+          </div>
 
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block">
@@ -531,6 +529,16 @@ export default async function RidePage({ params }: RidePageProps) {
                     </>
                   )}
 
+                  {/* Hosted by */}
+                  <Separator />
+                  <div className="space-y-1">
+                    <span className="text-sm text-muted-foreground">Hosted by</span>
+                    <Link href={`/organizers/${ride.organizer.id}`} className="text-sm font-medium hover:underline flex items-center gap-1">
+                      {ride.organizer.name}
+                      <ArrowUpRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+
                   {/* Attendees */}
                   <Separator />
                   <div className="space-y-2">
@@ -578,7 +586,6 @@ export default async function RidePage({ params }: RidePageProps) {
           </div>
         </div>
       </div>
-
     </div>
   );
 }
