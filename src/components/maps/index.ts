@@ -1,1 +1,1 @@
-export { Map } from './google-map';
+export { Map } from './leaflet-map';
