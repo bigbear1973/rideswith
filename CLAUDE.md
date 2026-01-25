@@ -19,6 +19,8 @@ Cycling group ride discovery and management platform.
 - `src/lib/prisma.ts` - Prisma client singleton
 - `src/lib/brand-dev.ts` - Brand.dev API integration for auto-fetching brand assets
 - `src/components/providers/units-provider.tsx` - km/mi unit preference context
+- `src/components/rides/location-link.tsx` - Map app picker (Apple Maps, Google Maps, Waze)
+- `src/components/rides/cake-and-coffee.tsx` - Post-ride comments and media gallery
 - `prisma/schema.prisma` - Database schema (User, Organizer, Ride, Rsvp, Brand, Chapter models)
 - `railway.json` - Railway deployment config
 
@@ -110,10 +112,18 @@ Brand (e.g., Straede)
 - `/brands/[slug]/create-chapter` - Start a chapter
 
 ### Database Models
-- **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev)
+- **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev), social links (instagram, twitter, facebook, strava, youtube)
 - **Chapter** - brand reference, city, slug, member counts
 - **ChapterMember** - user, chapter, role (LEAD or AMBASSADOR)
 - **Ride** - optional `chapterId` for brand-affiliated rides
+
+### Brand Social Links (IMPLEMENTED)
+Brands can display links to their social media profiles:
+- Instagram, Twitter/X, Facebook, Strava Club, YouTube
+- Stored in Brand model as optional string fields
+- Edit via brand edit page (`/brands/[slug]/edit`)
+- Displayed as icon row in brand hero section
+- Smart URL handling: accepts handles (`@username`) or full URLs
 
 ### API Endpoints
 - `GET/POST /api/brands` - List and create brands
@@ -139,6 +149,11 @@ When creating a ride from a chapter page:
 - Ride detail page shows brand backdrop image and slogan in header
 - Promotional banner at bottom links back to the brand/chapter
 - Chapter ride counts are automatically incremented
+
+### Ride Detail Page Layout
+- Ride Info card displayed in main content (under date/time and location)
+- Sidebar only appears for branded rides (with brand card)
+- Non-branded rides use single-column layout for cleaner appearance
 
 ### Past Rides on Chapter Pages (IMPLEMENTED)
 - Chapter pages show collapsible "Past Rides" section
@@ -372,11 +387,14 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (rsvps, organizers)
 
 **Recently Completed:**
+- Brand social links (Instagram, Twitter, Facebook, Strava, YouTube) on brand pages
+- Ride detail layout improvements (Ride Info in main content, conditional sidebar)
+- Map app picker with clean SVG icons (replaced emoji icons with Lucide-style SVGs)
+- Homepage cleanup (removed "Find your pace" section)
 - "Cake & Coffee Stop" post-ride social features (comments + photo/video uploads)
 - Cloudinary integration for photo/video uploads (unsigned upload preset)
 - Video support with play icon overlays and lightbox player
 - Past rides section on brand chapter pages (collapsible, loads on demand)
-- Homepage cleanup (removed unused sections)
 - Brand & Chapter system with hierarchical organization
 - Brand.dev integration for auto-fetching brand assets (logo, logoDark, backdrop, slogan)
 - Verified badge component for brand ambassadors
@@ -397,11 +415,14 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Brand social links (Instagram, Twitter, Facebook, Strava, YouTube)
+- [x] Ride detail layout - Ride Info in main content, sidebar only for branded rides
+- [x] Map app picker icons - clean SVG icons matching Lucide style (Apple Maps, Google Maps, Waze)
+- [x] Homepage cleanup (removed "Find your pace" section)
 - [x] "Cake & Coffee Stop" - post-ride comments and photo/video uploads
 - [x] Cloudinary integration for media uploads (unsigned preset)
 - [x] Video support with thumbnails, play icons, and lightbox player
 - [x] Past rides section on brand chapter pages (collapsible, on-demand loading)
-- [x] Homepage cleanup (removed "How it works", "Organize rides?", "Why cyclists choose")
 - [x] Brand & Chapter system with hierarchical organization
 - [x] Brand.dev integration for auto-fetching brand assets
 - [x] Chapter-linked ride creation (/create?chapterId=xxx)
