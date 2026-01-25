@@ -102,7 +102,7 @@ export default async function ProfilePage() {
                     <p className="text-muted-foreground">{user.email}</p>
                     {user.slug && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        rideswith.app/u/{user.slug}
+                        rideswith.com/u/{user.slug}
                       </p>
                     )}
                     {user.bio && (

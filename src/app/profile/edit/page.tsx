@@ -201,7 +201,7 @@ export default function EditProfilePage() {
               <div className="space-y-2">
                 <Label htmlFor="slug">Custom Profile URL</Label>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">rideswith.app/u/</span>
+                  <span className="text-sm text-muted-foreground">rideswith.com/u/</span>
                   <div className="relative flex-1">
                     <Input
                       id="slug"
