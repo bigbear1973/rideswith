@@ -8,8 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatsBanner } from '@/components/ui/stats-banner';
 import { ColoredSection } from '@/components/ui/colored-section';
-import { FeatureCard } from '@/components/ui/feature-card';
-import { MapPin, Users, ArrowRight, Search, Route, Camera, Bike, Clock, Heart, Loader2 } from 'lucide-react';
+import { MapPin, Users, ArrowRight, Bike, Loader2 } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 
 // Type for latest rides from API
@@ -47,7 +46,6 @@ const IMAGES = {
   moderate: 'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=400&q=80',
   fast: 'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&q=80',
   race: 'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=400&q=80',
-  organizer: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
 };
 
 // Fallback hero images when no brands registered
@@ -381,103 +379,6 @@ export default function HomePage() {
           ))}
         </div>
       </ColoredSection>
-
-      {/* How It Works */}
-      <section className="px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-4">How RidesWith works</h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Join thousands of cyclists who use RidesWith to find their community
-          </p>
-          <div className="grid gap-6 sm:grid-cols-3">
-            <FeatureCard
-              icon={Search}
-              title="Discover rides"
-              description="Find local group rides that match your pace, schedule, and riding style."
-            />
-            <FeatureCard
-              icon={Users}
-              title="Join the group"
-              description="RSVP with one click and download routes for any GPS device."
-            />
-            <FeatureCard
-              icon={Bike}
-              title="Ride together"
-              description="Meet at the start, enjoy the ride, and become part of the community."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Organizer CTA - Black section */}
-      <ColoredSection color="black">
-        <div className="grid gap-12 md:grid-cols-2 md:items-center">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl text-white">
-              Organize group rides?
-            </h2>
-            <p className="text-lg text-white/80">
-              Create a club profile, manage all your rides in one place,
-              and grow your community with easy invite links.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="c40Dark" size="lg" asChild>
-                <Link href="/organizers/create">GET STARTED FREE</Link>
-              </Button>
-              <Button variant="c40Dark" size="lg" asChild>
-                <Link href="/about/organizers">LEARN MORE</Link>
-              </Button>
-            </div>
-          </div>
-          <div className="hidden md:block relative aspect-[4/3] rounded-2xl overflow-hidden">
-            <Image
-              src={IMAGES.organizer}
-              alt="Cycling club group"
-              fill
-              className="object-cover"
-            />
-          </div>
-        </div>
-      </ColoredSection>
-
-      {/* Why RidesWith */}
-      <section className="px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold sm:text-3xl text-center mb-12">Why cyclists choose RidesWith</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard
-              icon={MapPin}
-              title="Local rides everywhere"
-              description="Find group rides in your city, no matter where you are."
-            />
-            <FeatureCard
-              icon={Clock}
-              title="Fits your schedule"
-              description="Morning, evening, weekend - find rides when you're free."
-            />
-            <FeatureCard
-              icon={Heart}
-              title="Build community"
-              description="Turn strangers into riding buddies and lifelong friends."
-            />
-            <FeatureCard
-              icon={Route}
-              title="GPX downloads"
-              description="Get the route on your GPS device before every ride."
-            />
-            <FeatureCard
-              icon={Camera}
-              title="Share memories"
-              description="Post photos and relive the best moments together."
-            />
-            <FeatureCard
-              icon={Users}
-              title="All levels welcome"
-              description="From beginners to racers, there's a group for everyone."
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Final CTA */}
       <StatsBanner
