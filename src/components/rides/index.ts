@@ -4,3 +4,6 @@ export { RouteEmbed } from './route-embed';
 export { CommunityRoutes } from './community-routes';
 export { CakeAndCoffee } from './cake-and-coffee';
 export { LocationLink } from './location-link';
+export { RsvpButton } from './rsvp-button';
+export { AttendeeList } from './attendee-list';
+export { RsvpSection } from './rsvp-section';

@@ -4,9 +4,8 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
@@ -89,23 +88,24 @@ export default async function RidePage({ params }: RidePageProps) {
         },
       },
       rsvps: {
-        where: { status: 'GOING' },
+        where: { status: { in: ['GOING', 'MAYBE'] } },
         include: {
           user: {
             select: {
               id: true,
               name: true,
               email: true,
+              image: true,
+              slug: true,
             },
           },
         },
-        take: 10,
+        orderBy: { createdAt: 'asc' },
+        take: 20,
       },
       _count: {
         select: {
-          rsvps: {
-            where: { status: 'GOING' },
-          },
+          rsvps: true,
         },
       },
     },
@@ -115,8 +115,30 @@ export default async function RidePage({ params }: RidePageProps) {
     notFound();
   }
 
-  const totalAttendees = ride._count.rsvps;
+  // Count RSVPs by status
+  const goingRsvps = await prisma.rsvp.count({
+    where: { rideId: id, status: 'GOING' },
+  });
+  const maybeRsvps = await prisma.rsvp.count({
+    where: { rideId: id, status: 'MAYBE' },
+  });
+
+  // Get current user's RSVP status
+  let currentUserRsvpStatus: 'GOING' | 'MAYBE' | 'NOT_GOING' | null = null;
+  if (session?.user?.id) {
+    const userRsvp = await prisma.rsvp.findUnique({
+      where: {
+        rideId_userId: {
+          rideId: id,
+          userId: session.user.id,
+        },
+      },
+    });
+    currentUserRsvpStatus = userRsvp?.status ?? null;
+  }
+
   const pace = ride.pace.toLowerCase();
+  const isPastRide = new Date(ride.date) < new Date();
 
   // Brand info for branded rides
   const brand = ride.chapter?.brand;
@@ -133,19 +155,15 @@ export default async function RidePage({ params }: RidePageProps) {
   const formattedStartTime = format(ride.date, 'h:mm a');
   const formattedEndTime = ride.endTime ? format(ride.endTime, 'h:mm a') : null;
 
-  // Get attendee initials
+  // Format attendees for the component
   const attendees = ride.rsvps.map((rsvp) => {
     const name = rsvp.user.name || rsvp.user.email?.split('@')[0] || 'User';
-    const initials = name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
     return {
       id: rsvp.user.id,
       name,
-      initials,
+      image: rsvp.user.image,
+      slug: rsvp.user.slug,
+      status: rsvp.status as 'GOING' | 'MAYBE' | 'NOT_GOING',
     };
   });
 
@@ -373,43 +391,17 @@ export default async function RidePage({ params }: RidePageProps) {
                   </Link>
                 </div>
 
-                {/* Attendees */}
+                {/* RSVP & Attendees */}
                 <Separator />
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Attendees ({totalAttendees})
-                    </span>
-                    {totalAttendees > 5 && (
-                      <Button variant="ghost" size="sm" className="h-auto p-0 text-xs">
-                        See all
-                      </Button>
-                    )}
-                  </div>
-                  {attendees.length > 0 ? (
-                    <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {attendees.slice(0, 5).map((attendee) => (
-                          <Avatar key={attendee.id} className="h-8 w-8 border-2 border-background">
-                            <AvatarFallback className="text-xs">{attendee.initials}</AvatarFallback>
-                          </Avatar>
-                        ))}
-                        {totalAttendees > 5 && (
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium">
-                            +{totalAttendees - 5}
-                          </div>
-                        )}
-                      </div>
-                      {ride.maxAttendees && (
-                        <span className="text-xs text-muted-foreground">
-                          {ride.maxAttendees - totalAttendees} spots left
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">No attendees yet. Be the first!</p>
-                  )}
-                </div>
+                <RsvpSection
+                  rideId={id}
+                  currentUserRsvpStatus={currentUserRsvpStatus}
+                  attendees={attendees}
+                  totalGoing={goingRsvps}
+                  totalMaybe={maybeRsvps}
+                  maxAttendees={ride.maxAttendees}
+                  isPastRide={isPastRide}
+                />
 
                 {/* Copy ride info */}
                 <Separator />

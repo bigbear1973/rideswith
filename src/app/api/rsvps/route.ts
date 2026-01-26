@@ -1,11 +1,166 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-export async function GET() {
-  // TODO: Implement RSVP listing
-  return NextResponse.json({ data: [], message: 'RSVPs endpoint - to be implemented' });
+// GET /api/rsvps?rideId=xxx - Get RSVPs for a ride
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const rideId = searchParams.get('rideId');
+
+    if (!rideId) {
+      return NextResponse.json({ error: 'rideId is required' }, { status: 400 });
+    }
+
+    const rsvps = await prisma.rsvp.findMany({
+      where: { rideId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return NextResponse.json(rsvps);
+  } catch (error) {
+    console.error('GET /api/rsvps error:', error);
+    return NextResponse.json({ error: 'Failed to fetch RSVPs' }, { status: 500 });
+  }
 }
 
-export async function POST() {
-  // TODO: Implement RSVP creation
-  return NextResponse.json({ message: 'Create RSVP endpoint - to be implemented' });
+// POST /api/rsvps - Create or update RSVP
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { rideId, status } = body;
+
+    if (!rideId) {
+      return NextResponse.json({ error: 'rideId is required' }, { status: 400 });
+    }
+
+    // Validate status
+    const validStatuses = ['GOING', 'MAYBE', 'NOT_GOING'];
+    if (!status || !validStatuses.includes(status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
+
+    // Check if ride exists and is published
+    const ride = await prisma.ride.findUnique({
+      where: { id: rideId },
+      select: {
+        id: true,
+        status: true,
+        maxAttendees: true,
+        _count: {
+          select: {
+            rsvps: {
+              where: { status: 'GOING' },
+            },
+          },
+        },
+      },
+    });
+
+    if (!ride) {
+      return NextResponse.json({ error: 'Ride not found' }, { status: 404 });
+    }
+
+    if (ride.status !== 'PUBLISHED') {
+      return NextResponse.json({ error: 'Cannot RSVP to unpublished ride' }, { status: 400 });
+    }
+
+    // Check capacity if setting to GOING
+    if (status === 'GOING' && ride.maxAttendees) {
+      const existingRsvp = await prisma.rsvp.findUnique({
+        where: {
+          rideId_userId: {
+            rideId,
+            userId: session.user.id,
+          },
+        },
+      });
+
+      // Only check capacity if user isn't already GOING
+      if (!existingRsvp || existingRsvp.status !== 'GOING') {
+        if (ride._count.rsvps >= ride.maxAttendees) {
+          return NextResponse.json({ error: 'Ride is at capacity' }, { status: 400 });
+        }
+      }
+    }
+
+    // Upsert RSVP
+    const rsvp = await prisma.rsvp.upsert({
+      where: {
+        rideId_userId: {
+          rideId,
+          userId: session.user.id,
+        },
+      },
+      update: { status },
+      create: {
+        rideId,
+        userId: session.user.id,
+        status,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(rsvp);
+  } catch (error) {
+    console.error('POST /api/rsvps error:', error);
+    return NextResponse.json({ error: 'Failed to update RSVP' }, { status: 500 });
+  }
+}
+
+// DELETE /api/rsvps - Remove RSVP
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const rideId = searchParams.get('rideId');
+
+    if (!rideId) {
+      return NextResponse.json({ error: 'rideId is required' }, { status: 400 });
+    }
+
+    await prisma.rsvp.delete({
+      where: {
+        rideId_userId: {
+          rideId,
+          userId: session.user.id,
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('DELETE /api/rsvps error:', error);
+    return NextResponse.json({ error: 'Failed to remove RSVP' }, { status: 500 });
+  }
 }
