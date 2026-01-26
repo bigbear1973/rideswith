@@ -20,7 +20,18 @@ import {
   Check,
   X,
   ExternalLink,
+  ChevronDown,
+  ChevronRight,
+  MapPin,
 } from 'lucide-react';
+
+interface Chapter {
+  id: string;
+  name: string;
+  slug: string;
+  city: string | null;
+  sponsorsEnabled: boolean | null;
+}
 
 interface Community {
   id: string;
@@ -29,6 +40,7 @@ interface Community {
   type: 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP';
   logo: string | null;
   sponsorsEnabled: boolean;
+  chapters: Chapter[];
   _count?: {
     chapters: number;
   };
@@ -61,6 +73,7 @@ export default function AdminCommunitiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [expandedCommunities, setExpandedCommunities] = useState<Set<string>>(new Set());
 
   const isPlatformAdmin = session?.user?.role === 'PLATFORM_ADMIN';
 
@@ -92,7 +105,12 @@ export default function AdminCommunitiesPage() {
             c.name.toLowerCase().includes(query) ||
             c.slug.toLowerCase().includes(query) ||
             c.createdBy?.email?.toLowerCase().includes(query) ||
-            c.createdBy?.name?.toLowerCase().includes(query)
+            c.createdBy?.name?.toLowerCase().includes(query) ||
+            c.chapters.some(
+              (ch) =>
+                ch.name.toLowerCase().includes(query) ||
+                ch.city?.toLowerCase().includes(query)
+            )
         )
       );
     }
@@ -138,6 +156,68 @@ export default function AdminCommunitiesPage() {
       setError('Failed to update community');
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const toggleChapterSponsors = async (
+    communityId: string,
+    chapterId: string,
+    currentValue: boolean | null
+  ) => {
+    setUpdating(chapterId);
+    // Toggle: null/true -> false (disable), false -> null (inherit/enable)
+    const newValue = currentValue === false ? null : false;
+
+    try {
+      const res = await fetch(`/api/admin/chapters/${chapterId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sponsorsEnabled: newValue }),
+      });
+
+      if (res.ok) {
+        setCommunities(
+          communities.map((c) =>
+            c.id === communityId
+              ? {
+                  ...c,
+                  chapters: c.chapters.map((ch) =>
+                    ch.id === chapterId ? { ...ch, sponsorsEnabled: newValue } : ch
+                  ),
+                }
+              : c
+          )
+        );
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Failed to update chapter');
+      }
+    } catch {
+      setError('Failed to update chapter');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const toggleExpanded = (communityId: string) => {
+    const newExpanded = new Set(expandedCommunities);
+    if (newExpanded.has(communityId)) {
+      newExpanded.delete(communityId);
+    } else {
+      newExpanded.add(communityId);
+    }
+    setExpandedCommunities(newExpanded);
+  };
+
+  const getChapterStatusLabel = (chapter: Chapter, brandEnabled: boolean) => {
+    if (chapter.sponsorsEnabled === false) {
+      return { label: 'Disabled', color: 'text-red-600', effective: false };
+    }
+    // null or true = inherit from brand
+    if (brandEnabled) {
+      return { label: 'Inherit (On)', color: 'text-green-600', effective: true };
+    } else {
+      return { label: 'Inherit (Off)', color: 'text-muted-foreground', effective: false };
     }
   };
 
@@ -194,8 +274,8 @@ export default function AdminCommunitiesPage() {
           <CardHeader>
             <CardTitle>Communities</CardTitle>
             <CardDescription>
-              Toggle sponsors feature for each community. Communities with sponsors enabled
-              can add sponsors to their ride pages.
+              Toggle sponsors feature for each community and chapter. Click on a community
+              to expand and manage chapter-level settings.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -205,7 +285,7 @@ export default function AdminCommunitiesPage() {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, slug, or owner..."
+                placeholder="Search by name, slug, city, or owner..."
                 className="pl-9"
               />
             </div>
@@ -230,7 +310,7 @@ export default function AdminCommunitiesPage() {
               </div>
               <div className="p-3 rounded-lg bg-muted/50 text-center">
                 <p className="text-2xl font-bold">
-                  {communities.reduce((sum, c) => sum + (c._count?.chapters || 0), 0)}
+                  {communities.reduce((sum, c) => sum + (c.chapters?.length || 0), 0)}
                 </p>
                 <p className="text-xs text-muted-foreground">Total Chapters</p>
               </div>
@@ -245,86 +325,167 @@ export default function AdminCommunitiesPage() {
               ) : (
                 filteredCommunities.map((community) => {
                   const TypeIcon = COMMUNITY_TYPE_ICONS[community.type];
-                  return (
-                    <div
-                      key={community.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-                    >
-                      {/* Logo */}
-                      {community.logo ? (
-                        <img
-                          src={community.logo}
-                          alt={community.name}
-                          className="h-12 w-12 rounded-lg object-contain"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
-                          <TypeIcon className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
+                  const isExpanded = expandedCommunities.has(community.id);
+                  const hasChapters = community.chapters && community.chapters.length > 0;
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                  return (
+                    <div key={community.id} className="rounded-lg border bg-card overflow-hidden">
+                      {/* Community Row */}
+                      <div className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
+                        {/* Expand toggle */}
+                        {hasChapters ? (
+                          <button
+                            onClick={() => toggleExpanded(community.id)}
+                            className="p-1 hover:bg-muted rounded"
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </button>
+                        ) : (
+                          <div className="w-6" />
+                        )}
+
+                        {/* Logo */}
+                        {community.logo ? (
+                          <img
+                            src={community.logo}
+                            alt={community.name}
+                            className="h-12 w-12 rounded-lg object-contain"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
+                            <TypeIcon className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Link
+                              href={`/communities/${community.slug}`}
+                              className="font-medium hover:underline truncate"
+                            >
+                              {community.name}
+                            </Link>
+                            <Badge
+                              variant="secondary"
+                              className={COMMUNITY_TYPE_COLORS[community.type]}
+                            >
+                              {community.type}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span>/{community.slug}</span>
+                            {hasChapters && (
+                              <span>{community.chapters.length} chapters</span>
+                            )}
+                            {community.createdBy && (
+                              <span className="truncate">
+                                Owner: {community.createdBy.name || community.createdBy.email}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-3">
                           <Link
                             href={`/communities/${community.slug}`}
-                            className="font-medium hover:underline truncate"
+                            target="_blank"
+                            className="text-muted-foreground hover:text-foreground"
                           >
-                            {community.name}
+                            <ExternalLink className="h-4 w-4" />
                           </Link>
-                          <Badge
-                            variant="secondary"
-                            className={COMMUNITY_TYPE_COLORS[community.type]}
+
+                          {/* Sponsors Toggle */}
+                          <Button
+                            variant={community.sponsorsEnabled ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => toggleSponsorsEnabled(community.id, community.sponsorsEnabled)}
+                            disabled={updating === community.id}
+                            className={community.sponsorsEnabled ? 'bg-green-600 hover:bg-green-700' : ''}
                           >
-                            {community.type}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span>/{community.slug}</span>
-                          {community._count?.chapters ? (
-                            <span>{community._count.chapters} chapters</span>
-                          ) : null}
-                          {community.createdBy && (
-                            <span className="truncate">
-                              Owner: {community.createdBy.name || community.createdBy.email}
-                            </span>
-                          )}
+                            {updating === community.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : community.sponsorsEnabled ? (
+                              <>
+                                <Check className="h-4 w-4 mr-1" />
+                                Sponsors On
+                              </>
+                            ) : (
+                              <>
+                                <X className="h-4 w-4 mr-1" />
+                                Sponsors Off
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-3">
-                        <Link
-                          href={`/communities/${community.slug}`}
-                          target="_blank"
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
+                      {/* Chapters (expanded) */}
+                      {isExpanded && hasChapters && (
+                        <div className="border-t bg-muted/30">
+                          {community.chapters.map((chapter) => {
+                            const chapterStatus = getChapterStatusLabel(chapter, community.sponsorsEnabled);
+                            return (
+                              <div
+                                key={chapter.id}
+                                className="flex items-center gap-4 px-4 py-3 pl-16 border-b last:border-b-0 hover:bg-muted/50"
+                              >
+                                {/* Chapter icon */}
+                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                                </div>
 
-                        {/* Sponsors Toggle */}
-                        <Button
-                          variant={community.sponsorsEnabled ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => toggleSponsorsEnabled(community.id, community.sponsorsEnabled)}
-                          disabled={updating === community.id}
-                          className={community.sponsorsEnabled ? 'bg-green-600 hover:bg-green-700' : ''}
-                        >
-                          {updating === community.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : community.sponsorsEnabled ? (
-                            <>
-                              <Check className="h-4 w-4 mr-1" />
-                              Sponsors On
-                            </>
-                          ) : (
-                            <>
-                              <X className="h-4 w-4 mr-1" />
-                              Sponsors Off
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                                {/* Chapter info */}
+                                <div className="flex-1 min-w-0">
+                                  <Link
+                                    href={`/communities/${community.slug}/${chapter.slug}`}
+                                    className="font-medium text-sm hover:underline"
+                                  >
+                                    {chapter.name}
+                                  </Link>
+                                  {chapter.city && (
+                                    <p className="text-xs text-muted-foreground">{chapter.city}</p>
+                                  )}
+                                </div>
+
+                                {/* Chapter sponsor status */}
+                                <div className="flex items-center gap-3">
+                                  <span className={`text-xs ${chapterStatus.color}`}>
+                                    {chapterStatus.label}
+                                  </span>
+
+                                  <Button
+                                    variant={chapter.sponsorsEnabled === false ? 'outline' : 'default'}
+                                    size="sm"
+                                    onClick={() =>
+                                      toggleChapterSponsors(
+                                        community.id,
+                                        chapter.id,
+                                        chapter.sponsorsEnabled
+                                      )
+                                    }
+                                    disabled={updating === chapter.id}
+                                    className={chapter.sponsorsEnabled !== false ? 'bg-green-600 hover:bg-green-700' : ''}
+                                  >
+                                    {updating === chapter.id ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : chapter.sponsorsEnabled === false ? (
+                                      'Enable'
+                                    ) : (
+                                      'Disable'
+                                    )}
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 })

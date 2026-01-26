@@ -31,6 +31,16 @@ export async function GET() {
             email: true,
           },
         },
+        chapters: {
+          orderBy: { name: "asc" },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            city: true,
+            sponsorsEnabled: true,
+          },
+        },
         _count: {
           select: {
             chapters: true,
