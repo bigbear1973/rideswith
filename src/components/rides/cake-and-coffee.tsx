@@ -357,36 +357,47 @@ export function CakeAndCoffee({ rideId, rideDate, isOrganizer }: CakeAndCoffeePr
         {/* Photo/Video Lightbox */}
         {selectedPhoto && (
           <div
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/95 flex flex-col"
             onClick={() => setSelectedPhoto(null)}
           >
-            <button
-              className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full z-10"
-              onClick={() => setSelectedPhoto(null)}
-            >
-              <X className="h-6 w-6" />
-            </button>
-            {selectedPhoto.isVideo ? (
-              <video
-                src={selectedPhoto.url}
-                controls
-                autoPlay
-                className="max-w-full max-h-[90vh] rounded-lg"
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <img
-                src={selectedPhoto.url}
-                alt={selectedPhoto.caption || 'Ride photo'}
-                className="max-w-full max-h-[90vh] object-contain rounded-lg"
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-            <div className="absolute bottom-4 left-4 right-4 text-center text-white">
-              <p className="text-sm">
-                {selectedPhoto.isVideo ? 'Video' : 'Photo'} by {selectedPhoto.user.name} &middot;{' '}
-                {formatDistanceToNow(new Date(selectedPhoto.createdAt), { addSuffix: true })}
+            {/* Header with prominent close button */}
+            <div className="flex-shrink-0 flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white text-sm truncate flex-1 mr-4">
+                {selectedPhoto.isVideo ? 'Video' : 'Photo'} by {selectedPhoto.user.name}
               </p>
+              <button
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full font-medium transition-colors"
+                onClick={() => setSelectedPhoto(null)}
+              >
+                <X className="h-5 w-5" />
+                <span className="text-sm">Close</span>
+              </button>
+            </div>
+
+            {/* Media content */}
+            <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+              {selectedPhoto.isVideo ? (
+                <video
+                  src={selectedPhoto.url}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="max-w-full max-h-full rounded-lg"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <img
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.caption || 'Ride photo'}
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+            </div>
+
+            {/* Footer with timestamp */}
+            <div className="flex-shrink-0 p-4 text-center text-white/70 text-xs">
+              {formatDistanceToNow(new Date(selectedPhoto.createdAt), { addSuffix: true })}
             </div>
           </div>
         )}
