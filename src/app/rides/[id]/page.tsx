@@ -61,6 +61,18 @@ export default async function RidePage({ params }: RidePageProps) {
             },
             select: {
               userId: true,
+              role: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                  slug: true,
+                },
+              },
+            },
+            orderBy: {
+              role: 'asc', // OWNER comes before ADMIN alphabetically
             },
           },
         },
@@ -385,10 +397,17 @@ export default async function RidePage({ params }: RidePageProps) {
                 <Separator />
                 <div className="space-y-1">
                   <span className="text-sm text-muted-foreground">Hosted by</span>
-                  <Link href={`/organizers/${ride.organizer.id}`} className="text-sm font-medium hover:underline flex items-center gap-1">
-                    {ride.organizer.name}
-                    <ArrowUpRight className="h-3 w-3" />
-                  </Link>
+                  {ride.organizer.members[0]?.user ? (
+                    <Link
+                      href={ride.organizer.members[0].user.slug ? `/u/${ride.organizer.members[0].user.slug}` : '#'}
+                      className="text-sm font-medium hover:underline flex items-center gap-1"
+                    >
+                      {ride.organizer.members[0].user.name || ride.organizer.name}
+                      <ArrowUpRight className="h-3 w-3" />
+                    </Link>
+                  ) : (
+                    <span className="text-sm font-medium">{ride.organizer.name}</span>
+                  )}
                 </div>
 
                 {/* RSVP & Attendees */}
