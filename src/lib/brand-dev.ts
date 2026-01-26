@@ -192,3 +192,14 @@ export function generateBrandSlug(name: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 30);
 }
+
+/**
+ * Clean a domain by removing protocol, www prefix, and trailing slashes
+ */
+export function cleanDomain(domain: string): string {
+  return domain
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/$/, "")
+    .toLowerCase();
+}

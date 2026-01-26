@@ -5,6 +5,7 @@ import {
   fetchBrandAssets,
   isValidDomain,
   generateBrandSlug,
+  cleanDomain,
 } from "@/lib/brand-dev";
 
 // GET /api/brands - List all brands
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         slug,
         type: communityType,
-        domain: domain || null,
+        domain: domain ? cleanDomain(domain) : null,
         description: brandAssets?.description || null,
         logo: brandAssets?.logo || null,
         logoDark: brandAssets?.logoDark || null,

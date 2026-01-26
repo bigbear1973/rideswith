@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { fetchBrandAssets, isValidDomain } from "@/lib/brand-dev";
+import { fetchBrandAssets, isValidDomain, cleanDomain } from "@/lib/brand-dev";
 
 interface RouteParams {
   params: Promise<{ slug: string }>;
@@ -130,7 +130,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 400 }
         );
       }
-      updateData.domain = body.domain;
+      updateData.domain = cleanDomain(body.domain);
     }
 
     // Type field
