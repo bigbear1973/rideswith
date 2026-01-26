@@ -106,11 +106,11 @@ Brand (e.g., Straede)
 ```
 
 ### URL Structure
-- `/brands` - Browse all brands
-- `/brands/[slug]` - Brand profile (e.g., /brands/straede)
-- `/brands/[slug]/[chapter]` - Chapter page (e.g., /brands/straede/leipzig)
-- `/brands/create` - Register a new brand
-- `/brands/[slug]/create-chapter` - Start a chapter
+- `/communities` - Browse all communities (brands, clubs, groups)
+- `/communities/[slug]` - Community profile (e.g., /communities/straede)
+- `/communities/[slug]/[chapter]` - Chapter page (e.g., /communities/straede/leipzig)
+- `/communities/create` - Register a new community
+- `/communities/[slug]/create-chapter` - Start a chapter
 
 ### Database Models
 - **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev), social links (instagram, twitter, facebook, strava, youtube)
@@ -118,17 +118,23 @@ Brand (e.g., Straede)
 - **ChapterMember** - user, chapter, role (OWNER, ADMIN, MODERATOR; legacy: LEAD, AMBASSADOR)
 - **Ride** - optional `chapterId` for brand-affiliated rides
 
-### Brand Social Links (IMPLEMENTED)
-Brands can display links to their social media profiles:
+### Community Social Links (IMPLEMENTED)
+Communities can display links to their social media profiles:
 - Instagram, Twitter/X, Facebook, Strava Club, YouTube
 - Stored in Brand model as optional string fields
-- Edit via brand edit page (`/brands/[slug]/edit`)
-- Displayed as icon row in brand hero section
+- Edit via community edit page (`/communities/[slug]/edit`)
+- Displayed as icon row in community hero section
 - Smart URL handling: accepts handles (`@username`) or full URLs
 
+### Community Types (IMPLEMENTED)
+Communities can be one of three types, displayed as badges:
+- **BRAND** - Commercial cycling brand (Rapha, Straede) - purple badge
+- **CLUB** - Cycling club or team - blue badge
+- **GROUP** - Informal riding group - green badge
+
 ### API Endpoints
-- `GET/POST /api/brands` - List and create brands
-- `GET/PUT /api/brands/[slug]` - Brand details, refresh from Brand.dev
+- `GET/POST /api/communities` - List and create communities
+- `GET/PUT /api/communities/[slug]` - Community details, refresh from Brand.dev
 - `GET/POST /api/chapters` - List and create chapters
 - `GET/PUT/POST /api/chapters/[id]` - Chapter details, update, add members
 
@@ -149,7 +155,7 @@ Chapter members (Owners, Admins, Moderators) display a blue verified checkmark:
 `src/lib/brand-dev.ts` provides:
 - `fetchBrandAssets(domain)` - Fetches logo, colors, fonts, backdrop, slogan from domain
 - Auto-populates brand profile when domain is entered
-- Can refresh brand assets via PUT `/api/brands/[slug]` with `refreshBranding: true`
+- Can refresh brand assets via PUT `/api/communities/[slug]` with `refreshBranding: true`
 
 ### Chapter-Linked Rides (IMPLEMENTED)
 When creating a ride from a chapter page:
@@ -246,11 +252,11 @@ Natural language / voice input to auto-fill ride details:
 | `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (fetches from DB) |
 | `/rides/[id]/edit` | `src/app/rides/[id]/edit/page.tsx` | Edit/delete rides |
 | `/organizers/[id]` | `src/app/organizers/[id]/page.tsx` | Placeholder only |
-| `/brands` | `src/app/brands/page.tsx` | Brand communities listing |
-| `/brands/create` | `src/app/brands/create/page.tsx` | Register new brand |
-| `/brands/[slug]` | `src/app/brands/[slug]/page.tsx` | Brand profile with chapters |
-| `/brands/[slug]/[chapter]` | `src/app/brands/[slug]/[chapter]/page.tsx` | Chapter page with rides |
-| `/brands/[slug]/create-chapter` | `src/app/brands/[slug]/create-chapter/page.tsx` | Start a chapter |
+| `/communities` | `src/app/communities/page.tsx` | Communities listing (brands, clubs, groups) |
+| `/communities/create` | `src/app/communities/create/page.tsx` | Register new community |
+| `/communities/[slug]` | `src/app/communities/[slug]/page.tsx` | Community profile with chapters |
+| `/communities/[slug]/[chapter]` | `src/app/communities/[slug]/[chapter]/page.tsx` | Chapter page with rides |
+| `/communities/[slug]/create-chapter` | `src/app/communities/[slug]/create-chapter/page.tsx` | Start a chapter |
 
 ### Broken Links (404s)
 | Link | Referenced In | Priority |
@@ -413,7 +419,7 @@ Natural language / voice input to auto-fill ride details:
 - Brand & Chapter system with hierarchical organization
 - Brand.dev integration for auto-fetching brand assets (logo, logoDark, backdrop, slogan)
 - Verified badge component for brand ambassadors
-- Brand pages (/brands, /brands/[slug], /brands/[slug]/[chapter])
+- Community pages (/communities, /communities/[slug], /communities/[slug]/[chapter])
 - Brand/chapter creation flows
 - Chapter-linked ride creation (/create?chapterId=xxx)
 - Ride detail pages show brand backdrop/slogan for chapter rides
@@ -428,6 +434,7 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] URL rename: /brands → /communities with type badges (Brand/Club/Group)
 - [x] Profile image upload - users can upload their own profile photo
 - [x] Social icons - removed external link arrows, made icons 25% bigger
 - [x] "Hosted by" link now goes to user profile instead of organizer

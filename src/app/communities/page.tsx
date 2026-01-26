@@ -5,8 +5,14 @@ export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Users, Plus } from "lucide-react";
+import { Building2, MapPin, Users, Plus, UsersRound } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+
+const COMMUNITY_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2; color: string }> = {
+  BRAND: { label: "Brand", icon: Building2, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
+  CLUB: { label: "Club", icon: Users, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  GROUP: { label: "Group", icon: UsersRound, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+};
 
 async function getBrands() {
   const brands = await prisma.brand.findMany({
@@ -101,7 +107,7 @@ export default async function BrandsPage() {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold">All Communities</h2>
           <Button asChild>
-            <Link href="/brands/create">
+            <Link href="/communities/create">
               <Plus className="h-4 w-4 mr-2" />
               Create Community
             </Link>
@@ -117,14 +123,14 @@ export default async function BrandsPage() {
                 Be the first to create a brand, club, or group and start a chapter.
               </p>
               <Button asChild>
-                <Link href="/brands/create">Create Your Community</Link>
+                <Link href="/communities/create">Create Your Community</Link>
               </Button>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {brands.map((brand) => (
-              <Link key={brand.id} href={`/brands/${brand.slug}`}>
+              <Link key={brand.id} href={`/communities/${brand.slug}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-4">
@@ -135,7 +141,17 @@ export default async function BrandsPage() {
                         primaryColor={brand.primaryColor}
                       />
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{brand.name}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{brand.name}</CardTitle>
+                          {brand.type && COMMUNITY_TYPE_LABELS[brand.type] && (
+                            <Badge
+                              variant="secondary"
+                              className={`text-xs ${COMMUNITY_TYPE_LABELS[brand.type].color}`}
+                            >
+                              {COMMUNITY_TYPE_LABELS[brand.type].label}
+                            </Badge>
+                          )}
+                        </div>
                         {brand.domain && (
                           <p className="text-sm text-muted-foreground">
                             {brand.domain}

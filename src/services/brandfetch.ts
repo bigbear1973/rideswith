@@ -33,7 +33,7 @@ export async function fetchBrandInfo(domain: string): Promise<BrandInfo | null> 
   }
 
   try {
-    const response = await fetch(`https://api.brandfetch.io/v2/brands/${domain}`, {
+    const response = await fetch(`https://api.brandfetch.io/v2/communities/${domain}`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },

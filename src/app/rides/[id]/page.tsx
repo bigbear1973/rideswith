@@ -277,7 +277,7 @@ export default async function RidePage({ params }: RidePageProps) {
           <div className={hasBranding && brand && chapter && brand.domain ? "lg:col-span-2 space-y-6" : "space-y-6 max-w-3xl"}>
             {/* Back link - Desktop */}
             <Link
-              href={hasBranding && brand && chapter ? `/brands/${brand.slug}/${chapter.slug}` : '/discover'}
+              href={hasBranding && brand && chapter ? `/communities/${brand.slug}/${chapter.slug}` : '/discover'}
               className="hidden lg:inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />

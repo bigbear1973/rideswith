@@ -8,7 +8,7 @@ import {
   cleanDomain,
 } from "@/lib/brand-dev";
 
-// GET /api/brands - List all brands
+// GET /api/communities - List all communities
 export async function GET() {
   try {
     const brands = await prisma.brand.findMany({
@@ -44,7 +44,7 @@ export async function GET() {
   }
 }
 
-// POST /api/brands - Create a new brand
+// POST /api/communities - Create a new community
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();

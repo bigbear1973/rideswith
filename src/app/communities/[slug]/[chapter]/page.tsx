@@ -96,7 +96,7 @@ export default function ChapterPage({ params }: PageProps) {
         const { slug, chapter: chapterSlug } = await params;
 
         // First get the brand to find the chapter
-        const brandRes = await fetch(`/api/brands/${slug}`);
+        const brandRes = await fetch(`/api/communities/${slug}`);
         if (!brandRes.ok) {
           if (brandRes.status === 404) {
             setError("Brand not found");
@@ -175,7 +175,7 @@ export default function ChapterPage({ params }: PageProps) {
             {error || "Chapter not found"}
           </h1>
           <Button asChild variant="outline">
-            <Link href="/brands">Back to Communities</Link>
+            <Link href="/communities">Back to Communities</Link>
           </Button>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function ChapterPage({ params }: PageProps) {
       >
         <div className="container mx-auto px-4">
           <Link
-            href={`/brands/${chapter.brand.slug}`}
+            href={`/communities/${chapter.brand.slug}`}
             className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4"
           >
             <ArrowLeft className="h-4 w-4" />

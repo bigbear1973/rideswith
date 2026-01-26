@@ -282,7 +282,7 @@ export default function CreateRidePage() {
 
   // Determine back link based on context
   const backLink = chapterInfo
-    ? `/brands/${chapterInfo.brand.slug}/${chapterInfo.slug}`
+    ? `/communities/${chapterInfo.brand.slug}/${chapterInfo.slug}`
     : '/discover';
 
   return (

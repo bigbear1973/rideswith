@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/brands/backdrops - Get all brand backdrop images for hero rotation
+// GET /api/communities/backdrops - Get all brand backdrop images for hero rotation
 export async function GET() {
   try {
     const brands = await prisma.brand.findMany({

@@ -7,7 +7,7 @@ interface RouteParams {
   params: Promise<{ slug: string }>;
 }
 
-// GET /api/brands/[slug] - Get a single brand
+// GET /api/communities/[slug] - Get a single brand
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { slug } = await params;
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(brand);
   } catch (error) {
-    console.error("GET /api/brands/[slug] error:", error);
+    console.error("GET /api/communities/[slug] error:", error);
     return NextResponse.json(
       { error: "Failed to fetch brand" },
       { status: 500 }
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PUT /api/brands/[slug] - Update brand (owner only)
+// PUT /api/communities/[slug] - Update brand (owner only)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
@@ -158,7 +158,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(updatedBrand);
   } catch (error) {
-    console.error("PUT /api/brands/[slug] error:", error);
+    console.error("PUT /api/communities/[slug] error:", error);
     return NextResponse.json(
       { error: "Failed to update brand" },
       { status: 500 }
@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/brands/[slug] - Delete brand (owner only)
+// DELETE /api/communities/[slug] - Delete brand (owner only)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
@@ -198,7 +198,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE /api/brands/[slug] error:", error);
+    console.error("DELETE /api/communities/[slug] error:", error);
     return NextResponse.json(
       { error: "Failed to delete brand" },
       { status: 500 }

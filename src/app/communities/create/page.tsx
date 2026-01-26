@@ -75,7 +75,7 @@ export default function CreateBrandPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/brands", {
+      const res = await fetch("/api/communities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -92,7 +92,7 @@ export default function CreateBrandPage() {
       }
 
       const brand = await res.json();
-      router.push(`/brands/${brand.slug}`);
+      router.push(`/communities/${brand.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create brand");
     } finally {
@@ -106,7 +106,7 @@ export default function CreateBrandPage() {
       <div className="bg-[#00D26A] text-white py-12">
         <div className="container mx-auto px-4">
           <Link
-            href="/brands"
+            href="/communities"
             className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4"
           >
             <ArrowLeft className="h-4 w-4" />

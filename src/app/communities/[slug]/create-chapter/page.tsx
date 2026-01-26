@@ -36,7 +36,7 @@ export default function CreateChapterPage({ params }: PageProps) {
   useEffect(() => {
     async function loadBrand() {
       try {
-        const res = await fetch(`/api/brands/${slug}`);
+        const res = await fetch(`/api/communities/${slug}`);
         if (!res.ok) {
           throw new Error("Brand not found");
         }
@@ -83,7 +83,7 @@ export default function CreateChapterPage({ params }: PageProps) {
       }
 
       const chapter = await res.json();
-      router.push(`/brands/${brand.slug}/${chapter.slug}`);
+      router.push(`/communities/${brand.slug}/${chapter.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create chapter");
     } finally {
@@ -105,7 +105,7 @@ export default function CreateChapterPage({ params }: PageProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Community not found</h1>
           <Button asChild variant="outline">
-            <Link href="/brands">Back to Communities</Link>
+            <Link href="/communities">Back to Communities</Link>
           </Button>
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function CreateChapterPage({ params }: PageProps) {
       >
         <div className="container mx-auto px-4">
           <Link
-            href={`/brands/${brand.slug}`}
+            href={`/communities/${brand.slug}`}
             className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4"
           >
             <ArrowLeft className="h-4 w-4" />

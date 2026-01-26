@@ -86,14 +86,14 @@ export default function EditBrandPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push(`/auth/signin?callbackUrl=/brands/${slug}/edit`);
+      router.push(`/auth/signin?callbackUrl=/communities/${slug}/edit`);
     }
   }, [status, router, slug]);
 
   useEffect(() => {
     async function fetchBrand() {
       try {
-        const response = await fetch(`/api/brands/${slug}`);
+        const response = await fetch(`/api/communities/${slug}`);
         if (response.ok) {
           const data = await response.json();
           setBrand(data);
@@ -138,7 +138,7 @@ export default function EditBrandPage() {
     setSuccess(false);
 
     try {
-      const response = await fetch(`/api/brands/${slug}`, {
+      const response = await fetch(`/api/communities/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -151,7 +151,7 @@ export default function EditBrandPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push(`/brands/${slug}`);
+        router.push(`/communities/${slug}`);
       }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update brand');
@@ -167,7 +167,7 @@ export default function EditBrandPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/brands/${slug}`, {
+      const response = await fetch(`/api/communities/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshBranding: true }),
@@ -222,7 +222,7 @@ export default function EditBrandPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/brands/${slug}`, {
+      const response = await fetch(`/api/communities/${slug}`, {
         method: 'DELETE',
       });
 
@@ -268,7 +268,7 @@ export default function EditBrandPage() {
     <div className="min-h-screen pb-8">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <Link
-          href={`/brands/${slug}`}
+          href={`/communities/${slug}`}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
@@ -305,7 +305,7 @@ export default function EditBrandPage() {
                 <div className="flex-1">
                   <p className="font-medium">{brand.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    rideswith.com/brands/{brand.slug}
+                    rideswith.com/communities/{brand.slug}
                   </p>
                   {(formData.primaryColor || brand.primaryColor) && (
                     <div className="flex items-center gap-2 mt-2">
@@ -690,7 +690,7 @@ export default function EditBrandPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => router.push(`/brands/${slug}`)}
+                    onClick={() => router.push(`/communities/${slug}`)}
                   >
                     Cancel
                   </Button>

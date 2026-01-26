@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   MapPin,
   Users,
+  UsersRound,
   Bike,
   Plus,
   Globe,
@@ -21,7 +22,14 @@ import {
   Twitter,
   Facebook,
   Youtube,
+  Building2,
 } from "lucide-react";
+
+const COMMUNITY_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2; color: string }> = {
+  BRAND: { label: "Brand", icon: Building2, color: "bg-white/20 text-white" },
+  CLUB: { label: "Club", icon: Users, color: "bg-white/20 text-white" },
+  GROUP: { label: "Group", icon: UsersRound, color: "bg-white/20 text-white" },
+};
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -110,9 +118,19 @@ export default async function BrandPage({ params }: PageProps) {
               </div>
             )}
             <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                {brand.name}
-              </h1>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-4xl md:text-5xl font-bold">
+                  {brand.name}
+                </h1>
+                {brand.type && COMMUNITY_TYPE_LABELS[brand.type] && (
+                  <Badge
+                    variant="secondary"
+                    className={`text-sm ${COMMUNITY_TYPE_LABELS[brand.type].color}`}
+                  >
+                    {COMMUNITY_TYPE_LABELS[brand.type].label}
+                  </Badge>
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-4">
                 {brand.domain && (
                   <a
@@ -197,7 +215,7 @@ export default async function BrandPage({ params }: PageProps) {
                 size="sm"
                 className="ml-auto"
               >
-                <Link href={`/brands/${brand.slug}/edit`}>
+                <Link href={`/communities/${brand.slug}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Link>
@@ -255,7 +273,7 @@ export default async function BrandPage({ params }: PageProps) {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold">Chapters</h2>
           <Button asChild>
-            <Link href={`/brands/${brand.slug}/create-chapter`}>
+            <Link href={`/communities/${brand.slug}/create-chapter`}>
               <Plus className="h-4 w-4 mr-2" />
               Start a Chapter
             </Link>
@@ -271,7 +289,7 @@ export default async function BrandPage({ params }: PageProps) {
                 Be the first to start a {brand.name} chapter in your city.
               </p>
               <Button asChild>
-                <Link href={`/brands/${brand.slug}/create-chapter`}>
+                <Link href={`/communities/${brand.slug}/create-chapter`}>
                   Start a Chapter
                 </Link>
               </Button>
@@ -282,7 +300,7 @@ export default async function BrandPage({ params }: PageProps) {
             {brand.chapters.map((chapter) => (
               <Link
                 key={chapter.id}
-                href={`/brands/${brand.slug}/${chapter.slug}`}
+                href={`/communities/${brand.slug}/${chapter.slug}`}
               >
                 <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader className="pb-3">

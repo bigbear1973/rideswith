@@ -312,7 +312,7 @@ export default async function ProfilePage() {
               My Communities ({user.brands.length})
             </CardTitle>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/brands/create">
+              <Link href="/communities/create">
                 <Plus className="h-4 w-4 mr-2" />
                 Create
               </Link>
@@ -328,7 +328,7 @@ export default async function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 {user.brands.map((brand) => (
-                  <Link key={brand.id} href={`/brands/${brand.slug}`}>
+                  <Link key={brand.id} href={`/communities/${brand.slug}`}>
                     <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                       <Avatar className="h-10 w-10">
                         {brand.logo && (
@@ -345,7 +345,7 @@ export default async function ProfilePage() {
                         </p>
                       </div>
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/brands/${brand.slug}/edit`}>
+                        <Link href={`/communities/${brand.slug}/edit`}>
                           <Edit className="h-4 w-4" />
                         </Link>
                       </Button>

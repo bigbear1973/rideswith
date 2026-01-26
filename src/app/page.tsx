@@ -71,7 +71,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchBrandBackdrops() {
       try {
-        const res = await fetch('/api/brands/backdrops');
+        const res = await fetch('/api/communities/backdrops');
         if (res.ok) {
           const data = await res.json();
           setBrandBackdrops(data);
