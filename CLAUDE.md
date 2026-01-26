@@ -116,7 +116,7 @@ Brand (e.g., Straede)
 - **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev), social links (instagram, twitter, facebook, strava, youtube)
 - **Chapter** - brand reference, city, slug, member counts
 - **ChapterMember** - user, chapter, role (OWNER, ADMIN, MODERATOR; legacy: LEAD, AMBASSADOR)
-- **Ride** - optional `chapterId` for brand-affiliated rides
+- **Ride** - optional `chapterId` for brand-affiliated rides, `paceMin`/`paceMax` for custom speed range
 
 ### Community Social Links (IMPLEMENTED)
 Communities can display links to their social media profiles:
@@ -163,6 +163,17 @@ When creating a ride from a chapter page:
 - Ride detail page shows brand backdrop image and slogan in header
 - Promotional banner at bottom links back to the brand/chapter
 - Chapter ride counts are automatically incremented
+
+### Custom Speed Range (IMPLEMENTED)
+Replaced fixed pace categories (Casual/Moderate/Fast/Race) with custom speed inputs:
+- **Fields**: `paceMin` and `paceMax` (Float, nullable) in km/h
+- **Create/Edit forms**: Two number inputs for min and max speed
+- **Display formats**:
+  - Both set: "25-30 km/h"
+  - Min only: "25+ km/h"
+  - Max only: "Up to 30 km/h"
+- **Copy/paste**: Included in ride detail share text
+- **Legacy**: `pace` field (RidePace enum) kept for backward compatibility but no longer used in UI
 
 ### Ride Detail Page Layout
 - Ride Info card displayed in main content (under date/time and location)
@@ -402,6 +413,7 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (organizers)
 
 **Recently Completed:**
+- Custom speed range - organizers specify min/max speed (km/h) instead of pace categories
 - Profile image upload - users can upload their own profile photo via Cloudinary
 - Social icons improved - removed external link arrows, increased icon size 25%
 - "Hosted by" on ride detail now links to user profile instead of organizer
@@ -434,6 +446,7 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Custom speed range - replaced pace categories (Casual/Moderate/Fast/Race) with min/max speed inputs (km/h)
 - [x] URL rename: /brands → /communities with type badges (Brand/Club/Group)
 - [x] Profile image upload - users can upload their own profile photo
 - [x] Social icons - removed external link arrows, made icons 25% bigger

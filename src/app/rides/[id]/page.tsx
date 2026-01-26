@@ -296,29 +296,31 @@ export default async function RidePage({ params }: RidePageProps) {
               )}
             </div>
 
-            {/* Date & Time Card */}
+            {/* Date/Time & Location - Compact Row */}
             <Card>
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Calendar className="h-5 w-5 text-primary" />
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Date & Time */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <Calendar className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium">{formattedDate}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formattedStartTime}
+                        {formattedEndTime && ` - ${formattedEndTime}`}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{formattedDate}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formattedStartTime}
-                      {formattedEndTime && ` - ${formattedEndTime}`}
-                      {ride.timezone && ` ${ride.timezone}`}
-                    </p>
-                  </div>
+                  {/* Location */}
+                  <LocationLink
+                    locationName={ride.locationName}
+                    locationAddress={ride.locationAddress}
+                    latitude={ride.latitude}
+                    longitude={ride.longitude}
+                  />
                 </div>
-                <Separator />
-                <LocationLink
-                  locationName={ride.locationName}
-                  locationAddress={ride.locationAddress}
-                  latitude={ride.latitude}
-                  longitude={ride.longitude}
-                />
               </CardContent>
             </Card>
 
@@ -328,81 +330,69 @@ export default async function RidePage({ params }: RidePageProps) {
             {/* Community Route Links */}
             <CommunityRoutes rideId={id} />
 
-            {/* Ride Info */}
+            {/* Ride Details - Compact */}
             <Card>
-              <CardContent className="p-4 space-y-3">
-                <h3 className="font-semibold">Ride Info</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+              <CardContent className="p-4 space-y-4">
+                {/* Quick Stats Row */}
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
                   {ride.distance && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <Route className="h-4 w-4 text-muted-foreground" />
                       <span>{ride.distance} km</span>
                     </div>
                   )}
                   {ride.elevation && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span className="text-muted-foreground">↗</span>
                       <span>{ride.elevation} m</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{formattedStartTime}</span>
-                  </div>
+                  {speedRange && (
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span>{speedRange}</span>
+                    </div>
+                  )}
+                  {ride.terrain && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground">•</span>
+                      <span>{ride.terrain}</span>
+                    </div>
+                  )}
                   {ride.maxAttendees && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span>Max {ride.maxAttendees}</span>
                     </div>
                   )}
                 </div>
-                {speedRange && (
-                  <>
-                    <Separator />
-                    <div className="space-y-1">
-                      <span className="text-sm text-muted-foreground">Speed</span>
-                      <p className="text-sm font-medium">{speedRange}</p>
-                    </div>
-                  </>
-                )}
-                {ride.terrain && (
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Terrain</span>
-                    <p className="text-sm">{ride.terrain}</p>
-                  </div>
-                )}
 
                 {/* Description */}
                 {ride.description && (
                   <>
                     <Separator />
-                    <div className="space-y-1">
-                      <span className="text-sm text-muted-foreground">Details</span>
-                      <div className="text-sm">
-                        {ride.description.split('\n').map((paragraph, i) => (
-                          <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">
-                            {paragraph}
-                          </p>
-                        ))}
-                      </div>
+                    <div className="text-sm">
+                      {ride.description.split('\n').map((paragraph, i) => (
+                        <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">
+                          {paragraph}
+                        </p>
+                      ))}
                     </div>
                   </>
                 )}
 
-                {/* Hosted by */}
-                <Separator />
-                <div className="space-y-1">
-                  <span className="text-sm text-muted-foreground">Hosted by</span>
+                {/* Hosted by - inline */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Hosted by</span>
                   {ride.organizer.members[0]?.user ? (
                     <Link
                       href={ride.organizer.members[0].user.slug ? `/u/${ride.organizer.members[0].user.slug}` : '#'}
-                      className="text-sm font-medium hover:underline flex items-center gap-1"
+                      className="font-medium text-foreground hover:underline"
                     >
                       {ride.organizer.members[0].user.name || ride.organizer.name}
-                      <ArrowUpRight className="h-3 w-3" />
                     </Link>
                   ) : (
-                    <span className="text-sm font-medium">{ride.organizer.name}</span>
+                    <span className="font-medium text-foreground">{ride.organizer.name}</span>
                   )}
                 </div>
 
@@ -419,8 +409,9 @@ export default async function RidePage({ params }: RidePageProps) {
                 />
 
                 {/* Copy ride info */}
-                <Separator />
-                <CopyRideInfo rideInfo={rideInfoText} />
+                <div className="pt-2">
+                  <CopyRideInfo rideInfo={rideInfoText} />
+                </div>
               </CardContent>
             </Card>
 
