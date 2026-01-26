@@ -18,6 +18,7 @@ Cycling group ride discovery and management platform.
 - `src/lib/auth.ts` - Auth.js config with custom Resend email provider
 - `src/lib/prisma.ts` - Prisma client singleton
 - `src/lib/brand-dev.ts` - Brand.dev API integration for auto-fetching brand assets
+- `src/lib/roles.ts` - Chapter role helpers (normalizeRole, isOwner, isAdmin, isModerator)
 - `src/components/providers/units-provider.tsx` - km/mi unit preference context
 - `src/components/rides/location-link.tsx` - Map app picker (Apple Maps, Google Maps, Waze)
 - `src/components/rides/cake-and-coffee.tsx` - Post-ride comments and media gallery
@@ -114,7 +115,7 @@ Brand (e.g., Straede)
 ### Database Models
 - **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev), social links (instagram, twitter, facebook, strava, youtube)
 - **Chapter** - brand reference, city, slug, member counts
-- **ChapterMember** - user, chapter, role (LEAD or AMBASSADOR)
+- **ChapterMember** - user, chapter, role (OWNER, ADMIN, MODERATOR; legacy: LEAD, AMBASSADOR)
 - **Ride** - optional `chapterId` for brand-affiliated rides
 
 ### Brand Social Links (IMPLEMENTED)
@@ -131,8 +132,15 @@ Brands can display links to their social media profiles:
 - `GET/POST /api/chapters` - List and create chapters
 - `GET/PUT/POST /api/chapters/[id]` - Chapter details, update, add members
 
+### Community Admin Roles (IMPLEMENTED)
+Chapter members can have different roles with varying permissions:
+- **OWNER** - Full control, can transfer ownership, delete community
+- **ADMIN** - Can manage members, edit settings, create rides
+- **MODERATOR** - Can create rides, moderate content
+- Legacy roles (LEAD, AMBASSADOR) are mapped to new roles via `src/lib/roles.ts`
+
 ### Verified Badges
-Chapter members (Leads and Ambassadors) display a blue verified checkmark:
+Chapter members (Owners, Admins, Moderators) display a blue verified checkmark:
 - On their profile pages
 - On ride cards they organize
 - In attendee lists
@@ -154,6 +162,7 @@ When creating a ride from a chapter page:
 - Ride Info card displayed in main content (under date/time and location)
 - Sidebar only appears for branded rides (with brand card)
 - Non-branded rides use single-column layout for cleaner appearance
+- "Hosted by" links to the creator's user profile (/u/slug), not the organizer entity
 
 ### Past Rides on Chapter Pages (IMPLEMENTED)
 - Chapter pages show collapsible "Past Rides" section
@@ -180,8 +189,9 @@ Post-ride social features that unlock after a ride's date has passed.
 
 ### Cloudinary Integration
 - **Upload**: Client-side unsigned upload to Cloudinary
-- **Upload preset**: `ride_photos` (must be configured as unsigned in Cloudinary dashboard)
-- **Folder**: `ride-photos`
+- **Upload presets** (must be configured as unsigned in Cloudinary dashboard):
+  - `ride_photos` - For ride photos/videos (folder: `ride-photos`)
+  - `profile_photos` - For user profile images (folder: `profile-photos`)
 - **Thumbnails**: Auto-generated at 400x300 for gallery grid
 - **Video thumbnails**: Cloudinary generates frame from video
 
@@ -327,14 +337,14 @@ Natural language / voice input to auto-fill ride details:
 - [x] GET /api/rides/latest - Latest 3 rides for homepage
 - [x] GET/PUT /api/profile - User profile management
 - [x] GET /api/profile/check-slug - Slug availability check
-- [ ] GET/POST /api/rsvps - Manage attendance
+- [x] POST /api/rides/[id]/rsvp - RSVP to rides (going/maybe/not going)
 - [ ] GET/POST /api/organizers - Organizer profiles
 
 ### Phase 5: Ride Management
 - [x] Create ride form (full implementation)
 - [x] Edit/delete rides
-- [ ] RSVP functionality (going/maybe/not going)
-- [ ] Attendee list on ride detail
+- [x] RSVP functionality (going/maybe/not going)
+- [x] Attendee list on ride detail page
 - [ ] Organizer dashboard
 
 ### Phase 6: Organizer Features
@@ -383,14 +393,19 @@ Natural language / voice input to auto-fill ride details:
 
 **Placeholder/Disabled:**
 - Organizer detail page (shows ID only)
-- RSVP buttons
-- Some API endpoints (rsvps, organizers)
+- Some API endpoints (organizers)
 
 **Recently Completed:**
+- Profile image upload - users can upload their own profile photo via Cloudinary
+- Social icons improved - removed external link arrows, increased icon size 25%
+- "Hosted by" on ride detail now links to user profile instead of organizer
+- RSVP system with going/maybe/not going functionality
+- Attendee list on ride detail page with profile links
+- User social links (Instagram, Strava) on profile pages
+- Community admin roles (Owner, Admin, Moderator) with backward compatibility
 - Brand social links (Instagram, Twitter, Facebook, Strava, YouTube) on brand pages
 - Ride detail layout improvements (Ride Info in main content, conditional sidebar)
 - Map app picker with clean SVG icons (replaced emoji icons with Lucide-style SVGs)
-- Homepage cleanup (removed "Find your pace" section)
 - "Cake & Coffee Stop" post-ride social features (comments + photo/video uploads)
 - Cloudinary integration for photo/video uploads (unsigned upload preset)
 - Video support with play icon overlays and lightbox player
@@ -402,39 +417,34 @@ Natural language / voice input to auto-fill ride details:
 - Brand/chapter creation flows
 - Chapter-linked ride creation (/create?chapterId=xxx)
 - Ride detail pages show brand backdrop/slogan for chapter rides
-- Mobile menu auto-closes when link is clicked
-- Mobile menu includes user account options (profile, settings, sign out)
-- Discover page wired to database (was mock data)
+- Mobile menu improvements (auto-close, user account options)
 - User profile system (/profile, /profile/edit, /u/[slug])
 - Past rides archive (/discover/past) with time range and pace filters
 
-**Next Priority:** Add RSVP functionality, show verified badges on ride cards.
+**Next Priority:** Show verified badges on ride cards for chapter members.
 
 ---
 
 ## Active TODO List
 
 ### Completed Recently
+- [x] Profile image upload - users can upload their own profile photo
+- [x] Social icons - removed external link arrows, made icons 25% bigger
+- [x] "Hosted by" link now goes to user profile instead of organizer
+- [x] RSVP system with going/maybe/not going functionality
+- [x] Attendee list on ride detail page with profile links
+- [x] User social links (Instagram, Strava) on profiles
+- [x] Community admin roles (Owner, Admin, Moderator) with backward compatibility
 - [x] Brand social links (Instagram, Twitter, Facebook, Strava, YouTube)
 - [x] Ride detail layout - Ride Info in main content, sidebar only for branded rides
-- [x] Map app picker icons - clean SVG icons matching Lucide style (Apple Maps, Google Maps, Waze)
-- [x] Homepage cleanup (removed "Find your pace" section)
 - [x] "Cake & Coffee Stop" - post-ride comments and photo/video uploads
 - [x] Cloudinary integration for media uploads (unsigned preset)
-- [x] Video support with thumbnails, play icons, and lightbox player
-- [x] Past rides section on brand chapter pages (collapsible, on-demand loading)
 - [x] Brand & Chapter system with hierarchical organization
-- [x] Brand.dev integration for auto-fetching brand assets
-- [x] Chapter-linked ride creation (/create?chapterId=xxx)
-- [x] Ride detail pages show brand backdrop/slogan for chapter rides
-- [x] Mobile menu improvements (auto-close, user account options)
 - [x] User profile system (/profile, /profile/edit, /u/[slug])
 - [x] Past rides archive (/discover/past) with filters
 
 ### High Priority (Next Up)
-- [ ] Add RSVP functionality (going/maybe/not going)
 - [ ] Show verified badges on ride cards for chapter members
-- [ ] Attendee list on ride detail page
 
 ### Medium Priority
 - [ ] Build organizer profile page (/organizers/[id])
