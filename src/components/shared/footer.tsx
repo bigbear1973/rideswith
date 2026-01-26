@@ -4,11 +4,10 @@ import { Separator } from '@/components/ui/separator';
 const footerLinks = {
   riders: [
     { href: '/discover', label: 'Find Rides' },
-    { href: '/how-it-works', label: 'How It Works' },
   ],
   organizers: [
     { href: '/create', label: 'Create a Ride' },
-    { href: '/organizers/create', label: 'Start a Club' },
+    { href: '/communities/create', label: 'Start a Community' },
   ],
   company: [
     { href: '/about', label: 'About' },
