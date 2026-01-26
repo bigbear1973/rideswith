@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
@@ -22,19 +21,17 @@ interface RidePageProps {
   params: Promise<{ id: string }>;
 }
 
-const PACE_STYLES: Record<string, string> = {
-  casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  moderate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  fast: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-};
-
-const PACE_DESCRIPTIONS: Record<string, string> = {
-  casual: '< 20 km/h (12 mph)',
-  moderate: '20-28 km/h (12-17 mph)',
-  fast: '28-35 km/h (17-22 mph)',
-  race: '> 35 km/h (22+ mph)',
-};
+// Helper function to format speed range display
+function formatSpeedRange(paceMin: number | null, paceMax: number | null): string | null {
+  if (paceMin !== null && paceMax !== null) {
+    return `${paceMin}-${paceMax} km/h`;
+  } else if (paceMin !== null) {
+    return `${paceMin}+ km/h`;
+  } else if (paceMax !== null) {
+    return `Up to ${paceMax} km/h`;
+  }
+  return null;
+}
 
 export default async function RidePage({ params }: RidePageProps) {
   const { id } = await params;
@@ -149,7 +146,7 @@ export default async function RidePage({ params }: RidePageProps) {
     currentUserRsvpStatus = userRsvp?.status ?? null;
   }
 
-  const pace = ride.pace.toLowerCase();
+  const speedRange = formatSpeedRange(ride.paceMin, ride.paceMax);
   const isPastRide = new Date(ride.date) < new Date();
 
   // Brand info for branded rides
@@ -194,7 +191,7 @@ export default async function RidePage({ params }: RidePageProps) {
     ``,
     ride.distance ? `Distance: ${ride.distance} km` : null,
     ride.elevation ? `Elevation: ${ride.elevation} m` : null,
-    `Pace: ${pace}`,
+    speedRange ? `Speed: ${speedRange}` : null,
     ride.terrain ? `Terrain: ${ride.terrain}` : null,
     ``,
     ride.description ? `${ride.description}` : null,
@@ -359,16 +356,15 @@ export default async function RidePage({ params }: RidePageProps) {
                     </div>
                   )}
                 </div>
-                <Separator />
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Pace</span>
-                    <Badge variant="secondary" className={PACE_STYLES[pace]}>
-                      {pace}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{PACE_DESCRIPTIONS[pace]}</p>
-                </div>
+                {speedRange && (
+                  <>
+                    <Separator />
+                    <div className="space-y-1">
+                      <span className="text-sm text-muted-foreground">Speed</span>
+                      <p className="text-sm font-medium">{speedRange}</p>
+                    </div>
+                  </>
+                )}
                 {ride.terrain && (
                   <div className="space-y-1">
                     <span className="text-sm text-muted-foreground">Terrain</span>

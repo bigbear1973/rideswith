@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { RidePace } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const pace = searchParams.get('pace');
     const lat = searchParams.get('lat');
     const lng = searchParams.get('lng');
     const radius = searchParams.get('radius'); // in km
@@ -18,10 +16,6 @@ export async function GET(request: NextRequest) {
         gte: new Date(), // Only future rides
       },
     };
-
-    if (pace && ['CASUAL', 'MODERATE', 'FAST', 'RACE'].includes(pace.toUpperCase())) {
-      where.pace = pace.toUpperCase() as RidePace;
-    }
 
     const rides = await prisma.ride.findMany({
       where,
@@ -102,6 +96,8 @@ export async function GET(request: NextRequest) {
       distance: ride.distance,
       elevation: ride.elevation,
       pace: ride.pace.toLowerCase(),
+      paceMin: ride.paceMin,
+      paceMax: ride.paceMax,
       terrain: ride.terrain,
       maxAttendees: ride.maxAttendees,
       isFree: ride.isFree,
@@ -131,7 +127,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate required fields
-    const { title, date, locationName, locationAddress, latitude, longitude, pace } = body;
+    const { title, date, locationName, locationAddress, latitude, longitude } = body;
 
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -143,10 +139,6 @@ export async function POST(request: NextRequest) {
 
     if (!locationName || !locationAddress || latitude === undefined || longitude === undefined) {
       return NextResponse.json({ error: 'Location is required' }, { status: 400 });
-    }
-
-    if (!pace || !['CASUAL', 'MODERATE', 'FAST', 'RACE'].includes(pace)) {
-      return NextResponse.json({ error: 'Valid pace is required' }, { status: 400 });
     }
 
     // Find or create organizer for the user
@@ -200,7 +192,8 @@ export async function POST(request: NextRequest) {
         longitude: parseFloat(longitude),
         distance: body.distance ? parseFloat(body.distance) : null,
         elevation: body.elevation ? parseFloat(body.elevation) : null,
-        pace: pace as RidePace,
+        paceMin: body.paceMin ? parseFloat(body.paceMin) : null,
+        paceMax: body.paceMax ? parseFloat(body.paceMax) : null,
         terrain: body.terrain || null,
         maxAttendees: body.maxAttendees ? parseInt(body.maxAttendees) : null,
         routeUrl: body.routeUrl || null,

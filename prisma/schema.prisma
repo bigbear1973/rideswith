@@ -237,7 +237,9 @@ model Ride {
   // Ride details
   distance    Float?   // in km
   elevation   Float?   // in meters
-  pace        RidePace @default(MODERATE)
+  pace        RidePace @default(MODERATE) // Legacy field, kept for backward compatibility
+  paceMin     Float?   // Minimum speed in km/h (new)
+  paceMax     Float?   // Maximum speed in km/h (new)
   terrain     String?
 
   // Route

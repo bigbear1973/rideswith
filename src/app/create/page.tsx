@@ -38,12 +38,6 @@ interface LocationResult {
   lon: string;
 }
 
-const PACE_OPTIONS = [
-  { value: 'CASUAL', label: 'Casual', desc: '< 20 km/h' },
-  { value: 'MODERATE', label: 'Moderate', desc: '20-28 km/h' },
-  { value: 'FAST', label: 'Fast', desc: '28-35 km/h' },
-  { value: 'RACE', label: 'Race', desc: '> 35 km/h' },
-];
 
 const TERRAIN_OPTIONS = [
   'Road',
@@ -90,7 +84,8 @@ export default function CreateRidePage() {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [distance, setDistance] = useState('');
   const [elevation, setElevation] = useState('');
-  const [pace, setPace] = useState('MODERATE');
+  const [paceMin, setPaceMin] = useState('');
+  const [paceMax, setPaceMax] = useState('');
   const [terrain, setTerrain] = useState('');
   const [maxAttendees, setMaxAttendees] = useState('');
   const [routeUrl, setRouteUrl] = useState('');
@@ -241,7 +236,8 @@ export default function CreateRidePage() {
           longitude,
           distance: distance ? parseFloat(distance) : null,
           elevation: elevation ? parseFloat(elevation) : null,
-          pace,
+          paceMin: paceMin ? parseFloat(paceMin) : null,
+          paceMax: paceMax ? parseFloat(paceMax) : null,
           terrain: terrain || null,
           maxAttendees: maxAttendees ? parseInt(maxAttendees) : null,
           routeUrl: routeUrl.trim() || null,
@@ -504,30 +500,36 @@ export default function CreateRidePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Pace *</Label>
-                <RadioGroup
-                  value={pace}
-                  onValueChange={setPace}
-                  className="grid grid-cols-2 gap-3"
-                >
-                  {PACE_OPTIONS.map((option) => (
-                    <Label
-                      key={option.value}
-                      htmlFor={option.value}
-                      className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
-                        pace === option.value
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      <RadioGroupItem value={option.value} id={option.value} />
-                      <div>
-                        <p className="font-medium">{option.label}</p>
-                        <p className="text-xs text-muted-foreground">{option.desc}</p>
-                      </div>
-                    </Label>
-                  ))}
-                </RadioGroup>
+                <Label>Speed Range ({unitSystem === 'metric' ? 'km/h' : 'mph'})</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="paceMin" className="text-xs text-muted-foreground">Min Speed</Label>
+                    <Input
+                      id="paceMin"
+                      type="number"
+                      placeholder="e.g., 25"
+                      value={paceMin}
+                      onChange={(e) => setPaceMin(e.target.value)}
+                      min="0"
+                      step="1"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="paceMax" className="text-xs text-muted-foreground">Max Speed</Label>
+                    <Input
+                      id="paceMax"
+                      type="number"
+                      placeholder="e.g., 30"
+                      value={paceMax}
+                      onChange={(e) => setPaceMax(e.target.value)}
+                      min="0"
+                      step="1"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Specify the expected speed range for this ride
+                </p>
               </div>
 
               <div className="space-y-2">

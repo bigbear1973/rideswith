@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { RidePace } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -49,6 +48,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       distance: ride.distance,
       elevation: ride.elevation,
       pace: ride.pace.toLowerCase(),
+      paceMin: ride.paceMin,
+      paceMax: ride.paceMax,
       terrain: ride.terrain,
       maxAttendees: ride.maxAttendees,
       isFree: ride.isFree,
@@ -101,7 +102,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Validate required fields
-    const { title, date, locationName, locationAddress, latitude, longitude, pace } = body;
+    const { title, date, locationName, locationAddress, latitude, longitude } = body;
 
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -113,10 +114,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!locationName || !locationAddress || latitude === undefined || longitude === undefined) {
       return NextResponse.json({ error: 'Location is required' }, { status: 400 });
-    }
-
-    if (!pace || !['CASUAL', 'MODERATE', 'FAST', 'RACE'].includes(pace)) {
-      return NextResponse.json({ error: 'Valid pace is required' }, { status: 400 });
     }
 
     // Update the ride
@@ -134,7 +131,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         longitude: parseFloat(longitude),
         distance: body.distance ? parseFloat(body.distance) : null,
         elevation: body.elevation ? parseFloat(body.elevation) : null,
-        pace: pace as RidePace,
+        paceMin: body.paceMin !== undefined ? parseFloat(body.paceMin) : null,
+        paceMax: body.paceMax !== undefined ? parseFloat(body.paceMax) : null,
         terrain: body.terrain || null,
         maxAttendees: body.maxAttendees ? parseInt(body.maxAttendees) : null,
         routeUrl: body.routeUrl || null,

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Ride" ADD COLUMN     "paceMax" DOUBLE PRECISION,
+ADD COLUMN     "paceMin" DOUBLE PRECISION;
