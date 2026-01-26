@@ -97,6 +97,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
+    redirect({ url, baseUrl }) {
+      // Use custom domain if AUTH_URL is set, otherwise use baseUrl
+      const targetBase = process.env.AUTH_URL || 'https://rideswith.com';
+
+      // If the url is relative, prepend the target base
+      if (url.startsWith('/')) {
+        return `${targetBase}${url}`;
+      }
+
+      // If the url is on the old railway domain, redirect to custom domain
+      if (url.includes('rideswith-production.up.railway.app')) {
+        return url.replace('https://rideswith-production.up.railway.app', targetBase);
+      }
+
+      // If the url is on same origin or target base, allow it
+      if (url.startsWith(baseUrl) || url.startsWith(targetBase)) {
+        return url;
+      }
+
+      // Default to target base
+      return targetBase;
+    },
   },
   debug: process.env.NODE_ENV === 'development',
 });
