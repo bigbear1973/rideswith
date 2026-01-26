@@ -103,6 +103,9 @@ model Brand {
   strava    String? // Strava club URL
   youtube   String? // YouTube channel URL
 
+  // Sponsor settings
+  sponsorLabel String? // "sponsors" | "partners" | "ads" - defaults to "sponsors"
+
   // Ownership
   createdById String?
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
@@ -113,6 +116,7 @@ model Brand {
 
   // Relations
   chapters Chapter[]
+  sponsors Sponsor[]
 }
 
 model Chapter {
@@ -128,6 +132,9 @@ model Chapter {
   customLogo   String?
   customColors Json? // { primaryColor, secondaryColor }
 
+  // Sponsor settings (can override brand-level settings)
+  sponsorLabel String? // "sponsors" | "partners" | "ads" - inherits from brand if null
+
   // Stats (managed counters)
   memberCount Int @default(0)
   rideCount   Int @default(0)
@@ -136,8 +143,9 @@ model Chapter {
   updatedAt DateTime @updatedAt
 
   // Relations
-  members ChapterMember[]
-  rides   Ride[]
+  members  ChapterMember[]
+  rides    Ride[]
+  sponsors Sponsor[]
 
   @@unique([brandId, slug])
 }
@@ -366,4 +374,37 @@ model RidePhoto {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([rideId, createdAt])
+}
+
+// ============================================
+// Community Sponsors/Partners/Ads
+// ============================================
+
+model Sponsor {
+  id          String  @id @default(cuid())
+
+  // Sponsor can belong to a brand (applies to all chapters) OR a specific chapter
+  brandId     String?
+  brand       Brand?   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  chapterId   String?
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  name        String
+  domain      String? // For Brand.dev lookup
+  description String?
+  website     String  // Click-through URL
+
+  // Assets (from Brand.dev or manual upload)
+  logo         String?
+  primaryColor String?
+
+  // Display settings
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([brandId, isActive])
+  @@index([chapterId, isActive])
 }

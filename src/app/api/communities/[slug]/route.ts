@@ -151,6 +151,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.strava !== undefined) updateData.strava = body.strava || null;
     if (body.youtube !== undefined) updateData.youtube = body.youtube || null;
 
+    // Sponsor label setting
+    const validLabels = ["sponsors", "partners", "ads"];
+    if (body.sponsorLabel !== undefined) {
+      updateData.sponsorLabel = validLabels.includes(body.sponsorLabel) ? body.sponsorLabel : null;
+    }
+
     const updatedBrand = await prisma.brand.update({
       where: { slug },
       data: updateData,

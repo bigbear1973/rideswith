@@ -22,7 +22,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound, Trophy } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound, Trophy, Plus, Megaphone } from 'lucide-react';
+import { SponsorForm, SponsorListItem } from '@/components/communities';
 
 interface Brand {
   id: string;
@@ -42,6 +43,19 @@ interface Brand {
   facebook: string | null;
   strava: string | null;
   youtube: string | null;
+  sponsorLabel: string | null;
+}
+
+interface Sponsor {
+  id: string;
+  name: string;
+  domain: string | null;
+  description: string | null;
+  website: string;
+  logo: string | null;
+  primaryColor: string | null;
+  isActive: boolean;
+  displayOrder: number;
 }
 
 const COMMUNITY_TYPES = [
@@ -69,6 +83,10 @@ export default function EditBrandPage() {
   const [brand, setBrand] = useState<Brand | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBackdrop, setUploadingBackdrop] = useState(false);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [sponsorLabel, setSponsorLabel] = useState<'sponsors' | 'partners' | 'ads'>('sponsors');
+  const [showSponsorForm, setShowSponsorForm] = useState(false);
+  const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     type: 'BRAND' as 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP',
@@ -111,10 +129,18 @@ export default function EditBrandPage() {
             strava: data.strava || '',
             youtube: data.youtube || '',
           });
+          setSponsorLabel((data.sponsorLabel as 'sponsors' | 'partners' | 'ads') || 'sponsors');
 
           // Check ownership
           if (data.createdById !== session?.user?.id) {
             setError("You don't have permission to edit this brand");
+          }
+
+          // Fetch sponsors
+          const sponsorsRes = await fetch(`/api/communities/${slug}/sponsors?all=true`);
+          if (sponsorsRes.ok) {
+            const sponsorsData = await sponsorsRes.json();
+            setSponsors(sponsorsData.sponsors || []);
           }
         } else {
           setError('Brand not found');
@@ -141,7 +167,7 @@ export default function EditBrandPage() {
       const response = await fetch(`/api/communities/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, sponsorLabel }),
       });
 
       if (!response.ok) {
@@ -636,6 +662,100 @@ export default function EditBrandPage() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Sponsors/Partners/Ads Section */}
+              <div className="space-y-4 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      <Megaphone className="h-4 w-4" />
+                      {sponsorLabel === 'sponsors' ? 'Sponsors' : sponsorLabel === 'partners' ? 'Partners' : 'Ads'}
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Add sponsors or partners that appear on ride pages
+                    </p>
+                  </div>
+                </div>
+
+                {/* Label Type Selector */}
+                <div className="space-y-2">
+                  <Label className="text-sm">What do you call these?</Label>
+                  <div className="flex gap-2">
+                    {(['sponsors', 'partners', 'ads'] as const).map((label) => (
+                      <Button
+                        key={label}
+                        type="button"
+                        variant={sponsorLabel === label ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSponsorLabel(label)}
+                        className="capitalize"
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sponsors List */}
+                {sponsors.length > 0 && (
+                  <div className="space-y-2">
+                    {sponsors.map((sponsor) => (
+                      <SponsorListItem
+                        key={sponsor.id}
+                        sponsor={sponsor}
+                        label={sponsorLabel.slice(0, -1)}
+                        onEdit={(s) => {
+                          setEditingSponsor(s);
+                          setShowSponsorForm(true);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Add/Edit Sponsor Form */}
+                {showSponsorForm ? (
+                  <Card className="border-primary/50">
+                    <CardContent className="pt-4">
+                      <SponsorForm
+                        brandSlug={slug}
+                        sponsor={editingSponsor || undefined}
+                        onSave={(sponsor) => {
+                          if (editingSponsor) {
+                            setSponsors(sponsors.map((s) => s.id === sponsor.id ? sponsor : s));
+                          } else {
+                            setSponsors([...sponsors, sponsor]);
+                          }
+                          setShowSponsorForm(false);
+                          setEditingSponsor(null);
+                        }}
+                        onCancel={() => {
+                          setShowSponsorForm(false);
+                          setEditingSponsor(null);
+                        }}
+                        onDelete={editingSponsor ? () => {
+                          setSponsors(sponsors.filter((s) => s.id !== editingSponsor.id));
+                          setShowSponsorForm(false);
+                          setEditingSponsor(null);
+                        } : undefined}
+                      />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingSponsor(null);
+                      setShowSponsorForm(true);
+                    }}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add {sponsorLabel.slice(0, -1)}
+                  </Button>
+                )}
               </div>
 
               {/* Error/Success Messages */}
