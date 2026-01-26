@@ -425,7 +425,6 @@ Natural language / voice input to auto-fill ride details:
 | `/auth/error` | `src/app/auth/error/page.tsx` | Working |
 | `/rides/[id]` | `src/app/rides/[id]/page.tsx` | Working (fetches from DB) |
 | `/rides/[id]/edit` | `src/app/rides/[id]/edit/page.tsx` | Edit/delete rides |
-| `/organizers/[id]` | `src/app/organizers/[id]/page.tsx` | Placeholder only |
 | `/communities` | `src/app/communities/page.tsx` | Communities listing (brands, clubs, groups) |
 | `/communities/create` | `src/app/communities/create/page.tsx` | Register new community |
 | `/communities/[slug]` | `src/app/communities/[slug]/page.tsx` | Community profile with chapters |
@@ -436,12 +435,10 @@ Natural language / voice input to auto-fill ride details:
 ### Broken Links (404s)
 | Link | Referenced In | Priority |
 |------|---------------|----------|
-| `/organizers/create` | Homepage CTA + Footer | HIGH - main conversion path |
 | `/privacy` | Footer + Sign-in page | MEDIUM - legal requirement |
 | `/terms` | Footer + Sign-in page | MEDIUM - legal requirement |
 | `/about` | Footer | LOW |
 | `/how-it-works` | Footer | LOW |
-| `/about/organizers` | Homepage "Learn more" | LOW |
 
 ### Pages Needing Work
 | Page | Current State | What's Needed |
@@ -452,8 +449,6 @@ Natural language / voice input to auto-fill ride details:
 | `/u/[slug]` | ✅ DONE | Public profile pages |
 | `/rides/[id]/edit` | ✅ DONE | Edit and delete rides |
 | `/discover/past` | ✅ DONE | Past rides archive with filters |
-| `/organizers/create` | Does not exist | Create organizer signup flow |
-| `/organizers/[id]` | Shows ID only | Full organizer profile with rides |
 | `/rides/[id]` | ✅ DONE | Fetches from database |
 
 ---
@@ -462,7 +457,6 @@ Natural language / voice input to auto-fill ride details:
 
 ### 1. Fix Critical 404s
 - [x] Create `/profile` page (user profile)
-- [ ] Create `/organizers/create` page (organizer signup)
 - [ ] Create `/privacy` page (privacy policy)
 - [ ] Create `/terms` page (terms of service)
 
@@ -473,7 +467,6 @@ Natural language / voice input to auto-fill ride details:
 - [x] `/u/[slug]` - Public profile pages
 - [x] `/rides/[id]/edit` - Edit and delete rides
 - [x] `/discover/past` - Past rides archive
-- [ ] `/organizers/[id]` - Fetch real organizer data, show rides
 
 ### 3. Wire Up Database
 - [x] `/discover` - Fetch rides from DB instead of mock data
@@ -505,9 +498,8 @@ Natural language / voice input to auto-fill ride details:
 
 ### Phase 3: Fix Basics (MOSTLY COMPLETE)
 - [x] Create profile pages (/profile, /profile/edit, /u/[slug])
-- [ ] Create missing pages (organizers/create, privacy, terms)
+- [ ] Create missing pages (privacy, terms)
 - [x] Enable create ride form
-- [ ] Build organizer profile page
 - [x] Wire pages to database (discover, rides)
 - [x] Wire homepage to database (latest rides from /api/rides/latest)
 
@@ -519,30 +511,23 @@ Natural language / voice input to auto-fill ride details:
 - [x] GET/PUT /api/profile - User profile management
 - [x] GET /api/profile/check-slug - Slug availability check
 - [x] POST /api/rides/[id]/rsvp - RSVP to rides (going/maybe/not going)
-- [ ] GET/POST /api/organizers - Organizer profiles
 
 ### Phase 5: Ride Management
 - [x] Create ride form (full implementation)
 - [x] Edit/delete rides
 - [x] RSVP functionality (going/maybe/not going)
 - [x] Attendee list on ride detail page
-- [ ] Organizer dashboard
 
-### Phase 6: Organizer Features
-- [ ] Member management (invite, roles)
-- [ ] Organizer branding (logo, colors)
-- [ ] Organizer ride calendar
-
-### Phase 7: Enhanced Features
+### Phase 6: Enhanced Features
 - [ ] GPX route upload + map visualization
 - [x] Photo/video upload for rides (Cloudinary integration)
-- [ ] Recurring rides
+- [x] Recurring rides
 - [ ] Ride series/events
 - [ ] Email notifications (ride reminders, updates)
 
-### Phase 8: Discovery & Social
+### Phase 7: Discovery & Social
 - [ ] Advanced search (location, date, pace)
-- [ ] Follow organizers
+- [ ] Follow users/communities
 - [x] Ride history (on profile page)
 - [x] User ride stats (on profile page)
 - [ ] Social sharing
@@ -568,13 +553,8 @@ Natural language / voice input to auto-fill ride details:
 - Homepage "Latest rides" section (fetches from /api/rides/latest)
 
 **Broken (404s):**
-- /organizers/create
 - /privacy, /terms
-- /about, /how-it-works, /about/organizers
-
-**Placeholder/Disabled:**
-- Organizer detail page (shows ID only)
-- Some API endpoints (organizers)
+- /about, /how-it-works
 
 **Recently Completed:**
 - Chapter-level sponsor toggles in admin panel (expandable community rows)
@@ -672,7 +652,6 @@ Natural language / voice input to auto-fill ride details:
 - [ ] Show verified badges on ride cards for chapter members
 
 ### Medium Priority
-- [ ] Build organizer profile page (/organizers/[id])
 - [ ] Create /privacy page (privacy policy)
 - [ ] Create /terms page (terms of service)
 - [ ] GPX route upload + map visualization
@@ -680,7 +659,7 @@ Natural language / voice input to auto-fill ride details:
 
 ### Low Priority
 - [ ] Advanced search (location radius)
-- [ ] Follow organizers
+- [ ] Follow users/communities
 - [ ] Social sharing
 
 ---
