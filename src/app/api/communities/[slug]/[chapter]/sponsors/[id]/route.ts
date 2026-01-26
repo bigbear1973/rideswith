@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fetchBrandAssets } from "@/lib/brand-dev";
+import { canManageSponsors, isPlatformAdmin } from "@/lib/platform-admin";
 
 interface RouteParams {
   params: Promise<{ slug: string; chapter: string; id: string }>;
@@ -73,11 +74,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Check permission
+    // Check if sponsors are enabled for this community
+    if (!canManageSponsors(session, chapter.brand.sponsorsEnabled)) {
+      return NextResponse.json(
+        { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check permission (platform admins can always manage)
     const isBrandOwner = chapter.brand.createdById === session.user.id;
     const isChapterAdmin = chapter.members.length > 0;
 
-    if (!isBrandOwner && !isChapterAdmin) {
+    if (!isBrandOwner && !isChapterAdmin && !isPlatformAdmin(session)) {
       return NextResponse.json(
         { error: "You don't have permission to edit sponsors" },
         { status: 403 }
@@ -167,11 +176,19 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Check permission
+    // Check if sponsors are enabled for this community
+    if (!canManageSponsors(session, chapter.brand.sponsorsEnabled)) {
+      return NextResponse.json(
+        { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check permission (platform admins can always manage)
     const isBrandOwner = chapter.brand.createdById === session.user.id;
     const isChapterAdmin = chapter.members.length > 0;
 
-    if (!isBrandOwner && !isChapterAdmin) {
+    if (!isBrandOwner && !isChapterAdmin && !isPlatformAdmin(session)) {
       return NextResponse.json(
         { error: "You don't have permission to delete sponsors" },
         { status: 403 }

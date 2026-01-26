@@ -20,6 +20,7 @@ model User {
   slug          String?   @unique // Custom profile URL (e.g., /u/username)
   bio           String?   @db.Text
   location      String?
+  role          String    @default("USER") // "USER" | "PLATFORM_ADMIN"
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -106,6 +107,7 @@ model Brand {
   // Sponsor settings
   sponsorLabel    String?  // "sponsors" | "partners" | "ads" - defaults to "sponsors"
   hidePresentedBy Boolean @default(false) // Hide the "Presented by" sidebar card on ride pages
+  sponsorsEnabled Boolean @default(false) // Platform admin must enable this for community to use sponsors
 
   // Ownership
   createdById String?

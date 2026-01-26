@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fetchBrandAssets } from "@/lib/brand-dev";
+import { canManageSponsors, isPlatformAdmin } from "@/lib/platform-admin";
 
 interface RouteParams {
   params: Promise<{ slug: string }>;
@@ -16,11 +17,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const brand = await prisma.brand.findUnique({
       where: { slug },
-      select: { id: true, sponsorLabel: true },
+      select: { id: true, sponsorLabel: true, sponsorsEnabled: true },
     });
 
     if (!brand) {
       return NextResponse.json({ error: "Community not found" }, { status: 404 });
+    }
+
+    // If sponsors aren't enabled, return empty list (unless admin)
+    const session = await auth();
+    if (!brand.sponsorsEnabled && !isPlatformAdmin(session)) {
+      return NextResponse.json({
+        sponsors: [],
+        sponsorLabel: brand.sponsorLabel || "sponsors",
+        sponsorsEnabled: false,
+      });
     }
 
     const sponsors = await prisma.sponsor.findMany({
@@ -34,6 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       sponsors,
       sponsorLabel: brand.sponsorLabel || "sponsors",
+      sponsorsEnabled: brand.sponsorsEnabled,
     });
   } catch (error) {
     console.error("GET /api/communities/[slug]/sponsors error:", error);
@@ -63,8 +75,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Community not found" }, { status: 404 });
     }
 
-    // Check ownership
-    if (brand.createdById !== session.user.id) {
+    // Check if sponsors are enabled for this community
+    if (!canManageSponsors(session, brand.sponsorsEnabled)) {
+      return NextResponse.json(
+        { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check ownership (platform admins can always manage)
+    if (brand.createdById !== session.user.id && !isPlatformAdmin(session)) {
       return NextResponse.json(
         { error: "You don't have permission to add sponsors" },
         { status: 403 }

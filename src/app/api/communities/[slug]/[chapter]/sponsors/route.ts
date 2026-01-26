@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fetchBrandAssets } from "@/lib/brand-dev";
+import { canManageSponsors, isPlatformAdmin } from "@/lib/platform-admin";
 
 interface RouteParams {
   params: Promise<{ slug: string; chapter: string }>;
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           select: {
             id: true,
             sponsorLabel: true,
+            sponsorsEnabled: true,
           },
         },
       },
@@ -34,6 +36,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!chapter) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+    }
+
+    // If sponsors aren't enabled at brand level, return empty list (unless admin)
+    const session = await auth();
+    if (!chapter.brand.sponsorsEnabled && !isPlatformAdmin(session)) {
+      return NextResponse.json({
+        sponsors: [],
+        sponsorLabel: chapter.sponsorLabel || chapter.brand.sponsorLabel || "sponsors",
+        sponsorsEnabled: false,
+      });
     }
 
     // Get chapter-specific sponsors only (chapters don't inherit brand sponsors)
@@ -51,6 +63,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       sponsors,
       sponsorLabel,
+      sponsorsEnabled: chapter.brand.sponsorsEnabled,
     });
   } catch (error) {
     console.error("GET /api/communities/[slug]/[chapter]/sponsors error:", error);
@@ -93,11 +106,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Check permission: must be brand owner or chapter admin
+    // Check if sponsors are enabled for this community
+    if (!canManageSponsors(session, chapter.brand.sponsorsEnabled)) {
+      return NextResponse.json(
+        { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check permission: must be brand owner, chapter admin, or platform admin
     const isBrandOwner = chapter.brand.createdById === session.user.id;
     const isChapterAdmin = chapter.members.length > 0;
 
-    if (!isBrandOwner && !isChapterAdmin) {
+    if (!isBrandOwner && !isChapterAdmin && !isPlatformAdmin(session)) {
       return NextResponse.json(
         { error: "You don't have permission to add sponsors" },
         { status: 403 }
