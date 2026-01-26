@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for recurrence settings
-    const isRecurring = body.recurrencePattern && body.recurrenceEndDate;
+    const isRecurring = !!(body.recurrencePattern && body.recurrenceEndDate);
     const recurrencePattern = body.recurrencePattern as RecurrencePattern | null;
     const recurrenceEndDate = body.recurrenceEndDate ? new Date(body.recurrenceEndDate) : null;
 
@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
         recurrencePattern: isRecurring ? recurrencePattern : null,
         recurrenceDay: isRecurring ? firstRideDate.getDay() : null,
         recurrenceEndDate: isRecurring ? recurrenceEndDate : null,
-        isRecurringTemplate: isRecurring || false,
+        isRecurringTemplate: isRecurring,
       },
       include: {
         organizer: {
