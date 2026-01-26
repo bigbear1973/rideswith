@@ -155,9 +155,13 @@ model ChapterMember {
 }
 
 enum ChapterRole {
+  // New roles
   OWNER      // Full control, can transfer ownership, delete community
   ADMIN      // Can manage members, edit settings, create rides
   MODERATOR  // Can create rides, moderate content
+  // Legacy roles (will be migrated)
+  LEAD       // Maps to OWNER
+  AMBASSADOR // Maps to MODERATOR
 }
 
 enum CommunityType {

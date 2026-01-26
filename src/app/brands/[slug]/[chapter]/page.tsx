@@ -63,7 +63,7 @@ interface ChapterData {
   };
   members: Array<{
     id: string;
-    role: "OWNER" | "ADMIN" | "MODERATOR";
+    role: "OWNER" | "ADMIN" | "MODERATOR" | "LEAD" | "AMBASSADOR";
     user: {
       id: string;
       name: string | null;
@@ -182,9 +182,10 @@ export default function ChapterPage({ params }: PageProps) {
     );
   }
 
-  const owners = chapter.members.filter((m) => m.role === "OWNER");
+  // Handle both new roles (OWNER/ADMIN/MODERATOR) and legacy roles (LEAD/AMBASSADOR)
+  const owners = chapter.members.filter((m) => m.role === "OWNER" || m.role === "LEAD");
   const admins = chapter.members.filter((m) => m.role === "ADMIN");
-  const moderators = chapter.members.filter((m) => m.role === "MODERATOR");
+  const moderators = chapter.members.filter((m) => m.role === "MODERATOR" || m.role === "AMBASSADOR");
 
   return (
     <div className="min-h-screen bg-background">

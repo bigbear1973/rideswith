@@ -345,7 +345,7 @@ export default async function BrandPage({ params }: PageProps) {
                       {chapter.members.length > 0 && (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <BadgeCheck className="h-3 w-3 text-blue-500" />
-                          {chapter.members.find((m) => m.role === "OWNER")?.user
+                          {chapter.members.find((m) => m.role === "OWNER" || m.role === "LEAD")?.user
                             .name || "Owner"}
                         </div>
                       )}

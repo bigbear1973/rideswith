@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ChapterRole } from "@prisma/client";
+import { isOwner, isAdmin, normalizeRole } from "@/lib/roles";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -135,7 +136,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!membership || !["OWNER", "ADMIN"].includes(membership.role)) {
+    if (!membership || !isAdmin(membership.role)) {
       return NextResponse.json(
         { error: "Only owners and admins can update chapter settings" },
         { status: 403 }
@@ -211,7 +212,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!currentMembership || !["OWNER", "ADMIN"].includes(currentMembership.role)) {
+    if (!currentMembership || !isAdmin(currentMembership.role)) {
       return NextResponse.json(
         { error: "Only owners and admins can add members" },
         { status: 403 }
@@ -241,8 +242,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    // Admins cannot promote to Owner or Admin
-    if (currentMembership.role === "ADMIN" && ["OWNER", "ADMIN"].includes(role)) {
+    // Admins cannot promote to Owner or Admin (only Owners can)
+    if (!isOwner(currentMembership.role) && ["OWNER", "ADMIN"].includes(role)) {
       return NextResponse.json(
         { error: "Admins can only add moderators" },
         { status: 403 }
@@ -317,7 +318,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Users can remove themselves
     const isSelfRemoval = currentUserId === targetUserId;
 
-    if (!isSelfRemoval && (!currentMembership || !["OWNER", "ADMIN"].includes(currentMembership.role))) {
+    if (!isSelfRemoval && (!currentMembership || !isAdmin(currentMembership.role))) {
       return NextResponse.json(
         { error: "Only owners and admins can remove members" },
         { status: 403 }
@@ -341,12 +342,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Cannot remove the last Owner
-    if (targetMembership.role === "OWNER") {
+    // Cannot remove the last Owner (includes legacy LEAD role)
+    if (isOwner(targetMembership.role)) {
       const ownerCount = await prisma.chapterMember.count({
         where: {
           chapterId: id,
-          role: "OWNER",
+          role: { in: ["OWNER", "LEAD"] },
         },
       });
 
@@ -359,7 +360,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Admins cannot remove Owners or other Admins
-    if (currentMembership?.role === "ADMIN" && ["OWNER", "ADMIN"].includes(targetMembership.role)) {
+    if (currentMembership && !isOwner(currentMembership.role) && isAdmin(targetMembership.role)) {
       return NextResponse.json(
         { error: "Admins can only remove moderators" },
         { status: 403 }
@@ -428,7 +429,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    if (!currentMembership || !["OWNER", "ADMIN"].includes(currentMembership.role)) {
+    if (!currentMembership || !isAdmin(currentMembership.role)) {
       return NextResponse.json(
         { error: "Only owners and admins can update roles" },
         { status: 403 }
@@ -453,19 +454,19 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Only owners can promote to Admin or Owner
-    if (currentMembership.role === "ADMIN" && ["OWNER", "ADMIN"].includes(role)) {
+    if (!isOwner(currentMembership.role) && ["OWNER", "ADMIN"].includes(role)) {
       return NextResponse.json(
         { error: "Only owners can promote to admin or owner" },
         { status: 403 }
       );
     }
 
-    // Cannot demote the last Owner
-    if (targetMembership.role === "OWNER" && role !== "OWNER") {
+    // Cannot demote the last Owner (includes legacy LEAD role)
+    if (isOwner(targetMembership.role) && role !== "OWNER") {
       const ownerCount = await prisma.chapterMember.count({
         where: {
           chapterId: id,
-          role: "OWNER",
+          role: { in: ["OWNER", "LEAD"] },
         },
       });
 
