@@ -296,9 +296,10 @@ export default async function RidePage({ params }: RidePageProps) {
               )}
             </div>
 
-            {/* Date/Time & Location - Compact Row */}
+            {/* Ride Overview Card - Date, Location, Stats */}
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-4 space-y-4">
+                {/* Date/Time & Location Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Date & Time */}
                   <div className="flex items-start gap-3">
@@ -321,6 +322,45 @@ export default async function RidePage({ params }: RidePageProps) {
                     longitude={ride.longitude}
                   />
                 </div>
+
+                {/* Ride Stats */}
+                {(ride.distance || ride.elevation || speedRange || ride.terrain) && (
+                  <>
+                    <Separator />
+                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                      {ride.distance && (
+                        <div className="flex items-center gap-1.5">
+                          <Route className="h-4 w-4 text-muted-foreground" />
+                          <span>{ride.distance} km</span>
+                        </div>
+                      )}
+                      {ride.elevation && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">↗</span>
+                          <span>{ride.elevation} m</span>
+                        </div>
+                      )}
+                      {speedRange && (
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>{speedRange}</span>
+                        </div>
+                      )}
+                      {ride.terrain && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">•</span>
+                          <span>{ride.terrain}</span>
+                        </div>
+                      )}
+                      {ride.maxAttendees && (
+                        <div className="flex items-center gap-1.5">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span>Max {ride.maxAttendees}</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -330,55 +370,18 @@ export default async function RidePage({ params }: RidePageProps) {
             {/* Community Route Links */}
             <CommunityRoutes rideId={id} />
 
-            {/* Ride Details - Compact */}
+            {/* Ride Details Card */}
             <Card>
               <CardContent className="p-4 space-y-4">
-                {/* Quick Stats Row */}
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                  {ride.distance && (
-                    <div className="flex items-center gap-1.5">
-                      <Route className="h-4 w-4 text-muted-foreground" />
-                      <span>{ride.distance} km</span>
-                    </div>
-                  )}
-                  {ride.elevation && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">↗</span>
-                      <span>{ride.elevation} m</span>
-                    </div>
-                  )}
-                  {speedRange && (
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{speedRange}</span>
-                    </div>
-                  )}
-                  {ride.terrain && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground">•</span>
-                      <span>{ride.terrain}</span>
-                    </div>
-                  )}
-                  {ride.maxAttendees && (
-                    <div className="flex items-center gap-1.5">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>Max {ride.maxAttendees}</span>
-                    </div>
-                  )}
-                </div>
-
                 {/* Description */}
                 {ride.description && (
-                  <>
-                    <Separator />
-                    <div className="text-sm">
-                      {ride.description.split('\n').map((paragraph, i) => (
-                        <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </>
+                  <div className="text-sm">
+                    {ride.description.split('\n').map((paragraph, i) => (
+                      <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                 )}
 
                 {/* Hosted by - inline */}
