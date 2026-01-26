@@ -57,6 +57,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       routeUrl: ride.routeUrl,
       organizer: ride.organizer,
       attendeeCount: ride._count.rsvps,
+      // Recurrence fields
+      recurrencePattern: ride.recurrencePattern,
+      recurrenceSeriesId: ride.recurrenceSeriesId,
+      recurrenceEndDate: ride.recurrenceEndDate,
+      isRecurringTemplate: ride.isRecurringTemplate,
     });
   } catch (error) {
     console.error('GET /api/rides/[id] error:', error);

@@ -192,6 +192,44 @@ Replaced fixed pace categories (Casual/Moderate/Fast/Race) with custom speed inp
 - User search by name or email via `/api/users/search` endpoint
 - Roles have hierarchical permissions for editing chapters and creating rides
 
+### Recurring Rides (IMPLEMENTED)
+Organizers can create recurring ride series that repeat on a schedule.
+
+**Recurrence Options:**
+- **WEEKLY** - Same day every week
+- **BIWEEKLY** - Same day every 2 weeks
+- **MONTHLY** - Same day every month
+
+**Database Fields (Ride model):**
+```prisma
+recurrencePattern   RecurrencePattern? // WEEKLY, BIWEEKLY, MONTHLY
+recurrenceDay       Int?               // 0-6 for day of week (0=Sunday)
+recurrenceEndDate   DateTime?          // When the series ends
+recurrenceSeriesId  String?            // Links rides in same series
+isRecurringTemplate Boolean            // True for the template ride
+```
+
+**How it works:**
+- When creating a recurring ride, all instances are generated at creation time
+- Each instance is a separate ride record, linked via `recurrenceSeriesId`
+- The first ride is marked as `isRecurringTemplate: true`
+- Editing one instance only affects that occurrence, not the entire series
+
+**UI:**
+- Create form has "Make this a recurring ride" toggle
+- Edit form shows info banner if ride is part of a series
+
+### Add to Calendar (IMPLEMENTED)
+Users can export rides to their calendar app.
+
+**Supported:**
+- Google Calendar (opens in new tab)
+- Outlook Web (opens in new tab)
+- Apple Calendar (.ics file download)
+
+**Component:** `src/components/rides/add-to-calendar.tsx`
+**Location:** Appears below the date/time on ride detail pages (for upcoming rides only)
+
 ### Past Rides on Chapter Pages (IMPLEMENTED)
 - Chapter pages show collapsible "Past Rides" section
 - Past rides load on-demand when expanded (API: `?includePastRides=true`)
@@ -520,6 +558,8 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Recurring rides - create weekly/biweekly/monthly ride series
+- [x] Add to Calendar - export rides to Google Calendar, Outlook, Apple Calendar
 - [x] Discussion section moved from sidebar to main content (visible for all rides)
 - [x] Chapter team management - add/remove members, change roles in chapter settings
 - [x] Hide "Presented by" card option at community/chapter level
@@ -558,8 +598,6 @@ Natural language / voice input to auto-fill ride details:
 - [ ] Email notifications (ride reminders, updates)
 
 ### Low Priority
-- [ ] Recurring rides
-- [ ] Ride series/events
 - [ ] Advanced search (location radius, date range)
 - [ ] Follow organizers
 - [ ] Social sharing

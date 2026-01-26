@@ -40,7 +40,10 @@ import {
   Link as LinkIcon,
   Euro,
   Trash2,
+  Repeat,
+  Info,
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useUnits } from '@/components/providers/units-provider';
 
 interface LocationResult {
@@ -93,6 +96,10 @@ export default function EditRidePage({ params }: EditRidePageProps) {
   const [routeUrl, setRouteUrl] = useState('');
   const [isFree, setIsFree] = useState(true);
   const [price, setPrice] = useState('');
+
+  // Recurrence info (read-only for edit form)
+  const [recurrenceSeriesId, setRecurrenceSeriesId] = useState<string | null>(null);
+  const [recurrencePattern, setRecurrencePattern] = useState<string | null>(null);
 
   // Location search state
   const [locationSearch, setLocationSearch] = useState('');
@@ -154,6 +161,8 @@ export default function EditRidePage({ params }: EditRidePageProps) {
         setRouteUrl(ride.routeUrl || '');
         setIsFree(ride.isFree);
         setPrice(ride.price?.toString() || '');
+        setRecurrenceSeriesId(ride.recurrenceSeriesId || null);
+        setRecurrencePattern(ride.recurrencePattern || null);
       } catch (err) {
         setLoadError('Failed to load ride');
       } finally {
@@ -381,6 +390,17 @@ export default function EditRidePage({ params }: EditRidePageProps) {
 
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Recurrence Info Banner */}
+          {recurrenceSeriesId && (
+            <Alert>
+              <Repeat className="h-4 w-4" />
+              <AlertDescription>
+                This ride is part of a recurring series ({recurrencePattern?.toLowerCase().replace('_', ' ')}).
+                Changes made here will only affect this specific occurrence, not the entire series.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Basic Info */}
           <Card>
             <CardHeader>

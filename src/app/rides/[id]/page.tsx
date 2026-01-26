@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments, AddToCalendar } from '@/components/rides';
 import { SponsorCard } from '@/components/communities';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -328,12 +328,23 @@ export default async function RidePage({ params }: RidePageProps) {
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                       <Calendar className="h-5 w-5 text-primary" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium">{formattedDate}</p>
                       <p className="text-sm text-muted-foreground">
                         {formattedStartTime}
                         {formattedEndTime && ` - ${formattedEndTime}`}
                       </p>
+                      {!isPastRide && (
+                        <AddToCalendar
+                          title={ride.title}
+                          description={ride.description}
+                          date={ride.date}
+                          endTime={ride.endTime}
+                          locationName={ride.locationName}
+                          locationAddress={ride.locationAddress}
+                          rideUrl={rideUrl}
+                        />
+                      )}
                     </div>
                   </div>
                   {/* Location */}

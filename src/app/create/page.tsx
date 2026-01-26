@@ -27,6 +27,7 @@ import {
   ChevronLeft,
   Link as LinkIcon,
   Euro,
+  Repeat,
 } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 import { DatePicker, TimePicker } from '@/components/ui/date-time-picker';
@@ -91,6 +92,11 @@ export default function CreateRidePage() {
   const [routeUrl, setRouteUrl] = useState('');
   const [isFree, setIsFree] = useState(true);
   const [price, setPrice] = useState('');
+
+  // Recurrence state
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrencePattern, setRecurrencePattern] = useState<'WEEKLY' | 'BIWEEKLY' | 'MONTHLY'>('WEEKLY');
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(undefined);
 
   // Location search state
   const [locationSearch, setLocationSearch] = useState('');
@@ -244,6 +250,9 @@ export default function CreateRidePage() {
           isFree,
           price: !isFree && price ? parseFloat(price) : null,
           chapterId: chapterId || null,
+          // Recurrence settings
+          recurrencePattern: isRecurring ? recurrencePattern : null,
+          recurrenceEndDate: isRecurring && recurrenceEndDate ? recurrenceEndDate.toISOString() : null,
         }),
       });
 
@@ -399,6 +408,59 @@ export default function CreateRidePage() {
                     placeholder="Select time"
                   />
                 </div>
+              </div>
+
+              <Separator />
+
+              {/* Recurrence Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Repeat className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor="recurring" className="cursor-pointer">Make this a recurring ride</Label>
+                  </div>
+                  <input
+                    type="checkbox"
+                    id="recurring"
+                    checked={isRecurring}
+                    onChange={(e) => setIsRecurring(e.target.checked)}
+                    className="h-5 w-5 rounded border-gray-300 cursor-pointer"
+                  />
+                </div>
+
+                {isRecurring && (
+                  <div className="space-y-4 pl-6 border-l-2 border-muted">
+                    <div className="space-y-2">
+                      <Label>Repeat</Label>
+                      <Select
+                        value={recurrencePattern}
+                        onValueChange={(v) => setRecurrencePattern(v as 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="WEEKLY">Every week</SelectItem>
+                          <SelectItem value="BIWEEKLY">Every 2 weeks</SelectItem>
+                          <SelectItem value="MONTHLY">Every month</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Until</Label>
+                      <DatePicker
+                        date={recurrenceEndDate}
+                        setDate={setRecurrenceEndDate}
+                        placeholder="Select end date"
+                        minDate={rideDate || new Date()}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        All ride instances will be created up to this date
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

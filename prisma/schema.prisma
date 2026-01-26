@@ -274,6 +274,13 @@ model Ride {
   // Status
   status      RideStatus @default(PUBLISHED)
 
+  // Recurrence (for series of rides)
+  recurrencePattern   RecurrencePattern? // WEEKLY, BIWEEKLY, MONTHLY
+  recurrenceDay       Int?               // 0-6 for day of week (0=Sunday)
+  recurrenceEndDate   DateTime?          // When the series ends
+  recurrenceSeriesId  String?            // Links rides in same series (first ride's ID)
+  isRecurringTemplate Boolean @default(false) // True for the "template" ride that defines the series
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -318,6 +325,12 @@ enum RideStatus {
   PUBLISHED
   CANCELLED
   COMPLETED
+}
+
+enum RecurrencePattern {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
 }
 
 model Rsvp {
