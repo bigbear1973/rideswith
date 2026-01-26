@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -287,12 +286,10 @@ export default function EditBrandPage() {
               {/* Brand Preview */}
               <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/50">
                 {formData.logo || brand.logo ? (
-                  <Image
+                  <img
                     src={formData.logo || brand.logo || ''}
                     alt={brand.name}
-                    width={64}
-                    height={64}
-                    className="rounded-lg object-contain"
+                    className="w-16 h-16 rounded-lg object-contain"
                   />
                 ) : (
                   <div
@@ -416,12 +413,10 @@ export default function EditBrandPage() {
                   <div className="flex items-start gap-4">
                     {formData.logo ? (
                       <div className="relative">
-                        <Image
+                        <img
                           src={formData.logo}
                           alt="Logo"
-                          width={80}
-                          height={80}
-                          className="rounded-lg object-contain border"
+                          className="w-20 h-20 rounded-lg object-contain border"
                         />
                         <Button
                           type="button"
@@ -475,11 +470,9 @@ export default function EditBrandPage() {
                   <Label>Backdrop Image</Label>
                   {formData.backdrop ? (
                     <div className="relative">
-                      <Image
+                      <img
                         src={formData.backdrop}
                         alt="Backdrop"
-                        width={600}
-                        height={200}
                         className="w-full h-32 rounded-lg object-cover border"
                       />
                       <Button
