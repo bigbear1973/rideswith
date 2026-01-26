@@ -18,11 +18,13 @@ interface Chapter {
   slug: string;
   city: string;
   sponsorLabel: string | null;
+  hidePresentedBy: boolean | null;
   brand: {
     id: string;
     name: string;
     slug: string;
     sponsorLabel: string | null;
+    hidePresentedBy: boolean;
   };
   members: Array<{
     id: string;
@@ -60,6 +62,7 @@ export default function EditChapterPage() {
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [sponsorLabel, setSponsorLabel] = useState<'sponsors' | 'partners' | 'ads' | 'inherit'>('inherit');
+  const [hidePresentedBy, setHidePresentedBy] = useState<'inherit' | 'show' | 'hide'>('inherit');
   const [showSponsorForm, setShowSponsorForm] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [formData, setFormData] = useState({
@@ -109,6 +112,7 @@ export default function EditChapterPage() {
             name: brandData.name,
             slug: brandData.slug,
             sponsorLabel: brandData.sponsorLabel,
+            hidePresentedBy: brandData.hidePresentedBy || false,
           },
         });
         setFormData({
@@ -117,6 +121,14 @@ export default function EditChapterPage() {
         });
         // Set sponsor label - 'inherit' if null
         setSponsorLabel(fullChapter.sponsorLabel || 'inherit');
+        // Set hidePresentedBy - 'inherit' if null
+        setHidePresentedBy(
+          fullChapter.hidePresentedBy === true
+            ? 'hide'
+            : fullChapter.hidePresentedBy === false
+            ? 'show'
+            : 'inherit'
+        );
 
         // Check permission
         const isAdmin = fullChapter.members?.some(
@@ -162,6 +174,10 @@ export default function EditChapterPage() {
         body: JSON.stringify({
           ...formData,
           sponsorLabel: sponsorLabel === 'inherit' ? null : sponsorLabel,
+          hidePresentedBy:
+            hidePresentedBy === 'inherit'
+              ? null
+              : hidePresentedBy === 'hide',
         }),
       });
 
@@ -257,6 +273,53 @@ export default function EditChapterPage() {
               </div>
             </div>
 
+            {/* Ride Page Display Settings */}
+            <div className="space-y-4 border-t pt-6">
+              <div>
+                <Label className="text-base font-semibold">Ride Page Display</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Control how your chapter appears on ride detail pages
+                </p>
+              </div>
+
+              {/* Hide Presented By setting */}
+              <div className="space-y-2">
+                <Label className="text-sm">&quot;Presented by&quot; Card</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={hidePresentedBy === 'inherit' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setHidePresentedBy('inherit')}
+                  >
+                    Inherit from community
+                    <span className="ml-1 opacity-70">
+                      ({chapter.brand.hidePresentedBy ? 'hidden' : 'visible'})
+                    </span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={hidePresentedBy === 'show' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setHidePresentedBy('show')}
+                  >
+                    Show
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={hidePresentedBy === 'hide' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setHidePresentedBy('hide')}
+                  >
+                    Hide
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  The sidebar card that links to your community&apos;s external website
+                </p>
+              </div>
+            </div>
+
             {/* Sponsors/Partners/Ads Section */}
             <div className="space-y-4 border-t pt-6">
               <div className="flex items-center justify-between">
@@ -270,7 +333,7 @@ export default function EditChapterPage() {
                       : 'Ads'}
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Add sponsors or partners that appear on your chapter's ride pages
+                    Add sponsors or partners that appear on your chapter&apos;s ride pages
                   </p>
                 </div>
               </div>

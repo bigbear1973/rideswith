@@ -157,6 +157,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       updateData.sponsorLabel = validLabels.includes(body.sponsorLabel) ? body.sponsorLabel : null;
     }
 
+    // Hide "Presented by" card setting
+    if (body.hidePresentedBy !== undefined) {
+      updateData.hidePresentedBy = !!body.hidePresentedBy;
+    }
+
     const updatedBrand = await prisma.brand.update({
       where: { slug },
       data: updateData,

@@ -44,6 +44,7 @@ interface Brand {
   strava: string | null;
   youtube: string | null;
   sponsorLabel: string | null;
+  hidePresentedBy: boolean;
 }
 
 interface Sponsor {
@@ -87,6 +88,7 @@ export default function EditBrandPage() {
   const [uploadingBackdrop, setUploadingBackdrop] = useState(false);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [sponsorLabel, setSponsorLabel] = useState<'sponsors' | 'partners' | 'ads'>('sponsors');
+  const [hidePresentedBy, setHidePresentedBy] = useState(false);
   const [showSponsorForm, setShowSponsorForm] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [formData, setFormData] = useState({
@@ -132,6 +134,7 @@ export default function EditBrandPage() {
             youtube: data.youtube || '',
           });
           setSponsorLabel((data.sponsorLabel as 'sponsors' | 'partners' | 'ads') || 'sponsors');
+          setHidePresentedBy(data.hidePresentedBy || false);
 
           // Check ownership
           if (data.createdById !== session?.user?.id) {
@@ -169,7 +172,7 @@ export default function EditBrandPage() {
       const response = await fetch(`/api/communities/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, sponsorLabel }),
+        body: JSON.stringify({ ...formData, sponsorLabel, hidePresentedBy }),
       });
 
       if (!response.ok) {
@@ -663,6 +666,35 @@ export default function EditBrandPage() {
                       placeholder="Channel URL"
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Ride Page Display Settings */}
+              <div className="space-y-4 border-t pt-6">
+                <div>
+                  <Label className="text-base font-semibold">Ride Page Display</Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Control how your community appears on ride detail pages
+                  </p>
+                </div>
+
+                {/* Hide Presented By toggle */}
+                <div className="flex items-center justify-between p-4 rounded-lg border">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="hidePresentedBy" className="cursor-pointer">
+                      Hide &quot;Presented by&quot; Card
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Remove the sidebar card that links to your external website
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    id="hidePresentedBy"
+                    checked={hidePresentedBy}
+                    onChange={(e) => setHidePresentedBy(e.target.checked)}
+                    className="h-5 w-5 rounded border-gray-300 cursor-pointer"
+                  />
                 </div>
               </div>
 

@@ -82,6 +82,7 @@ export default async function RidePage({ params }: RidePageProps) {
           slug: true,
           city: true,
           sponsorLabel: true,
+          hidePresentedBy: true,
           sponsors: {
             where: { isActive: true },
             orderBy: { displayOrder: 'asc' },
@@ -109,6 +110,7 @@ export default async function RidePage({ params }: RidePageProps) {
               slogan: true,
               domain: true,
               sponsorLabel: true, // Used as fallback if chapter doesn't set its own
+              hidePresentedBy: true, // Used as fallback if chapter doesn't set its own
             },
           },
         },
@@ -170,6 +172,9 @@ export default async function RidePage({ params }: RidePageProps) {
   const brand = ride.chapter?.brand;
   const chapter = ride.chapter;
   const hasBranding = !!brand;
+
+  // Check if "Presented by" card should be hidden (chapter setting overrides brand)
+  const hidePresentedBy = chapter?.hidePresentedBy ?? brand?.hidePresentedBy ?? false;
 
   // Check if current user can edit this ride
   const canEdit = session?.user?.id && ride.organizer.members.some(
@@ -471,50 +476,52 @@ export default async function RidePage({ params }: RidePageProps) {
           {hasBranding && brand && chapter && brand.domain && (
             <div className="hidden lg:block">
               <div className="sticky top-24 space-y-4">
-                {/* Brand Card - links to external brand site */}
-                <Card className="overflow-hidden">
-                  <a
-                    href={`https://${brand.domain}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block group"
-                  >
-                    {/* Backdrop image */}
-                    {brand.backdrop && (
-                      <div
-                        className="h-32 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${brand.backdrop})` }}
-                      />
-                    )}
-                    {/* Brand info below image */}
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        {brand.logo ? (
-                          <img
-                            src={brand.logo}
-                            alt={brand.name}
-                            className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
-                          />
-                        ) : (
-                          <div
-                            className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
-                            style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
-                          >
-                            {brand.name.charAt(0)}
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-muted-foreground">Presented by</p>
-                          <p className="font-semibold truncate">{brand.name}</p>
-                          {brand.slogan && (
-                            <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
+                {/* Brand Card - links to external brand site (can be hidden) */}
+                {!hidePresentedBy && (
+                  <Card className="overflow-hidden">
+                    <a
+                      href={`https://${brand.domain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group"
+                    >
+                      {/* Backdrop image */}
+                      {brand.backdrop && (
+                        <div
+                          className="h-32 bg-cover bg-center"
+                          style={{ backgroundImage: `url(${brand.backdrop})` }}
+                        />
+                      )}
+                      {/* Brand info below image */}
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          {brand.logo ? (
+                            <img
+                              src={brand.logo}
+                              alt={brand.name}
+                              className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
+                            />
+                          ) : (
+                            <div
+                              className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
+                              style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
+                            >
+                              {brand.name.charAt(0)}
+                            </div>
                           )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground">Presented by</p>
+                            <p className="font-semibold truncate">{brand.name}</p>
+                            {brand.slogan && (
+                              <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
+                            )}
+                          </div>
+                          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                         </div>
-                        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </div>
-                    </CardContent>
-                  </a>
-                </Card>
+                      </CardContent>
+                    </a>
+                  </Card>
+                )}
 
                 {/* Sponsors Section - chapter-specific sponsors only */}
                 {(() => {

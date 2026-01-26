@@ -104,7 +104,8 @@ model Brand {
   youtube   String? // YouTube channel URL
 
   // Sponsor settings
-  sponsorLabel String? // "sponsors" | "partners" | "ads" - defaults to "sponsors"
+  sponsorLabel    String?  // "sponsors" | "partners" | "ads" - defaults to "sponsors"
+  hidePresentedBy Boolean @default(false) // Hide the "Presented by" sidebar card on ride pages
 
   // Ownership
   createdById String?
@@ -133,7 +134,8 @@ model Chapter {
   customColors Json? // { primaryColor, secondaryColor }
 
   // Sponsor settings (can override brand-level settings)
-  sponsorLabel String? // "sponsors" | "partners" | "ads" - inherits from brand if null
+  sponsorLabel    String?  // "sponsors" | "partners" | "ads" - inherits from brand if null
+  hidePresentedBy Boolean? // Hide "Presented by" card - inherits from brand if null
 
   // Stats (managed counters)
   memberCount Int @default(0)
