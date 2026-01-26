@@ -10,3 +10,4 @@ export { RsvpSection } from './rsvp-section';
 export { SidebarComments } from './sidebar-comments';
 export { AddToCalendar } from './add-to-calendar';
 export { LiveLocationBanner } from './live-location-banner';
+export { ShareButton } from './share-button';

@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments, AddToCalendar, LiveLocationBanner } from '@/components/rides';
+import { RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments, AddToCalendar, LiveLocationBanner, ShareButton } from '@/components/rides';
 import { SponsorCard } from '@/components/communities';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -308,14 +308,21 @@ export default async function RidePage({ params }: RidePageProps) {
               <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
                 {ride.title}
               </h1>
-              {canEdit && (
-                <Button variant="outline" size="sm" asChild className="hidden lg:flex">
-                  <Link href={`/rides/${id}/edit`}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Link>
-                </Button>
-              )}
+              <div className="flex items-center gap-2 shrink-0">
+                <ShareButton
+                  rideInfo={rideInfoText}
+                  rideUrl={rideUrl}
+                  rideTitle={ride.title}
+                />
+                {canEdit && (
+                  <Button variant="outline" size="sm" asChild className="hidden lg:flex">
+                    <Link href={`/rides/${id}/edit`}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Link>
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Live Location Banner - shown when ride is live */}
@@ -483,10 +490,6 @@ export default async function RidePage({ params }: RidePageProps) {
                   isPastRide={isPastRide}
                 />
 
-                {/* Copy ride info */}
-                <div className="pt-2">
-                  <CopyRideInfo rideInfo={rideInfoText} />
-                </div>
               </CardContent>
             </Card>
 
