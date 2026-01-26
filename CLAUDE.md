@@ -180,10 +180,17 @@ Replaced fixed pace categories (Casual/Moderate/Fast/Race) with custom speed inp
 
 ### Ride Detail Page Layout
 - Ride Info card displayed in main content (under date/time and location)
-- Sidebar appears with brand card (for branded rides) and Discussion section
-- Discussion sidebar: users can ask questions, post links, and reply to comments
-- Non-branded rides still show sidebar for discussion
+- Discussion section in main content area (below route links, above RSVP card) - visible for all rides
+- Sidebar (branded rides only) shows "Presented by" card and sponsor cards
+- "Presented by" card can be hidden at community or chapter level (hidePresentedBy setting)
 - "Hosted by" links to the creator's user profile (/u/slug), not the organizer entity
+
+### Chapter Team Management (IMPLEMENTED)
+- Chapter settings page includes team member management section
+- Owners can add/remove members, change roles (Owner, Admin, Moderator)
+- Admins can only add/manage Moderators
+- User search by name or email via `/api/users/search` endpoint
+- Roles have hierarchical permissions for editing chapters and creating rides
 
 ### Past Rides on Chapter Pages (IMPLEMENTED)
 - Chapter pages show collapsible "Past Rides" section
@@ -473,8 +480,12 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (organizers)
 
 **Recently Completed:**
+- Discussion moved to main content area (visible for all rides, not just branded)
+- Chapter team management UI - add/remove members, change roles via chapter settings
+- Hide "Presented by" option at community and chapter levels (hidePresentedBy setting)
+- Sponsor card logo visibility fix for dark mode (bg-muted instead of bg-white)
 - Team community type - 4th option (Brand/Club/Team/Group) with Trophy icon and orange badge
-- Sidebar Discussion on ride detail pages - users can ask questions, post links, reply to comments
+- Discussion section on ride detail pages - users can ask questions, post links, reply to comments
 - Threaded comment replies - comments now support nested replies with inline reply forms
 - Custom speed range - organizers specify min/max speed (km/h) instead of pace categories
 - Profile image upload - users can upload their own profile photo via Cloudinary
@@ -509,11 +520,15 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Discussion section moved from sidebar to main content (visible for all rides)
+- [x] Chapter team management - add/remove members, change roles in chapter settings
+- [x] Hide "Presented by" card option at community/chapter level
+- [x] Sponsor card logo visibility fix for dark mode
 - [x] Community Sponsors/Partners/Ads - chapters can manage sponsors with Small/Medium/Large display sizes
 - [x] Chapter settings page - `/communities/[slug]/[chapter]/edit` for managing sponsors and settings
 - [x] Sponsor display sizes - Small (logo+name), Medium (+description), Large (+backdrop image)
 - [x] Team community type - 4th option (Brand/Club/Team/Group) with Trophy icon and orange badge
-- [x] Sidebar Discussion on ride detail pages - questions, links, threaded replies
+- [x] Discussion section on ride detail pages - questions, links, threaded replies
 - [x] Threaded comment replies - nested replies with inline reply forms
 - [x] Custom speed range - replaced pace categories (Casual/Moderate/Fast/Race) with min/max speed inputs (km/h)
 - [x] URL rename: /brands → /communities with type badges (Brand/Club/Team/Group)
