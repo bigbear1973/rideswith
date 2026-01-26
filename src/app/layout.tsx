@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description:
     'Discover cycling group rides near you, join with one click, and get routes on any GPS platform. For riders and organizers.',
   keywords: ['cycling', 'group rides', 'bike rides', 'cycling events', 'GPS routes'],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith-production.up.railway.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'),
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

@@ -180,7 +180,7 @@ export default async function RidePage({ params }: RidePageProps) {
   });
 
   // Build ride info text for copying
-  const rideUrl = `https://rideswith-production.up.railway.app/rides/${id}`;
+  const rideUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/rides/${id}`;
   // Shorten address: take first 2-3 parts (e.g., "Phoenix Park, Dublin" instead of full address)
   const shortAddress = ride.locationAddress.split(',').slice(0, 2).join(',').trim();
   const rideInfoText = [
