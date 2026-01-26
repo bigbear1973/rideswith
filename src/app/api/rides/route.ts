@@ -328,6 +328,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(ride, { status: 201 });
   } catch (error) {
     console.error('POST /api/rides error:', error);
-    return NextResponse.json({ error: 'Failed to create ride' }, { status: 500 });
+    // Return more details in development
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create ride';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
