@@ -214,6 +214,7 @@ isRecurringTemplate Boolean            // True for the template ride
 - Each instance is a separate ride record, linked via `recurrenceSeriesId`
 - The first ride is marked as `isRecurringTemplate: true`
 - Editing one instance only affects that occurrence, not the entire series
+- Homepage "Latest rides" only shows template rides (not all instances)
 
 **UI:**
 - Create form has "Make this a recurring ride" toggle
@@ -498,7 +499,7 @@ Natural language / voice input to auto-fill ride details:
 - All UI pages rendered (responsive)
 - Settings persistence (localStorage)
 - Map with location search
-- Filter UI on discover page (with working distance + pace filters)
+- Filter UI on discover page (with working distance, pace, and date range filters)
 - Discover page fetches from database
 - User profile pages with ride history and stats
 - Public profile URLs (/u/username)
@@ -518,6 +519,9 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (organizers)
 
 **Recently Completed:**
+- Date range filter on Discover page (Next 7 days, 2 weeks, month, 3 months)
+- Mobile sponsors section on ride detail page (shows sponsors below main content on mobile)
+- Improved video lightbox close button for mobile (prominent header bar with Close button)
 - Discussion moved to main content area (visible for all rides, not just branded)
 - Chapter team management UI - add/remove members, change roles via chapter settings
 - Hide "Presented by" option at community and chapter levels (hidePresentedBy setting)
@@ -558,6 +562,9 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Date range filter on Discover page (Next 7 days, 2 weeks, month, 3 months)
+- [x] Mobile sponsors section on ride detail page
+- [x] Improved video lightbox close button for mobile
 - [x] Recurring rides - create weekly/biweekly/monthly ride series
 - [x] Add to Calendar - export rides to Google Calendar, Outlook, Apple Calendar
 - [x] Discussion section moved from sidebar to main content (visible for all rides)
@@ -598,6 +605,28 @@ Natural language / voice input to auto-fill ride details:
 - [ ] Email notifications (ride reminders, updates)
 
 ### Low Priority
-- [ ] Advanced search (location radius, date range)
+- [ ] Advanced search (location radius)
 - [ ] Follow organizers
 - [ ] Social sharing
+
+---
+
+## Discover Page Filters (IMPLEMENTED)
+
+The Discover page supports multiple filters for finding rides:
+
+**Location Filters:**
+- Search by city/location using OpenStreetMap Nominatim
+- Use current location via geolocation
+- Radius filter: 10km, 25km, 50km, 100km, 200km
+
+**Ride Filters:**
+- **Pace**: Casual, Moderate, Fast, Race (multi-select)
+- **Distance**: Short (<30km), Medium (30-60km), Long (60-100km), Epic (>100km) (multi-select)
+- **Date Range**: All upcoming, Next 7 days, Next 2 weeks, Next month, Next 3 months
+
+**UI:**
+- Desktop: Dropdown menus and select components in filter bar
+- Mobile: Filter sheet (bottom drawer) with button groups
+- Active filter count badge on filter button
+- "Clear filters" button when filters are active
