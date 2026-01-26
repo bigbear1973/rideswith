@@ -9,6 +9,11 @@ export async function GET() {
         date: {
           gte: new Date(), // Only future rides
         },
+        // For recurring rides, only show the template (first ride in series)
+        OR: [
+          { recurrenceSeriesId: null }, // Not part of a recurring series
+          { isRecurringTemplate: true }, // Is the template ride
+        ],
       },
       include: {
         organizer: {
