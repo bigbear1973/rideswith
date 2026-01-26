@@ -19,10 +19,12 @@ Cycling group ride discovery and management platform.
 - `src/lib/prisma.ts` - Prisma client singleton
 - `src/lib/brand-dev.ts` - Brand.dev API integration for auto-fetching brand assets
 - `src/lib/roles.ts` - Chapter role helpers (normalizeRole, isOwner, isAdmin, isModerator)
+- `src/lib/platform-admin.ts` - Platform admin helpers (isPlatformAdmin, canManageSponsors)
 - `src/components/providers/units-provider.tsx` - km/mi unit preference context
 - `src/components/rides/location-link.tsx` - Map app picker (Apple Maps, Google Maps, Waze)
 - `src/components/rides/cake-and-coffee.tsx` - Post-ride comments and media gallery
 - `prisma/schema.prisma` - Database schema (User, Organizer, Ride, Rsvp, Brand, Chapter models)
+- `prisma/seed.ts` - Database seed script (sets platform admin on deployment)
 - `railway.json` - Railway deployment config
 
 ## Commands
@@ -292,6 +294,58 @@ enum SponsorSize {
 - Only chapter-specific sponsors are shown (not inherited from community)
 - Section header uses the chapter's label (or inherited from community)
 
+### Platform Admin & Paid Sponsors (IMPLEMENTED)
+Platform owner controls which communities can use the sponsors feature, enabling monetization as a paid add-on.
+
+**User Roles:**
+- **USER** - Default role for all users
+- **PLATFORM_ADMIN** - Special role with full platform access (only `rogermbyrne@gmail.com`)
+
+**Database Fields:**
+```prisma
+model User {
+  role  String @default("USER")  // "USER" | "PLATFORM_ADMIN"
+}
+
+model Brand {
+  sponsorsEnabled Boolean @default(false)  // Only platform admin can enable
+}
+```
+
+**How it works:**
+- Platform admin is automatically set via seed script on deployment
+- Communities have `sponsorsEnabled` flag (default: false)
+- Only platform admin can toggle `sponsorsEnabled` via admin panel
+- Community owners can only manage sponsors if the feature is enabled
+
+**Admin Panel:**
+- URL: `/admin/communities` (https://rideswith.com/admin/communities)
+- Only accessible by platform admin
+- Shows all communities with toggle for `sponsorsEnabled`
+- Displays community name, type, owner, and chapter count
+
+**Key Files:**
+- `src/lib/platform-admin.ts` - Helper functions (`isPlatformAdmin`, `canManageSponsors`)
+- `src/types/next-auth.d.ts` - TypeScript types for session with role
+- `src/app/admin/communities/page.tsx` - Admin panel UI
+- `src/app/api/admin/communities/route.ts` - GET all communities
+- `src/app/api/admin/communities/[id]/route.ts` - PATCH to toggle sponsorsEnabled
+- `prisma/seed.ts` - Sets platform admin on deployment
+
+**API Endpoints:**
+- `GET /api/admin/communities` - List all communities (platform admin only)
+- `PATCH /api/admin/communities/[id]` - Update community settings (sponsorsEnabled)
+
+**UI Behavior:**
+- Community owners see sponsors section only if `sponsorsEnabled === true`
+- Platform admin always sees sponsors section
+- When disabled, owners see: "Contact us to enable sponsors for your community"
+
+**Deployment Setup:**
+- Seed script runs automatically on Railway via `npm run start`
+- Sets `rogermbyrne@gmail.com` as PLATFORM_ADMIN if user exists
+- If user doesn't exist yet, they become admin on first login (handled by seed on next deploy)
+
 ---
 
 ## Cake & Coffee Stop (Post-Ride Social)
@@ -374,6 +428,7 @@ Natural language / voice input to auto-fill ride details:
 | `/communities/[slug]` | `src/app/communities/[slug]/page.tsx` | Community profile with chapters |
 | `/communities/[slug]/[chapter]` | `src/app/communities/[slug]/[chapter]/page.tsx` | Chapter page with rides |
 | `/communities/[slug]/create-chapter` | `src/app/communities/[slug]/create-chapter/page.tsx` | Start a chapter |
+| `/admin/communities` | `src/app/admin/communities/page.tsx` | Platform admin panel (admin only) |
 
 ### Broken Links (404s)
 | Link | Referenced In | Priority |
@@ -519,6 +574,9 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (organizers)
 
 **Recently Completed:**
+- Platform admin feature - control sponsors as paid add-on per community
+- Admin panel at /admin/communities for platform admin only
+- Automatic platform admin setup via seed script on deployment
 - Date range filter on Discover page (Next 7 days, 2 weeks, month, 3 months)
 - Mobile sponsors section on ride detail page (shows sponsors below main content on mobile)
 - Improved video lightbox close button for mobile (prominent header bar with Close button)
@@ -562,6 +620,9 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Platform admin feature - sponsors as paid add-on controlled by platform owner
+- [x] Admin panel at /admin/communities for managing community sponsor access
+- [x] Automatic platform admin setup via prisma/seed.ts on deployment
 - [x] Date range filter on Discover page (Next 7 days, 2 weeks, month, 3 months)
 - [x] Mobile sponsors section on ride detail page
 - [x] Improved video lightbox close button for mobile

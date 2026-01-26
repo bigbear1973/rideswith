@@ -163,8 +163,15 @@ export function DatePicker({
   disabled = false,
   minDate,
 }: DatePickerProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleSelect = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    setIsOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -183,7 +190,7 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={handleSelect}
           initialFocus
           disabled={(d) => minDate ? d < new Date(minDate.setHours(0, 0, 0, 0)) : false}
         />
@@ -207,6 +214,7 @@ export function TimePicker({
   className,
   disabled = false,
 }: TimePickerProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const minutes = ['00', '15', '30', '45'];
 
@@ -214,16 +222,24 @@ export function TimePicker({
 
   const handleHourChange = (newHour: string) => {
     const m = minute ?? 0;
-    setTime(`${newHour.padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+    const newTime = `${newHour.padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    setTime(newTime);
+    // Close if minute is already set
+    if (minute !== null) {
+      setIsOpen(false);
+    }
   };
 
   const handleMinuteChange = (newMinute: string) => {
     const h = hour ?? 8;
-    setTime(`${h.toString().padStart(2, '0')}:${newMinute}`);
+    const newTime = `${h.toString().padStart(2, '0')}:${newMinute}`;
+    setTime(newTime);
+    // Close after selecting minute (hour will be set)
+    setIsOpen(false);
   };
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

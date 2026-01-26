@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Settings, LogOut, Loader2 } from 'lucide-react';
+import { User, Settings, LogOut, Loader2, Shield } from 'lucide-react';
 
 export function UserMenu() {
   const { data: session, status } = useSession();
@@ -69,6 +69,17 @@ export function UserMenu() {
             Settings
           </Link>
         </DropdownMenuItem>
+        {session.user.role === 'PLATFORM_ADMIN' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin/communities" className="cursor-pointer">
+                <Shield className="h-4 w-4 mr-2" />
+                Admin: Communities
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: '/' })}

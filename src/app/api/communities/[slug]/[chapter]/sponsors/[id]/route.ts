@@ -74,10 +74,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Check if sponsors are enabled for this community
+    // Check if sponsors are enabled at brand level
     if (!canManageSponsors(session, chapter.brand.sponsorsEnabled)) {
       return NextResponse.json(
         { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check if chapter has explicitly disabled sponsors
+    if (chapter.sponsorsEnabled === false && !isPlatformAdmin(session)) {
+      return NextResponse.json(
+        { error: "Sponsors are disabled for this chapter." },
         { status: 403 }
       );
     }
@@ -176,10 +184,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Check if sponsors are enabled for this community
+    // Check if sponsors are enabled at brand level
     if (!canManageSponsors(session, chapter.brand.sponsorsEnabled)) {
       return NextResponse.json(
         { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check if chapter has explicitly disabled sponsors
+    if (chapter.sponsorsEnabled === false && !isPlatformAdmin(session)) {
+      return NextResponse.json(
+        { error: "Sponsors are disabled for this chapter." },
         { status: 403 }
       );
     }

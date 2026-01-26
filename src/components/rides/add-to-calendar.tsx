@@ -123,8 +123,12 @@ export function AddToCalendar({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
-          <CalendarPlus className="h-4 w-4" />
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-primary hover:text-primary/80"
+        >
+          <CalendarPlus className="h-3.5 w-3.5 mr-1" />
           Add to Calendar
         </Button>
       </PopoverTrigger>

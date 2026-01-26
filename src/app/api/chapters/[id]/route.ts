@@ -153,6 +153,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       updateData.customColors = body.customColors;
     if (body.sponsorLabel !== undefined) updateData.sponsorLabel = body.sponsorLabel;
     if (body.hidePresentedBy !== undefined) updateData.hidePresentedBy = body.hidePresentedBy;
+    if (body.sponsorsEnabled !== undefined) updateData.sponsorsEnabled = body.sponsorsEnabled;
 
     const chapter = await prisma.chapter.update({
       where: { id },

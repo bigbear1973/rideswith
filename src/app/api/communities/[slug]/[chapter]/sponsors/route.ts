@@ -24,6 +24,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       select: {
         id: true,
         sponsorLabel: true,
+        sponsorsEnabled: true,
         brand: {
           select: {
             id: true,
@@ -38,13 +39,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // If sponsors aren't enabled at brand level, return empty list (unless admin)
+    // Determine effective sponsorsEnabled: chapter can override brand (if chapter is explicitly false, disable)
+    // Hierarchy: brand must be enabled, then chapter can optionally disable
+    const brandEnabled = chapter.brand.sponsorsEnabled;
+    const chapterEnabled = chapter.sponsorsEnabled !== false; // null or true = enabled (if brand allows)
+    const effectiveSponsorsEnabled = brandEnabled && chapterEnabled;
+
+    // If sponsors aren't enabled, return empty list (unless admin)
     const session = await auth();
-    if (!chapter.brand.sponsorsEnabled && !isPlatformAdmin(session)) {
+    if (!effectiveSponsorsEnabled && !isPlatformAdmin(session)) {
       return NextResponse.json({
         sponsors: [],
         sponsorLabel: chapter.sponsorLabel || chapter.brand.sponsorLabel || "sponsors",
         sponsorsEnabled: false,
+        brandSponsorsEnabled: brandEnabled,
+        chapterSponsorsEnabled: chapter.sponsorsEnabled,
       });
     }
 
@@ -63,7 +72,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       sponsors,
       sponsorLabel,
-      sponsorsEnabled: chapter.brand.sponsorsEnabled,
+      sponsorsEnabled: effectiveSponsorsEnabled,
+      brandSponsorsEnabled: brandEnabled,
+      chapterSponsorsEnabled: chapter.sponsorsEnabled,
     });
   } catch (error) {
     console.error("GET /api/communities/[slug]/[chapter]/sponsors error:", error);
@@ -106,10 +117,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Check if sponsors are enabled for this community
+    // Check if sponsors are enabled at brand level
     if (!canManageSponsors(session, chapter.brand.sponsorsEnabled)) {
       return NextResponse.json(
         { error: "Sponsors are not enabled for this community. Contact the platform administrator." },
+        { status: 403 }
+      );
+    }
+
+    // Check if chapter has explicitly disabled sponsors
+    if (chapter.sponsorsEnabled === false && !isPlatformAdmin(session)) {
+      return NextResponse.json(
+        { error: "Sponsors are disabled for this chapter." },
         { status: 403 }
       );
     }

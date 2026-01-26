@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Share2, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ShareButtonProps {
   rideInfo: string;
@@ -10,26 +16,10 @@ interface ShareButtonProps {
   rideTitle: string;
 }
 
-export function ShareButton({ rideInfo, rideUrl, rideTitle }: ShareButtonProps) {
+export function ShareButton({ rideInfo }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleShare = async () => {
-    // Try native share API first (mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: rideTitle,
-          text: rideInfo,
-          url: rideUrl,
-        });
-        return;
-      } catch (err) {
-        // User cancelled or share failed, fall back to clipboard
-        if ((err as Error).name === 'AbortError') return;
-      }
-    }
-
-    // Fall back to clipboard
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(rideInfo);
       setCopied(true);
@@ -40,23 +30,32 @@ export function ShareButton({ rideInfo, rideUrl, rideTitle }: ShareButtonProps) 
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleShare}
-      className="gap-2"
-    >
-      {copied ? (
-        <>
-          <Check className="h-4 w-4 text-green-500" />
-          <span className="hidden sm:inline">Copied!</span>
-        </>
-      ) : (
-        <>
-          <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Share</span>
-        </>
-      )}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+            className="gap-2"
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="hidden sm:inline">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                <span className="hidden sm:inline">Share</span>
+              </>
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Copy all ride details and link to clipboard</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

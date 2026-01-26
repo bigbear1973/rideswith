@@ -138,6 +138,7 @@ model Chapter {
   // Sponsor settings (can override brand-level settings)
   sponsorLabel    String?  // "sponsors" | "partners" | "ads" - inherits from brand if null
   hidePresentedBy Boolean? // Hide "Presented by" card - inherits from brand if null
+  sponsorsEnabled Boolean? // Chapter can disable sponsors even if brand has them enabled (null = inherit from brand)
 
   // Stats (managed counters)
   memberCount Int @default(0)

@@ -32,6 +32,7 @@ interface Chapter {
   city: string;
   sponsorLabel: string | null;
   hidePresentedBy: boolean | null;
+  sponsorsEnabled: boolean | null;
   brand: {
     id: string;
     name: string;
@@ -97,7 +98,8 @@ export default function EditChapterPage() {
   const [memberError, setMemberError] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [isBrandOwner, setIsBrandOwner] = useState(false);
-  const [sponsorsEnabled, setSponsorsEnabled] = useState(false);
+  const [brandSponsorsEnabled, setBrandSponsorsEnabled] = useState(false);
+  const [chapterSponsorsEnabled, setChapterSponsorsEnabled] = useState<'inherit' | 'enabled' | 'disabled'>('inherit');
   const isPlatformAdmin = session?.user?.role === 'PLATFORM_ADMIN';
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function EditChapterPage() {
             sponsorsEnabled: brandData.sponsorsEnabled || false,
           },
         });
-        setSponsorsEnabled(brandData.sponsorsEnabled || false);
+        setBrandSponsorsEnabled(brandData.sponsorsEnabled || false);
         setMembers(fullChapter.members || []);
         setFormData({
           name: fullChapter.name || '',
@@ -161,6 +163,14 @@ export default function EditChapterPage() {
             ? 'hide'
             : fullChapter.hidePresentedBy === false
             ? 'show'
+            : 'inherit'
+        );
+        // Set chapter-level sponsors enabled
+        setChapterSponsorsEnabled(
+          fullChapter.sponsorsEnabled === true
+            ? 'enabled'
+            : fullChapter.sponsorsEnabled === false
+            ? 'disabled'
             : 'inherit'
         );
 
@@ -215,6 +225,10 @@ export default function EditChapterPage() {
             hidePresentedBy === 'inherit'
               ? null
               : hidePresentedBy === 'hide',
+          sponsorsEnabled:
+            chapterSponsorsEnabled === 'inherit'
+              ? null
+              : chapterSponsorsEnabled === 'enabled',
         }),
       });
 
@@ -640,7 +654,7 @@ export default function EditChapterPage() {
             </div>
 
             {/* Sponsors/Partners/Ads Section */}
-            {(sponsorsEnabled || isPlatformAdmin) ? (
+            {(brandSponsorsEnabled || isPlatformAdmin) ? (
               <div className="space-y-4 border-t pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -658,37 +672,79 @@ export default function EditChapterPage() {
                   </div>
                 </div>
 
-                {/* Label Type Selector */}
+                {/* Chapter Sponsors Toggle */}
                 <div className="space-y-2">
-                  <Label className="text-sm">What do you call these?</Label>
+                  <Label className="text-sm">Enable sponsors for this chapter?</Label>
                   <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
-                      variant={sponsorLabel === 'inherit' ? 'default' : 'outline'}
+                      variant={chapterSponsorsEnabled === 'inherit' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setSponsorLabel('inherit')}
+                      onClick={() => setChapterSponsorsEnabled('inherit')}
                     >
                       Inherit from community
-                      {chapter.brand.sponsorLabel && (
-                        <span className="ml-1 opacity-70">
-                          ({chapter.brand.sponsorLabel})
-                        </span>
-                      )}
+                      <span className="ml-1 opacity-70">
+                        ({brandSponsorsEnabled ? 'enabled' : 'disabled'})
+                      </span>
                     </Button>
-                    {(['sponsors', 'partners', 'ads'] as const).map((label) => (
-                      <Button
-                        key={label}
-                        type="button"
-                        variant={sponsorLabel === label ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSponsorLabel(label)}
-                        className="capitalize"
-                      >
-                        {label}
-                      </Button>
-                    ))}
+                    <Button
+                      type="button"
+                      variant={chapterSponsorsEnabled === 'enabled' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setChapterSponsorsEnabled('enabled')}
+                    >
+                      Enabled
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={chapterSponsorsEnabled === 'disabled' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setChapterSponsorsEnabled('disabled')}
+                    >
+                      Disabled
+                    </Button>
                   </div>
+                  {chapterSponsorsEnabled === 'disabled' && (
+                    <p className="text-sm text-muted-foreground">
+                      Sponsors are disabled for this chapter. Existing sponsors will be hidden.
+                    </p>
+                  )}
                 </div>
+
+                {/* Only show rest of sponsor UI if effectively enabled */}
+                {(chapterSponsorsEnabled !== 'disabled' || isPlatformAdmin) && (
+                  <>
+                    {/* Label Type Selector */}
+                    <div className="space-y-2">
+                      <Label className="text-sm">What do you call these?</Label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant={sponsorLabel === 'inherit' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSponsorLabel('inherit')}
+                        >
+                          Inherit from community
+                          {chapter.brand.sponsorLabel && (
+                            <span className="ml-1 opacity-70">
+                              ({chapter.brand.sponsorLabel})
+                            </span>
+                          )}
+                        </Button>
+                        {(['sponsors', 'partners', 'ads'] as const).map((label) => (
+                          <Button
+                            key={label}
+                            type="button"
+                            variant={sponsorLabel === label ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setSponsorLabel(label)}
+                            className="capitalize"
+                          >
+                            {label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
 
                 {/* Sponsors List */}
                 <SponsorList
@@ -760,6 +816,8 @@ export default function EditChapterPage() {
                     <Plus className="h-4 w-4 mr-2" />
                     Add {effectiveLabel.slice(0, -1)}
                   </Button>
+                )}
+                  </>
                 )}
               </div>
             ) : (
