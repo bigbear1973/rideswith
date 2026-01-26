@@ -54,6 +54,14 @@ const RADIUS_OPTIONS = [
   { value: '200', label: '200 km' },
 ];
 
+const DATE_RANGE_OPTIONS = [
+  { value: 'all', label: 'All upcoming', days: null },
+  { value: '7', label: 'Next 7 days', days: 7 },
+  { value: '14', label: 'Next 2 weeks', days: 14 },
+  { value: '30', label: 'Next month', days: 30 },
+  { value: '90', label: 'Next 3 months', days: 90 },
+];
+
 const PACE_STYLES: Record<string, string> = {
   casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
   moderate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -126,6 +134,7 @@ export default function DiscoverPage() {
   const [searchRadius, setSearchRadius] = useState('50');
   const [selectedPaces, setSelectedPaces] = useState<string[]>([]);
   const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
+  const [dateRange, setDateRange] = useState('all');
   const [locationName, setLocationName] = useState('Dublin, Ireland');
   const [hasRequestedLocation, setHasRequestedLocation] = useState(false);
   const { formatDistance, unitSystem } = useUnits();
@@ -176,7 +185,7 @@ export default function DiscoverPage() {
     fetchRides();
   }, []);
 
-  // Filter rides based on location, radius, pace, and distance
+  // Filter rides based on location, radius, pace, distance, and date range
   const filteredRides = rides.filter((ride) => {
     // Check distance from center (search radius)
     const distanceFromCenter = getDistanceKm(
@@ -203,7 +212,17 @@ export default function DiscoverPage() {
       matchesDistance = false;
     }
 
-    return withinRadius && matchesPace && matchesDistance;
+    // Check date range filter
+    let matchesDateRange = true;
+    if (dateRange !== 'all') {
+      const days = parseInt(dateRange);
+      const rideDate = new Date(ride.date);
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() + days);
+      matchesDateRange = rideDate <= cutoffDate;
+    }
+
+    return withinRadius && matchesPace && matchesDistance && matchesDateRange;
   });
 
   const mapMarkers = filteredRides.map((ride) => ({
@@ -293,9 +312,10 @@ export default function DiscoverPage() {
   const clearFilters = () => {
     setSelectedPaces([]);
     setSelectedDistances([]);
+    setDateRange('all');
   };
 
-  const activeFilterCount = selectedPaces.length + selectedDistances.length;
+  const activeFilterCount = selectedPaces.length + selectedDistances.length + (dateRange !== 'all' ? 1 : 0);
 
   // Format radius display based on unit system
   const formatRadius = (km: string) => {
@@ -444,6 +464,20 @@ export default function DiscoverPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger className={`w-36 ${dateRange !== 'all' ? 'bg-primary text-primary-foreground border-primary' : ''}`}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-[1100]">
+                  {DATE_RANGE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               {activeFilterCount > 0 && (
                 <Button variant="outline" size="sm" onClick={clearFilters} className="font-semibold">
                   <X className="h-4 w-4 mr-1" />
@@ -502,6 +536,23 @@ export default function DiscoverPage() {
                           variant={selectedDistances.includes(option.value) ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => toggleDistance(option.value)}
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Date Range */}
+                  <div>
+                    <h3 className="font-medium mb-3">Date Range</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {DATE_RANGE_OPTIONS.map((option) => (
+                        <Button
+                          key={option.value}
+                          variant={dateRange === option.value ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setDateRange(option.value)}
                         >
                           {option.label}
                         </Button>
