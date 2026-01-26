@@ -62,6 +62,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       recurrenceSeriesId: ride.recurrenceSeriesId,
       recurrenceEndDate: ride.recurrenceEndDate,
       isRecurringTemplate: ride.isRecurringTemplate,
+      // Live location fields
+      isLive: ride.isLive,
+      liveLocationUrl: ride.liveLocationUrl,
+      liveStartedAt: ride.liveStartedAt,
     });
   } catch (error) {
     console.error('GET /api/rides/[id] error:', error);
@@ -143,6 +147,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         routeUrl: body.routeUrl || null,
         isFree: body.isFree !== false,
         price: body.price ? parseFloat(body.price) : null,
+        // Live location fields
+        isLive: body.isLive === true,
+        liveLocationUrl: body.liveLocationUrl || null,
+        liveStartedAt: body.isLive === true && !ride.isLive ? new Date() : (body.isLive === false ? null : ride.liveStartedAt),
       },
       include: {
         organizer: {

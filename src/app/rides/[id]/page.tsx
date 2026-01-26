@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments, AddToCalendar } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments, AddToCalendar, LiveLocationBanner } from '@/components/rides';
 import { SponsorCard } from '@/components/communities';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -317,6 +317,14 @@ export default async function RidePage({ params }: RidePageProps) {
                 </Button>
               )}
             </div>
+
+            {/* Live Location Banner - shown when ride is live */}
+            {ride.isLive && (
+              <LiveLocationBanner
+                liveLocationUrl={ride.liveLocationUrl}
+                rideName={ride.title}
+              />
+            )}
 
             {/* Ride Overview Card - Date, Location, Stats, Description */}
             <Card>

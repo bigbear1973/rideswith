@@ -281,6 +281,11 @@ model Ride {
   recurrenceSeriesId  String?            // Links rides in same series (first ride's ID)
   isRecurringTemplate Boolean @default(false) // True for the "template" ride that defines the series
 
+  // Live location tracking
+  isLive          Boolean   @default(false) // Is ride currently happening/tracked
+  liveLocationUrl String?   // Google Maps live share URL
+  liveStartedAt   DateTime? // When organizer marked ride as live
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

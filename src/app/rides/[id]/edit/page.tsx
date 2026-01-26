@@ -42,6 +42,7 @@ import {
   Trash2,
   Repeat,
   Info,
+  Radio,
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useUnits } from '@/components/providers/units-provider';
@@ -100,6 +101,10 @@ export default function EditRidePage({ params }: EditRidePageProps) {
   // Recurrence info (read-only for edit form)
   const [recurrenceSeriesId, setRecurrenceSeriesId] = useState<string | null>(null);
   const [recurrencePattern, setRecurrencePattern] = useState<string | null>(null);
+
+  // Live location tracking
+  const [isLive, setIsLive] = useState(false);
+  const [liveLocationUrl, setLiveLocationUrl] = useState('');
 
   // Location search state
   const [locationSearch, setLocationSearch] = useState('');
@@ -163,6 +168,8 @@ export default function EditRidePage({ params }: EditRidePageProps) {
         setPrice(ride.price?.toString() || '');
         setRecurrenceSeriesId(ride.recurrenceSeriesId || null);
         setRecurrencePattern(ride.recurrencePattern || null);
+        setIsLive(ride.isLive || false);
+        setLiveLocationUrl(ride.liveLocationUrl || '');
       } catch (err) {
         setLoadError('Failed to load ride');
       } finally {
@@ -274,6 +281,8 @@ export default function EditRidePage({ params }: EditRidePageProps) {
           routeUrl: routeUrl.trim() || null,
           isFree,
           price: !isFree && price ? parseFloat(price) : null,
+          isLive,
+          liveLocationUrl: liveLocationUrl.trim() || null,
         }),
       });
 
@@ -706,6 +715,61 @@ export default function EditRidePage({ params }: EditRidePageProps) {
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Live Location Tracking */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Radio className="h-5 w-5" />
+                Live Location
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="isLive"
+                  checked={isLive}
+                  onChange={(e) => setIsLive(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-300"
+                />
+                <div>
+                  <Label htmlFor="isLive" className="cursor-pointer">
+                    Mark ride as live
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Shows a live banner on the ride page so participants can see the ride is in progress
+                  </p>
+                </div>
+              </div>
+
+              {isLive && (
+                <div className="space-y-2">
+                  <Label htmlFor="liveLocationUrl">Google Maps Live Share URL</Label>
+                  <div className="relative">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="liveLocationUrl"
+                      type="url"
+                      placeholder="https://maps.app.goo.gl/..."
+                      value={liveLocationUrl}
+                      onChange={(e) => setLiveLocationUrl(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p className="font-medium">How to share your live location:</p>
+                    <ol className="list-decimal list-inside space-y-1 pl-1">
+                      <li>Open Google Maps on your phone</li>
+                      <li>Tap your profile picture → Location sharing</li>
+                      <li>Tap &quot;Share location&quot; and choose duration</li>
+                      <li>Tap &quot;Copy to clipboard&quot; and paste the link here</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
