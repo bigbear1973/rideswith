@@ -431,6 +431,9 @@ export default async function RidePage({ params }: RidePageProps) {
             {/* Community Route Links */}
             <CommunityRoutes rideId={id} />
 
+            {/* Discussion Section */}
+            <SidebarComments rideId={id} isOrganizer={!!canEdit} />
+
             {/* Ride Details Card - RSVP & Attendees */}
             <Card>
               <CardContent className="p-4 space-y-4">
@@ -547,8 +550,6 @@ export default async function RidePage({ params }: RidePageProps) {
                   );
                 })()}
 
-                {/* Sidebar Comments */}
-                <SidebarComments rideId={id} isOrganizer={!!canEdit} />
               </div>
             </div>
           )}
