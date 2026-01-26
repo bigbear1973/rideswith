@@ -175,7 +175,7 @@ export default function ChapterPage({ params }: PageProps) {
             {error || "Chapter not found"}
           </h1>
           <Button asChild variant="outline">
-            <Link href="/brands">Back to Brands</Link>
+            <Link href="/brands">Back to Communities</Link>
           </Button>
         </div>
       </div>

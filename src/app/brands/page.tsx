@@ -55,10 +55,10 @@ export default async function BrandsPage() {
       <div className="bg-[#00D26A] text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Brand Communities
+            Communities
           </h1>
           <p className="text-xl opacity-90 max-w-2xl">
-            Discover cycling communities organized by your favorite brands.
+            Discover cycling communities: brands, clubs, and groups.
             Local chapters, global connections.
           </p>
         </div>
@@ -73,7 +73,7 @@ export default async function BrandsPage() {
                 {brands.length}
               </div>
               <div className="text-sm text-gray-400 uppercase tracking-wide">
-                Brands
+                Communities
               </div>
             </div>
             <div>
@@ -99,11 +99,11 @@ export default async function BrandsPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold">All Brands</h2>
+          <h2 className="text-2xl font-bold">All Communities</h2>
           <Button asChild>
             <Link href="/brands/create">
               <Plus className="h-4 w-4 mr-2" />
-              Register Brand
+              Create Community
             </Link>
           </Button>
         </div>
@@ -112,12 +112,12 @@ export default async function BrandsPage() {
           <Card className="text-center py-12">
             <CardContent>
               <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No brands yet</h3>
+              <h3 className="text-lg font-semibold mb-2">No communities yet</h3>
               <p className="text-muted-foreground mb-4">
-                Be the first to register your brand and create a chapter.
+                Be the first to create a brand, club, or group and start a chapter.
               </p>
               <Button asChild>
-                <Link href="/brands/create">Register Your Brand</Link>
+                <Link href="/brands/create">Create Your Community</Link>
               </Button>
             </CardContent>
           </Card>

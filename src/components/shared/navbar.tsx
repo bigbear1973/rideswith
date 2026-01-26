@@ -30,7 +30,7 @@ import {
 
 const navLinks = [
   { href: '/discover', label: 'Discover', icon: MapPin },
-  { href: '/brands', label: 'Brands', icon: Building2 },
+  { href: '/brands', label: 'Communities', icon: Building2 },
   { href: '/create', label: 'Create Ride', icon: PlusCircle },
 ];
 

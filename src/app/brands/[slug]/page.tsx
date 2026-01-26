@@ -199,7 +199,7 @@ export default async function BrandPage({ params }: PageProps) {
               >
                 <Link href={`/brands/${brand.slug}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit Brand
+                  Edit
                 </Link>
               </Button>
             )}

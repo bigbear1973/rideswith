@@ -277,7 +277,7 @@ export default function EditBrandPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Edit Brand</CardTitle>
+            <CardTitle>Edit Community</CardTitle>
             <CardDescription>
               Update your brand information and branding assets
             </CardDescription>
@@ -367,7 +367,7 @@ export default function EditBrandPage() {
 
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Brand Name</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
                   value={formData.name}

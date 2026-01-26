@@ -103,9 +103,9 @@ export default function CreateChapterPage({ params }: PageProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Brand not found</h1>
+          <h1 className="text-2xl font-bold mb-2">Community not found</h1>
           <Button asChild variant="outline">
-            <Link href="/brands">Back to Brands</Link>
+            <Link href="/brands">Back to Communities</Link>
           </Button>
         </div>
       </div>

@@ -105,9 +105,9 @@ export default async function ProfilePage() {
                 {user.image && <AvatarImage src={user.image} alt={user.name || ''} />}
                 <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="min-w-0">
                     <h1 className="text-2xl font-bold">{user.name || 'Anonymous Rider'}</h1>
                     <p className="text-muted-foreground">{user.email}</p>
                     {user.slug && (
@@ -125,17 +125,17 @@ export default async function ProfilePage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     <Button variant="outline" size="sm" asChild>
                       <Link href="/profile/edit">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        <Edit className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Edit</span>
                       </Link>
                     </Button>
                     <Button variant="outline" size="sm" asChild>
                       <Link href="/settings">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Settings
+                        <Settings className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Settings</span>
                       </Link>
                     </Button>
                   </div>
@@ -276,17 +276,17 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* My Brands */}
+        {/* My Communities */}
         <Card className="mt-8">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              My Brands ({user.brands.length})
+              My Communities ({user.brands.length})
             </CardTitle>
             <Button variant="outline" size="sm" asChild>
               <Link href="/brands/create">
                 <Plus className="h-4 w-4 mr-2" />
-                Create Brand
+                Create
               </Link>
             </Button>
           </CardHeader>
@@ -294,8 +294,8 @@ export default async function ProfilePage() {
             {user.brands.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Building2 className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                <p>No brands yet</p>
-                <p className="text-sm mt-1">Create a brand to manage chapters and rides.</p>
+                <p>No communities yet</p>
+                <p className="text-sm mt-1">Create a brand, club, or group to manage chapters and rides.</p>
               </div>
             ) : (
               <div className="space-y-3">
