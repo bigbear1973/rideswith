@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound, Trophy, Plus, Megaphone } from 'lucide-react';
-import { SponsorForm, SponsorListItem } from '@/components/communities';
+import { SponsorForm, SponsorList } from '@/components/communities';
 
 interface Brand {
   id: string;
@@ -700,20 +700,24 @@ export default function EditBrandPage() {
                 </div>
 
                 {/* Sponsors List */}
-                {sponsors.length > 0 && (
-                  <div className="space-y-2">
-                    {sponsors.map((sponsor) => (
-                      <SponsorListItem
-                        key={sponsor.id}
-                        sponsor={sponsor}
-                        onEdit={(s) => {
-                          setEditingSponsor(s);
-                          setShowSponsorForm(true);
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
+                <SponsorList
+                  sponsors={sponsors}
+                  onEdit={(s) => {
+                    setEditingSponsor(s);
+                    setShowSponsorForm(true);
+                  }}
+                  onReorder={async (reorderedSponsors) => {
+                    setSponsors(reorderedSponsors);
+                    // Save the new order to the backend
+                    for (const sponsor of reorderedSponsors) {
+                      await fetch(`/api/communities/${slug}/sponsors/${sponsor.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ displayOrder: sponsor.displayOrder }),
+                      });
+                    }
+                  }}
+                />
 
                 {/* Add/Edit Sponsor Form */}
                 {showSponsorForm ? (

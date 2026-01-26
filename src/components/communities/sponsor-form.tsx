@@ -488,6 +488,8 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
 interface SponsorListItemProps {
   sponsor: Sponsor;
   onEdit: (sponsor: Sponsor) => void;
+  isDragging?: boolean;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 const SIZE_LABELS: Record<SponsorSize, string> = {
@@ -496,15 +498,21 @@ const SIZE_LABELS: Record<SponsorSize, string> = {
   LARGE: 'L',
 };
 
-export function SponsorListItem({ sponsor, onEdit }: SponsorListItemProps) {
+export function SponsorListItem({ sponsor, onEdit, isDragging, dragHandleProps }: SponsorListItemProps) {
   return (
     <Card
-      className={`cursor-pointer hover:border-primary/50 transition-colors ${!sponsor.isActive ? 'opacity-60' : ''}`}
+      className={`cursor-pointer hover:border-primary/50 transition-colors ${!sponsor.isActive ? 'opacity-60' : ''} ${isDragging ? 'shadow-lg border-primary' : ''}`}
       onClick={() => onEdit(sponsor)}
     >
       <CardContent className="p-3">
         <div className="flex items-center gap-3">
-          <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+          <div
+            {...dragHandleProps}
+            className="cursor-grab active:cursor-grabbing touch-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
           {sponsor.logo ? (
             <img
               src={sponsor.logo}
@@ -543,5 +551,94 @@ export function SponsorListItem({ sponsor, onEdit }: SponsorListItemProps) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Reorderable Sponsor List with drag-and-drop
+interface SponsorListProps {
+  sponsors: Sponsor[];
+  onEdit: (sponsor: Sponsor) => void;
+  onReorder: (sponsors: Sponsor[]) => void;
+}
+
+export function SponsorList({ sponsors, onEdit, onReorder }: SponsorListProps) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedIndex !== null && index !== draggedIndex) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const newSponsors = [...sponsors];
+    const [draggedItem] = newSponsors.splice(draggedIndex, 1);
+    newSponsors.splice(dropIndex, 0, draggedItem);
+
+    // Update displayOrder for all items
+    const reorderedSponsors = newSponsors.map((s, i) => ({
+      ...s,
+      displayOrder: i,
+    }));
+
+    onReorder(reorderedSponsors);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  if (sponsors.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      {sponsors.map((sponsor, index) => (
+        <div
+          key={sponsor.id}
+          draggable
+          onDragStart={(e) => handleDragStart(e, index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, index)}
+          onDragEnd={handleDragEnd}
+          className={`transition-transform ${
+            dragOverIndex === index && draggedIndex !== null
+              ? draggedIndex < index
+                ? 'translate-y-1'
+                : '-translate-y-1'
+              : ''
+          }`}
+        >
+          <SponsorListItem
+            sponsor={sponsor}
+            onEdit={onEdit}
+            isDragging={draggedIndex === index}
+          />
+        </div>
+      ))}
+    </div>
   );
 }

@@ -118,6 +118,14 @@ export async function fetchBrandAssets(
 
     const data: BrandDevApiResponse = await response.json();
 
+    // Debug logging
+    console.log('[brand-dev] Raw API response for', cleanDomain, ':', JSON.stringify({
+      status: data.status,
+      hasBackdrops: !!data.brand?.backdrops?.length,
+      backdropsCount: data.brand?.backdrops?.length || 0,
+      backdrops: data.brand?.backdrops,
+    }, null, 2));
+
     if (data.status !== "ok" || !data.brand) {
       console.log(`Brand.dev returned non-ok status for: ${cleanDomain}`);
       return null;

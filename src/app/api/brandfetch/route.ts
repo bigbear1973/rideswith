@@ -16,6 +16,10 @@ export async function GET(request: NextRequest) {
 
     const assets = await fetchBrandAssets(domain);
 
+    // Debug logging
+    console.log('[brandfetch] Domain:', domain);
+    console.log('[brandfetch] Assets:', JSON.stringify(assets, null, 2));
+
     if (!assets) {
       return NextResponse.json(
         { error: 'Could not fetch brand assets for this domain' },
