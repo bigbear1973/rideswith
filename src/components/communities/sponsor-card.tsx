@@ -55,11 +55,11 @@ export function SponsorCard({ sponsor }: SponsorCardProps) {
                 <img
                   src={sponsor.logo}
                   alt={sponsor.name}
-                  className="h-12 w-12 object-contain rounded-lg bg-white p-1 -mt-8 relative z-10 shadow-md"
+                  className="h-12 w-12 object-contain rounded-lg bg-muted border p-1.5 -mt-8 relative z-10 shadow-md"
                 />
               ) : (
                 <div
-                  className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white -mt-8 relative z-10 shadow-md"
+                  className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white -mt-8 relative z-10 shadow-md border"
                   style={{ backgroundColor: sponsor.primaryColor || '#6b7280' }}
                 >
                   {sponsor.name.charAt(0)}
