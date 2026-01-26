@@ -148,15 +148,16 @@ model ChapterMember {
   chapter   Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role      ChapterRole @default(AMBASSADOR)
+  role      ChapterRole @default(MODERATOR)
   joinedAt  DateTime    @default(now())
 
   @@unique([chapterId, userId])
 }
 
 enum ChapterRole {
-  LEAD
-  AMBASSADOR
+  OWNER      // Full control, can transfer ownership, delete community
+  ADMIN      // Can manage members, edit settings, create rides
+  MODERATOR  // Can create rides, moderate content
 }
 
 enum CommunityType {

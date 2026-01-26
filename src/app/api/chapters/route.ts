@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create chapter with creator as LEAD
+    // Create chapter with creator as OWNER
     const chapter = await prisma.chapter.create({
       data: {
         brandId,
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
         members: {
           create: {
             userId,
-            role: "LEAD",
+            role: "OWNER",
           },
         },
       },

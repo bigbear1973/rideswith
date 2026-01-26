@@ -63,7 +63,7 @@ interface ChapterData {
   };
   members: Array<{
     id: string;
-    role: "LEAD" | "AMBASSADOR";
+    role: "OWNER" | "ADMIN" | "MODERATOR";
     user: {
       id: string;
       name: string | null;
@@ -182,8 +182,9 @@ export default function ChapterPage({ params }: PageProps) {
     );
   }
 
-  const lead = chapter.members.find((m) => m.role === "LEAD");
-  const ambassadors = chapter.members.filter((m) => m.role === "AMBASSADOR");
+  const owners = chapter.members.filter((m) => m.role === "OWNER");
+  const admins = chapter.members.filter((m) => m.role === "ADMIN");
+  const moderators = chapter.members.filter((m) => m.role === "MODERATOR");
 
   return (
     <div className="min-h-screen bg-background">
@@ -425,52 +426,95 @@ export default function ChapterPage({ params }: PageProps) {
                 <CardTitle className="text-lg">Chapter Team</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Chapter Lead */}
-                {lead && (
+                {/* Owners */}
+                {owners.length > 0 && (
                   <div>
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-                      Chapter Lead
+                      {owners.length === 1 ? "Owner" : "Owners"}
                     </p>
-                    <Link
-                      href={
-                        lead.user.slug
-                          ? `/u/${lead.user.slug}`
-                          : `/profile/${lead.user.id}`
-                      }
-                      className="flex items-center gap-3 hover:bg-muted rounded-lg p-2 -mx-2 transition-colors"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={lead.user.image || undefined}
-                          alt={lead.user.name || ""}
-                        />
-                        <AvatarFallback>
-                          {lead.user.name?.charAt(0) || "?"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium">
-                            {lead.user.name || "Unknown"}
-                          </span>
-                          <VerifiedBadge />
-                        </div>
-                        <span className="text-sm text-muted-foreground">
-                          Lead
-                        </span>
-                      </div>
-                    </Link>
+                    <div className="space-y-1">
+                      {owners.map((member) => (
+                        <Link
+                          key={member.id}
+                          href={
+                            member.user.slug
+                              ? `/u/${member.user.slug}`
+                              : `/profile/${member.user.id}`
+                          }
+                          className="flex items-center gap-3 hover:bg-muted rounded-lg p-2 -mx-2 transition-colors"
+                        >
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage
+                              src={member.user.image || undefined}
+                              alt={member.user.name || ""}
+                            />
+                            <AvatarFallback>
+                              {member.user.name?.charAt(0) || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">
+                                {member.user.name || "Unknown"}
+                              </span>
+                              <VerifiedBadge />
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              Owner
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {/* Ambassadors */}
-                {ambassadors.length > 0 && (
+                {/* Admins */}
+                {admins.length > 0 && (
                   <div>
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-                      Ambassadors
+                      {admins.length === 1 ? "Admin" : "Admins"}
                     </p>
                     <div className="space-y-1">
-                      {ambassadors.map((member) => (
+                      {admins.map((member) => (
+                        <Link
+                          key={member.id}
+                          href={
+                            member.user.slug
+                              ? `/u/${member.user.slug}`
+                              : `/profile/${member.user.id}`
+                          }
+                          className="flex items-center gap-3 hover:bg-muted rounded-lg p-2 -mx-2 transition-colors"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={member.user.image || undefined}
+                              alt={member.user.name || ""}
+                            />
+                            <AvatarFallback className="text-xs">
+                              {member.user.name?.charAt(0) || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm">
+                              {member.user.name || "Unknown"}
+                            </span>
+                            <VerifiedBadge />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Moderators */}
+                {moderators.length > 0 && (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                      {moderators.length === 1 ? "Moderator" : "Moderators"}
+                    </p>
+                    <div className="space-y-1">
+                      {moderators.map((member) => (
                         <Link
                           key={member.id}
                           href={
