@@ -323,6 +323,8 @@ model Brand {
 - Only accessible by platform admin
 - Shows all communities with toggle for `sponsorsEnabled`
 - Displays community name, type, owner, and chapter count
+- Expandable rows to show chapters within each community
+- Chapter-level sponsor toggle (inherit from brand, or explicitly disable)
 
 **Key Files:**
 - `src/lib/platform-admin.ts` - Helper functions (`isPlatformAdmin`, `canManageSponsors`)
@@ -333,8 +335,9 @@ model Brand {
 - `prisma/seed.ts` - Sets platform admin on deployment
 
 **API Endpoints:**
-- `GET /api/admin/communities` - List all communities (platform admin only)
+- `GET /api/admin/communities` - List all communities with chapters (platform admin only)
 - `PATCH /api/admin/communities/[id]` - Update community settings (sponsorsEnabled)
+- `PATCH /api/admin/chapters/[id]` - Update chapter settings (sponsorsEnabled)
 
 **UI Behavior:**
 - Community owners see sponsors section only if `sponsorsEnabled === true`
@@ -574,6 +577,10 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (organizers)
 
 **Recently Completed:**
+- Chapter-level sponsor toggles in admin panel (expandable community rows)
+- Share button changed to always copy to clipboard with tooltip
+- Date/time pickers auto-close after selection
+- Dark mode fixes for outline buttons and picker icons
 - Platform admin feature - control sponsors as paid add-on per community
 - Admin panel at /admin/communities for platform admin only
 - Automatic platform admin setup via seed script on deployment
@@ -620,6 +627,12 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Chapter-level sponsor toggles in admin panel (expandable community rows with chapter toggles)
+- [x] Admin menu link in user dropdown for platform admin
+- [x] Share button changed to clipboard copy with tooltip explanation
+- [x] Date/time pickers auto-close after selection
+- [x] Dark mode fixes - outline button hover, date/time picker icons visibility
+- [x] Chapter-level sponsor toggle in chapter settings (inherit, enable, disable)
 - [x] Platform admin feature - sponsors as paid add-on controlled by platform owner
 - [x] Admin panel at /admin/communities for managing community sponsor access
 - [x] Automatic platform admin setup via prisma/seed.ts on deployment
