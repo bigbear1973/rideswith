@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Instagram } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -21,6 +21,8 @@ interface UserProfile {
   slug: string | null;
   bio: string | null;
   location: string | null;
+  instagram: string | null;
+  strava: string | null;
 }
 
 export default function EditProfilePage() {
@@ -39,6 +41,8 @@ export default function EditProfilePage() {
     slug: '',
     bio: '',
     location: '',
+    instagram: '',
+    strava: '',
   });
 
   useEffect(() => {
@@ -59,6 +63,8 @@ export default function EditProfilePage() {
             slug: data.slug || '',
             bio: data.bio || '',
             location: data.location || '',
+            instagram: data.instagram || '',
+            strava: data.strava || '',
           });
         }
       } catch (err) {
@@ -251,6 +257,44 @@ export default function EditProfilePage() {
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="City, Country"
                 />
+              </div>
+
+              {/* Social Links */}
+              <div className="space-y-4">
+                <Label className="text-base font-semibold">Social Links</Label>
+                <p className="text-sm text-muted-foreground -mt-2">
+                  Connect your cycling profiles
+                </p>
+
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram" className="flex items-center gap-2">
+                      <Instagram className="h-4 w-4" />
+                      Instagram
+                    </Label>
+                    <Input
+                      id="instagram"
+                      value={formData.instagram}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      placeholder="@username or profile URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="strava" className="flex items-center gap-2">
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                      </svg>
+                      Strava
+                    </Label>
+                    <Input
+                      id="strava"
+                      value={formData.strava}
+                      onChange={(e) => setFormData({ ...formData, strava: e.target.value })}
+                      placeholder="Strava profile URL"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Error/Success Messages */}

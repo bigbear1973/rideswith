@@ -19,6 +19,8 @@ import {
   History,
   Building2,
   Plus,
+  Instagram,
+  ExternalLink,
 } from 'lucide-react';
 
 const PACE_STYLES: Record<string, string> = {
@@ -123,6 +125,35 @@ export default async function ProfilePage() {
                         <MapPin className="h-3.5 w-3.5" />
                         {user.location}
                       </p>
+                    )}
+                    {/* Social Links */}
+                    {(user.instagram || user.strava) && (
+                      <div className="flex items-center gap-3 mt-2">
+                        {user.instagram && (
+                          <a
+                            href={user.instagram.startsWith('http') ? user.instagram : `https://instagram.com/${user.instagram.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <Instagram className="h-4 w-4" />
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                        {user.strava && (
+                          <a
+                            href={user.strava.startsWith('http') ? user.strava : `https://strava.com/athletes/${user.strava}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                            </svg>
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="flex gap-2 shrink-0">
