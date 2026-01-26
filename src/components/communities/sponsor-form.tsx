@@ -123,7 +123,7 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'group_rides');
+      formData.append('upload_preset', 'brand_assets');
       formData.append('folder', type === 'logo' ? 'sponsor-logos' : 'sponsor-backdrops');
 
       const response = await fetch(

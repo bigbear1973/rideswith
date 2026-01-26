@@ -232,7 +232,7 @@ export default function EditBrandPage() {
     try {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
-      formDataUpload.append('upload_preset', 'group_rides');
+      formDataUpload.append('upload_preset', 'brand_assets');
       formDataUpload.append('folder', `brand-${type}s`);
 
       const response = await fetch(
