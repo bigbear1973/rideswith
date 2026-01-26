@@ -134,7 +134,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Type field
-    const validTypes = ["BRAND", "CLUB", "GROUP"];
+    const validTypes = ["BRAND", "CLUB", "TEAM", "GROUP"];
     if (body.type && validTypes.includes(body.type)) {
       updateData.type = body.type;
     }

@@ -167,6 +167,7 @@ enum ChapterRole {
 enum CommunityType {
   BRAND   // Commercial brand (Rapha, Straede)
   CLUB    // Cycling club
+  TEAM    // Racing or competitive team
   GROUP   // Informal group
 }
 

@@ -22,13 +22,13 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound, Trophy } from 'lucide-react';
 
 interface Brand {
   id: string;
   name: string;
   slug: string;
-  type: 'BRAND' | 'CLUB' | 'GROUP';
+  type: 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP';
   domain: string | null;
   description: string | null;
   logo: string | null;
@@ -46,7 +46,8 @@ interface Brand {
 
 const COMMUNITY_TYPES = [
   { value: 'BRAND', label: 'Brand', description: 'Commercial cycling brand (Rapha, Straede)', icon: Building2 },
-  { value: 'CLUB', label: 'Club', description: 'Cycling club or team', icon: Users },
+  { value: 'CLUB', label: 'Club', description: 'Cycling club with members', icon: Users },
+  { value: 'TEAM', label: 'Team', description: 'Racing or competitive team', icon: Trophy },
   { value: 'GROUP', label: 'Group', description: 'Informal riding group', icon: UsersRound },
 ] as const;
 
@@ -70,7 +71,7 @@ export default function EditBrandPage() {
   const [uploadingBackdrop, setUploadingBackdrop] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'BRAND' as 'BRAND' | 'CLUB' | 'GROUP',
+    type: 'BRAND' as 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP',
     domain: '',
     description: '',
     logo: '',
@@ -346,7 +347,7 @@ export default function EditBrandPage() {
                 <Label className="text-base font-semibold">Type</Label>
                 <RadioGroup
                   value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value as 'BRAND' | 'CLUB' | 'GROUP' })}
+                  onValueChange={(value) => setFormData({ ...formData, type: value as 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP' })}
                   className="grid gap-3"
                 >
                   {COMMUNITY_TYPES.map((type) => (

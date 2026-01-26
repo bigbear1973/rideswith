@@ -23,11 +23,13 @@ import {
   Facebook,
   Youtube,
   Building2,
+  Trophy,
 } from "lucide-react";
 
 const COMMUNITY_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2; color: string }> = {
   BRAND: { label: "Brand", icon: Building2, color: "bg-white/20 text-white" },
   CLUB: { label: "Club", icon: Users, color: "bg-white/20 text-white" },
+  TEAM: { label: "Team", icon: Trophy, color: "bg-white/20 text-white" },
   GROUP: { label: "Group", icon: UsersRound, color: "bg-white/20 text-white" },
 };
 

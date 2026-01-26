@@ -5,12 +5,13 @@ export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Users, Plus, UsersRound } from "lucide-react";
+import { Building2, MapPin, Users, Plus, UsersRound, Trophy } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
 const COMMUNITY_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2; color: string }> = {
   BRAND: { label: "Brand", icon: Building2, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
   CLUB: { label: "Club", icon: Users, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  TEAM: { label: "Team", icon: Trophy, color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
   GROUP: { label: "Group", icon: UsersRound, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
 };
 

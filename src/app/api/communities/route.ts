@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate type if provided
-    const validTypes = ["BRAND", "CLUB", "GROUP"];
+    const validTypes = ["BRAND", "CLUB", "TEAM", "GROUP"];
     const communityType = type && validTypes.includes(type) ? type : "BRAND";
 
     // Create the brand

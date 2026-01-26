@@ -10,11 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Loader2, Sparkles, Globe, Building2, Users, UsersRound } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, Globe, Building2, Users, UsersRound, Trophy } from "lucide-react";
 
 const COMMUNITY_TYPES = [
   { value: "BRAND", label: "Brand", description: "Commercial cycling brand (Rapha, Straede)", icon: Building2 },
-  { value: "CLUB", label: "Club", description: "Cycling club or team", icon: Users },
+  { value: "CLUB", label: "Club", description: "Cycling club with members", icon: Users },
+  { value: "TEAM", label: "Team", description: "Racing or competitive team", icon: Trophy },
   { value: "GROUP", label: "Group", description: "Informal riding group", icon: UsersRound },
 ] as const;
 
@@ -25,7 +26,7 @@ export default function CreateBrandPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
-  const [type, setType] = useState<"BRAND" | "CLUB" | "GROUP">("BRAND");
+  const [type, setType] = useState<"BRAND" | "CLUB" | "TEAM" | "GROUP">("BRAND");
   const [domain, setDomain] = useState("");
   const [description, setDescription] = useState("");
   const [brandPreview, setBrandPreview] = useState<{
@@ -185,7 +186,7 @@ export default function CreateBrandPage() {
                 <Label className="text-base">What type of community is this?</Label>
                 <RadioGroup
                   value={type}
-                  onValueChange={(value) => setType(value as "BRAND" | "CLUB" | "GROUP")}
+                  onValueChange={(value) => setType(value as "BRAND" | "CLUB" | "TEAM" | "GROUP")}
                   className="grid gap-3"
                 >
                   {COMMUNITY_TYPES.map((communityType) => (
