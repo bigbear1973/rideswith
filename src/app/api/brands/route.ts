@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, domain } = body;
+    const { name, domain, type } = body;
 
     // Validate name
     if (!name || typeof name !== "string" || name.trim().length < 2) {
@@ -89,11 +89,16 @@ export async function POST(request: NextRequest) {
       brandAssets = await fetchBrandAssets(domain);
     }
 
+    // Validate type if provided
+    const validTypes = ["BRAND", "CLUB", "GROUP"];
+    const communityType = type && validTypes.includes(type) ? type : "BRAND";
+
     // Create the brand
     const brand = await prisma.brand.create({
       data: {
         name: name.trim(),
         slug,
+        type: communityType,
         domain: domain || null,
         description: brandAssets?.description || null,
         logo: brandAssets?.logo || null,

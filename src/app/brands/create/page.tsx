@@ -9,7 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Loader2, Sparkles, Globe, Building2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, Loader2, Sparkles, Globe, Building2, Users, UsersRound } from "lucide-react";
+
+const COMMUNITY_TYPES = [
+  { value: "BRAND", label: "Brand", description: "Commercial cycling brand (Rapha, Straede)", icon: Building2 },
+  { value: "CLUB", label: "Club", description: "Cycling club or team", icon: Users },
+  { value: "GROUP", label: "Group", description: "Informal riding group", icon: UsersRound },
+] as const;
 
 export default function CreateBrandPage() {
   const router = useRouter();
@@ -18,6 +25,7 @@ export default function CreateBrandPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
+  const [type, setType] = useState<"BRAND" | "CLUB" | "GROUP">("BRAND");
   const [domain, setDomain] = useState("");
   const [description, setDescription] = useState("");
   const [brandPreview, setBrandPreview] = useState<{
@@ -72,6 +80,7 @@ export default function CreateBrandPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          type,
           domain: domain.trim() || null,
           description: description.trim() || null,
         }),
@@ -103,9 +112,9 @@ export default function CreateBrandPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Brands
           </Link>
-          <h1 className="text-3xl md:text-4xl font-bold">Register Your Brand</h1>
+          <h1 className="text-3xl md:text-4xl font-bold">Create Your Community</h1>
           <p className="text-white/80 mt-2">
-            Create a brand profile and start building local chapters.
+            Start a brand, club, or group and build local chapters.
           </p>
         </div>
       </div>
@@ -116,7 +125,7 @@ export default function CreateBrandPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Brand Details
+              Community Details
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -159,7 +168,7 @@ export default function CreateBrandPage() {
 
               {/* Brand Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Brand Name *</Label>
+                <Label htmlFor="name">Name *</Label>
                 <Input
                   id="name"
                   placeholder="Straede"
@@ -169,6 +178,34 @@ export default function CreateBrandPage() {
                   minLength={2}
                   maxLength={50}
                 />
+              </div>
+
+              {/* Community Type */}
+              <div className="space-y-3">
+                <Label className="text-base">What type of community is this?</Label>
+                <RadioGroup
+                  value={type}
+                  onValueChange={(value) => setType(value as "BRAND" | "CLUB" | "GROUP")}
+                  className="grid gap-3"
+                >
+                  {COMMUNITY_TYPES.map((communityType) => (
+                    <label
+                      key={communityType.value}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        type === communityType.value
+                          ? "border-primary bg-primary/5"
+                          : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <RadioGroupItem value={communityType.value} id={communityType.value} />
+                      <communityType.icon className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="font-medium">{communityType.label}</p>
+                        <p className="text-sm text-muted-foreground">{communityType.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </RadioGroup>
               </div>
 
               {/* Description */}
@@ -204,7 +241,7 @@ export default function CreateBrandPage() {
                       Creating...
                     </>
                   ) : (
-                    "Create Brand"
+                    "Create Community"
                   )}
                 </Button>
               </div>

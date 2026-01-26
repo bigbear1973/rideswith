@@ -133,6 +133,17 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       updateData.domain = body.domain;
     }
 
+    // Type field
+    const validTypes = ["BRAND", "CLUB", "GROUP"];
+    if (body.type && validTypes.includes(body.type)) {
+      updateData.type = body.type;
+    }
+
+    // Manual image uploads (Cloudinary URLs)
+    if (body.logo !== undefined) updateData.logo = body.logo || null;
+    if (body.backdrop !== undefined) updateData.backdrop = body.backdrop || null;
+    if (body.primaryColor !== undefined) updateData.primaryColor = body.primaryColor || null;
+
     // Social links (allow clearing by setting to empty string)
     if (body.instagram !== undefined) updateData.instagram = body.instagram || null;
     if (body.twitter !== undefined) updateData.twitter = body.twitter || null;

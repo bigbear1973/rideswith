@@ -75,11 +75,12 @@ model VerificationToken {
 // ============================================
 
 model Brand {
-  id          String   @id @default(cuid())
-  name        String   // "Straede"
-  slug        String   @unique // "straede"
-  domain      String?  // "straede.cc" (for Brand.dev lookup)
-  description String?  @db.Text
+  id          String        @id @default(cuid())
+  name        String        // "Straede"
+  slug        String        @unique // "straede"
+  type        CommunityType @default(BRAND) // BRAND, CLUB, or GROUP
+  domain      String?       // "straede.cc" (for Brand.dev lookup)
+  description String?       @db.Text
 
   // Brand.dev populated fields
   logo           String? // Full logo URL (for light backgrounds)
@@ -152,6 +153,12 @@ model ChapterMember {
 enum ChapterRole {
   LEAD
   AMBASSADOR
+}
+
+enum CommunityType {
+  BRAND   // Commercial brand (Rapha, Straede)
+  CLUB    // Cycling club
+  GROUP   // Informal group
 }
 
 // ============================================

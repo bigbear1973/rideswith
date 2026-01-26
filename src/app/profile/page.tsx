@@ -316,7 +316,7 @@ export default async function ProfilePage() {
                           {brand._count.chapters} chapter{brand._count.chapters !== 1 ? 's' : ''}
                         </p>
                       </div>
-                      <Button variant="ghost" size="sm" asChild onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="sm" asChild>
                         <Link href={`/brands/${brand.slug}/edit`}>
                           <Edit className="h-4 w-4" />
                         </Link>

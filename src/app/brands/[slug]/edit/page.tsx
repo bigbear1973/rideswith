@@ -22,16 +22,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound } from 'lucide-react';
 
 interface Brand {
   id: string;
   name: string;
   slug: string;
+  type: 'BRAND' | 'CLUB' | 'GROUP';
   domain: string | null;
   description: string | null;
   logo: string | null;
   logoIcon: string | null;
+  backdrop: string | null;
   primaryColor: string | null;
   secondaryColor: string | null;
   createdById: string | null;
@@ -41,6 +44,14 @@ interface Brand {
   strava: string | null;
   youtube: string | null;
 }
+
+const COMMUNITY_TYPES = [
+  { value: 'BRAND', label: 'Brand', description: 'Commercial cycling brand (Rapha, Straede)', icon: Building2 },
+  { value: 'CLUB', label: 'Club', description: 'Cycling club or team', icon: Users },
+  { value: 'GROUP', label: 'Group', description: 'Informal riding group', icon: UsersRound },
+] as const;
+
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 export default function EditBrandPage() {
   const router = useRouter();
@@ -56,10 +67,16 @@ export default function EditBrandPage() {
   const [success, setSuccess] = useState(false);
 
   const [brand, setBrand] = useState<Brand | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBackdrop, setUploadingBackdrop] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    type: 'BRAND' as 'BRAND' | 'CLUB' | 'GROUP',
     domain: '',
     description: '',
+    logo: '',
+    backdrop: '',
+    primaryColor: '',
     instagram: '',
     twitter: '',
     facebook: '',
@@ -82,8 +99,12 @@ export default function EditBrandPage() {
           setBrand(data);
           setFormData({
             name: data.name || '',
+            type: data.type || 'BRAND',
             domain: data.domain || '',
             description: data.description || '',
+            logo: data.logo || '',
+            backdrop: data.backdrop || '',
+            primaryColor: data.primaryColor || '',
             instagram: data.instagram || '',
             twitter: data.twitter || '',
             facebook: data.facebook || '',
@@ -168,6 +189,34 @@ export default function EditBrandPage() {
     }
   };
 
+  const handleImageUpload = async (file: File, type: 'logo' | 'backdrop') => {
+    if (type === 'logo') setUploadingLogo(true);
+    else setUploadingBackdrop(true);
+    setError(null);
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('upload_preset', 'brand_assets');
+      formDataUpload.append('folder', `brand-${type}s`);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formDataUpload }
+      );
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, [type]: data.secure_url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      if (type === 'logo') setUploadingLogo(false);
+      else setUploadingBackdrop(false);
+    }
+  };
+
   const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
@@ -237,18 +286,18 @@ export default function EditBrandPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Brand Preview */}
               <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/50">
-                {brand.logo ? (
+                {formData.logo || brand.logo ? (
                   <Image
-                    src={brand.logo}
+                    src={formData.logo || brand.logo || ''}
                     alt={brand.name}
                     width={64}
                     height={64}
-                    className="rounded-lg"
+                    className="rounded-lg object-contain"
                   />
                 ) : (
                   <div
                     className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
-                    style={{ backgroundColor: brand.primaryColor || '#6366f1' }}
+                    style={{ backgroundColor: formData.primaryColor || brand.primaryColor || '#6366f1' }}
                   >
                     {brand.name.slice(0, 2).toUpperCase()}
                   </div>
@@ -258,14 +307,14 @@ export default function EditBrandPage() {
                   <p className="text-sm text-muted-foreground">
                     rideswith.com/brands/{brand.slug}
                   </p>
-                  {brand.primaryColor && (
+                  {(formData.primaryColor || brand.primaryColor) && (
                     <div className="flex items-center gap-2 mt-2">
                       <div
                         className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: brand.primaryColor }}
+                        style={{ backgroundColor: formData.primaryColor || brand.primaryColor || undefined }}
                       />
                       <span className="text-xs text-muted-foreground">
-                        {brand.primaryColor}
+                        {formData.primaryColor || brand.primaryColor}
                       </span>
                     </div>
                   )}
@@ -286,6 +335,34 @@ export default function EditBrandPage() {
                     <span className="ml-2 hidden sm:inline">Refresh from Brand.dev</span>
                   </Button>
                 )}
+              </div>
+
+              {/* Community Type */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Type</Label>
+                <RadioGroup
+                  value={formData.type}
+                  onValueChange={(value) => setFormData({ ...formData, type: value as 'BRAND' | 'CLUB' | 'GROUP' })}
+                  className="grid gap-3"
+                >
+                  {COMMUNITY_TYPES.map((type) => (
+                    <label
+                      key={type.value}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        formData.type === type.value
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <RadioGroupItem value={type.value} id={type.value} />
+                      <type.icon className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="font-medium">{type.label}</p>
+                        <p className="text-sm text-muted-foreground">{type.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </RadioGroup>
               </div>
 
               {/* Name */}
@@ -324,6 +401,163 @@ export default function EditBrandPage() {
                   placeholder="Tell us about this brand..."
                   rows={3}
                 />
+              </div>
+
+              {/* Branding Assets */}
+              <div className="space-y-4">
+                <Label className="text-base font-semibold">Branding Assets</Label>
+                <p className="text-sm text-muted-foreground -mt-2">
+                  Upload custom images or enter a domain above to auto-fetch from Brand.dev
+                </p>
+
+                {/* Logo Upload */}
+                <div className="space-y-2">
+                  <Label>Logo</Label>
+                  <div className="flex items-start gap-4">
+                    {formData.logo ? (
+                      <div className="relative">
+                        <Image
+                          src={formData.logo}
+                          alt="Logo"
+                          width={80}
+                          height={80}
+                          className="rounded-lg object-contain border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6"
+                          onClick={() => setFormData({ ...formData, logo: '' })}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
+                        <Building2 className="h-8 w-8" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="logo-upload"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file, 'logo');
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('logo-upload')?.click()}
+                        disabled={uploadingLogo}
+                      >
+                        {uploadingLogo ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        Upload Logo
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Recommended: Square image, 200x200px or larger
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Backdrop Upload */}
+                <div className="space-y-2">
+                  <Label>Backdrop Image</Label>
+                  {formData.backdrop ? (
+                    <div className="relative">
+                      <Image
+                        src={formData.backdrop}
+                        alt="Backdrop"
+                        width={600}
+                        height={200}
+                        className="w-full h-32 rounded-lg object-cover border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-6 w-6"
+                        onClick={() => setFormData({ ...formData, backdrop: '' })}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="w-full h-32 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <Upload className="h-8 w-8 mx-auto mb-2" />
+                        <span className="text-sm">No backdrop image</span>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="backdrop-upload"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(file, 'backdrop');
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('backdrop-upload')?.click()}
+                    disabled={uploadingBackdrop}
+                  >
+                    {uploadingBackdrop ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    Upload Backdrop
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Recommended: Wide image, 1200x400px or larger
+                  </p>
+                </div>
+
+                {/* Primary Color */}
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor">Primary Color</Label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      id="primaryColor"
+                      value={formData.primaryColor || '#6366f1'}
+                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                      className="w-10 h-10 rounded cursor-pointer border"
+                    />
+                    <Input
+                      value={formData.primaryColor}
+                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                      placeholder="#6366f1"
+                      className="flex-1"
+                    />
+                    {formData.primaryColor && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setFormData({ ...formData, primaryColor: '' })}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Social Links */}
