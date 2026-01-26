@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection } from '@/components/rides';
+import { CopyRideInfo, RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments } from '@/components/rides';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import {
@@ -498,6 +498,9 @@ export default async function RidePage({ params }: RidePageProps) {
                     </CardContent>
                   </a>
                 </Card>
+
+                {/* Sidebar Comments */}
+                <SidebarComments rideId={id} isOrganizer={!!canEdit} />
               </div>
             </div>
           )}

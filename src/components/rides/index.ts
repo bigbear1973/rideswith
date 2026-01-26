@@ -7,3 +7,4 @@ export { LocationLink } from './location-link';
 export { RsvpButton } from './rsvp-button';
 export { AttendeeList } from './attendee-list';
 export { RsvpSection } from './rsvp-section';
+export { SidebarComments } from './sidebar-comments';
