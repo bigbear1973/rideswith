@@ -332,13 +332,17 @@ model RideComment {
   rideId    String
   userId    String
   content   String   @db.Text
+  parentId  String?  // For replies - references parent comment
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ride    Ride          @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  RideComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies RideComment[] @relation("CommentReplies")
 
   @@index([rideId, createdAt])
+  @@index([parentId])
 }
 
 model RidePhoto {

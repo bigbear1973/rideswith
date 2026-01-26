@@ -10,8 +10,12 @@ export async function GET(
   try {
     const { id: rideId } = await params;
 
+    // Fetch top-level comments (no parentId) with their replies
     const comments = await prisma.rideComment.findMany({
-      where: { rideId },
+      where: {
+        rideId,
+        parentId: null, // Only top-level comments
+      },
       include: {
         user: {
           select: {
@@ -22,21 +26,45 @@ export async function GET(
             slug: true,
           },
         },
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+                slug: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
 
     // Transform response
+    const transformUser = (user: { id: string; name: string | null; email: string | null; image: string | null; slug: string | null }) => ({
+      id: user.id,
+      name: user.name || user.email?.split('@')[0] || 'Anonymous',
+      image: user.image,
+      slug: user.slug,
+    });
+
     const response = comments.map((comment) => ({
       id: comment.id,
       content: comment.content,
       createdAt: comment.createdAt,
-      user: {
-        id: comment.user.id,
-        name: comment.user.name || comment.user.email?.split('@')[0] || 'Anonymous',
-        image: comment.user.image,
-        slug: comment.user.slug,
-      },
+      parentId: comment.parentId,
+      user: transformUser(comment.user),
+      replies: comment.replies.map((reply) => ({
+        id: reply.id,
+        content: reply.content,
+        createdAt: reply.createdAt,
+        parentId: reply.parentId,
+        user: transformUser(reply.user),
+      })),
     }));
 
     return NextResponse.json(response);
@@ -58,7 +86,7 @@ export async function POST(
     }
 
     const { id: rideId } = await params;
-    const { content } = await request.json();
+    const { content, parentId } = await request.json();
 
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return NextResponse.json({ error: 'Comment content is required' }, { status: 400 });
@@ -78,12 +106,25 @@ export async function POST(
       return NextResponse.json({ error: 'Ride not found' }, { status: 404 });
     }
 
+    // If parentId provided, verify parent comment exists and belongs to this ride
+    if (parentId) {
+      const parentComment = await prisma.rideComment.findUnique({
+        where: { id: parentId },
+        select: { id: true, rideId: true },
+      });
+
+      if (!parentComment || parentComment.rideId !== rideId) {
+        return NextResponse.json({ error: 'Parent comment not found' }, { status: 404 });
+      }
+    }
+
     // Create comment
     const comment = await prisma.rideComment.create({
       data: {
         rideId,
         userId: session.user.id,
         content: content.trim(),
+        parentId: parentId || null,
       },
       include: {
         user: {
@@ -102,6 +143,7 @@ export async function POST(
       id: comment.id,
       content: comment.content,
       createdAt: comment.createdAt,
+      parentId: comment.parentId,
       user: {
         id: comment.user.id,
         name: comment.user.name || comment.user.email?.split('@')[0] || 'Anonymous',
