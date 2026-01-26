@@ -179,6 +179,13 @@ export default function EditBrandPage() {
 
       const updatedBrand = await response.json();
       setBrand(updatedBrand);
+      // Update formData with refreshed values
+      setFormData(prev => ({
+        ...prev,
+        logo: updatedBrand.logo || '',
+        backdrop: updatedBrand.backdrop || '',
+        primaryColor: updatedBrand.primaryColor || '',
+      }));
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
