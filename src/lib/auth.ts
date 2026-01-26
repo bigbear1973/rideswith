@@ -7,7 +7,7 @@ import type { Adapter } from 'next-auth/adapters';
 // Log environment status on startup
 console.log('[Auth] RESEND_API_KEY configured:', !!process.env.RESEND_API_KEY);
 console.log('[Auth] EMAIL_FROM:', process.env.EMAIL_FROM || 'not set, using default');
-console.log('[Auth] AUTH_URL:', process.env.AUTH_URL || 'not set');
+console.log('[Auth] AUTH_URL:', process.env.AUTH_URL || 'https://rideswith.com');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

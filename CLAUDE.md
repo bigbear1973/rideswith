@@ -39,7 +39,7 @@ npm run db:studio    # Open Prisma Studio
 
 - `DATABASE_URL` - PostgreSQL connection (linked from Railway Postgres service)
 - `AUTH_SECRET` - Auth.js secret
-- `AUTH_URL` - https://rideswith-production.up.railway.app
+- `AUTH_URL` - https://rideswith.com
 - `RESEND_API_KEY` - For magic link emails
 - `EMAIL_FROM` - Sender address (using resend.dev for now)
 - `BRAND_DEV_API_KEY` - For auto-fetching brand logos/colors from Brand.dev
