@@ -484,6 +484,35 @@ export default async function RidePage({ params }: RidePageProps) {
 
             {/* Cake & Coffee Stop - Post-ride social section */}
             <CakeAndCoffee rideId={id} rideDate={ride.date} isOrganizer={!!canEdit} />
+
+            {/* Mobile Sponsors Section - shown below main content on mobile for branded rides */}
+            {hasBranding && brand && chapter && (
+              <div className="lg:hidden">
+                {(() => {
+                  const chapterSponsors = chapter?.sponsors || [];
+                  const sponsorLabel = chapter?.sponsorLabel || brand.sponsorLabel || 'sponsors';
+                  const labelText = sponsorLabel === 'partners' ? 'Our Partners' : sponsorLabel === 'ads' ? 'Ads' : 'Our Sponsors';
+
+                  if (chapterSponsors.length === 0) return null;
+
+                  return (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground capitalize">
+                        {labelText}
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {chapterSponsors.map((sponsor) => (
+                          <SponsorCard
+                            key={sponsor.id}
+                            sponsor={sponsor}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
 
           {/* Sidebar - Desktop (only shows for branded rides) */}
