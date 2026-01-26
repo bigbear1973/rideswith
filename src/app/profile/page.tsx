@@ -330,14 +330,21 @@ export default async function ProfilePage() {
                 {user.brands.map((brand) => (
                   <Link key={brand.id} href={`/communities/${brand.slug}`}>
                     <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                      <Avatar className="h-10 w-10">
-                        {brand.logo && (
-                          <AvatarImage src={brand.logo} alt={brand.name} />
-                        )}
-                        <AvatarFallback>
-                          {brand.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                      {brand.logo ? (
+                        <div className="h-10 w-10 rounded-lg bg-white p-1.5 flex items-center justify-center">
+                          <img
+                            src={brand.logo}
+                            alt={brand.name}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback>
+                            {brand.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
                       <div className="flex-1">
                         <h4 className="font-medium">{brand.name}</h4>
                         <p className="text-sm text-muted-foreground">
