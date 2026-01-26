@@ -465,8 +465,8 @@ export default function DiscoverPage() {
               </DropdownMenu>
 
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className={`w-36 ${dateRange !== 'all' ? 'bg-primary text-primary-foreground border-primary' : ''}`}>
-                  <Calendar className="h-4 w-4 mr-2" />
+                <SelectTrigger className={`w-44 ${dateRange !== 'all' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' : ''}`}>
+                  <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="z-[1100]">
