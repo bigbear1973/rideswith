@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
   History,
   ChevronDown,
   ChevronUp,
+  Settings,
 } from "lucide-react";
 import { useUnits } from "@/components/providers/units-provider";
 
@@ -88,7 +90,9 @@ export default function ChapterPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null);
   const [showPastRides, setShowPastRides] = useState(false);
   const [loadingPastRides, setLoadingPastRides] = useState(false);
+  const [brandOwnerId, setBrandOwnerId] = useState<string | null>(null);
   const { formatDistance } = useUnits();
+  const { data: session } = useSession();
 
   useEffect(() => {
     async function loadChapter() {
@@ -106,6 +110,7 @@ export default function ChapterPage({ params }: PageProps) {
         }
 
         const brand = await brandRes.json();
+        setBrandOwnerId(brand.createdById);
         const chapterData = brand.chapters.find(
           (c: { slug: string }) => c.slug === chapterSlug
         );
@@ -187,6 +192,14 @@ export default function ChapterPage({ params }: PageProps) {
   const admins = chapter.members.filter((m) => m.role === "ADMIN");
   const moderators = chapter.members.filter((m) => m.role === "MODERATOR" || m.role === "AMBASSADOR");
 
+  // Check if current user can edit this chapter
+  const canEdit = session?.user?.id && (
+    brandOwnerId === session.user.id ||
+    chapter.members.some(
+      (m) => m.user.id === session.user?.id && ["OWNER", "ADMIN", "LEAD"].includes(m.role)
+    )
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section with Brand Colors */}
@@ -203,27 +216,42 @@ export default function ChapterPage({ params }: PageProps) {
             Back to {chapter.brand.name}
           </Link>
 
-          <div className="flex items-center gap-6">
-            {chapter.brand.logo ? (
-              <img
-                src={chapter.brand.logo}
-                alt={chapter.brand.name}
-                className="h-16 w-16 object-contain rounded-lg bg-white p-2"
-              />
-            ) : (
-              <div className="h-16 w-16 rounded-lg bg-white/20 flex items-center justify-center text-2xl font-bold">
-                {chapter.brand.name.charAt(0)}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              {chapter.brand.logo ? (
+                <img
+                  src={chapter.brand.logo}
+                  alt={chapter.brand.name}
+                  className="h-16 w-16 object-contain rounded-lg bg-white p-2"
+                />
+              ) : (
+                <div className="h-16 w-16 rounded-lg bg-white/20 flex items-center justify-center text-2xl font-bold">
+                  {chapter.brand.name.charAt(0)}
+                </div>
+              )}
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold">
+                  {chapter.brand.name} {chapter.name}
+                </h1>
+                <p className="text-white/80 flex items-center gap-1 mt-1">
+                  <MapPin className="h-4 w-4" />
+                  {chapter.city}
+                </p>
               </div>
-            )}
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold">
-                {chapter.brand.name} {chapter.name}
-              </h1>
-              <p className="text-white/80 flex items-center gap-1 mt-1">
-                <MapPin className="h-4 w-4" />
-                {chapter.city}
-              </p>
             </div>
+            {canEdit && (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+              >
+                <Link href={`/communities/${chapter.brand.slug}/${chapter.slug}/edit`}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

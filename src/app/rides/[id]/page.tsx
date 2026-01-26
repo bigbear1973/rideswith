@@ -90,8 +90,10 @@ export default async function RidePage({ params }: RidePageProps) {
               name: true,
               website: true,
               logo: true,
+              backdrop: true,
               primaryColor: true,
               description: true,
+              displaySize: true,
             },
           },
           brand: {
@@ -106,22 +108,7 @@ export default async function RidePage({ params }: RidePageProps) {
               backdrop: true,
               slogan: true,
               domain: true,
-              sponsorLabel: true,
-              sponsors: {
-                where: {
-                  isActive: true,
-                  chapterId: null, // Only brand-level sponsors (not chapter-specific)
-                },
-                orderBy: { displayOrder: 'asc' },
-                select: {
-                  id: true,
-                  name: true,
-                  website: true,
-                  logo: true,
-                  primaryColor: true,
-                  description: true,
-                },
-              },
+              sponsorLabel: true, // Used as fallback if chapter doesn't set its own
             },
           },
         },
@@ -529,30 +516,24 @@ export default async function RidePage({ params }: RidePageProps) {
                   </a>
                 </Card>
 
-                {/* Sponsors Section - combines chapter-specific and brand-level sponsors */}
+                {/* Sponsors Section - chapter-specific sponsors only */}
                 {(() => {
-                  // Combine chapter sponsors + brand sponsors (chapter sponsors first)
-                  const allSponsors = [
-                    ...(chapter?.sponsors || []),
-                    ...(brand.sponsors || []),
-                  ];
-                  // Use chapter label if set, otherwise brand label
+                  const chapterSponsors = chapter?.sponsors || [];
+                  // Use chapter label if set, otherwise inherit from brand
                   const sponsorLabel = chapter?.sponsorLabel || brand.sponsorLabel || 'sponsors';
                   const labelText = sponsorLabel === 'partners' ? 'Our Partners' : sponsorLabel === 'ads' ? 'Ads' : 'Our Sponsors';
-                  const singleLabel = sponsorLabel === 'partners' ? 'Partner' : sponsorLabel === 'ads' ? 'Ad' : 'Sponsor';
 
-                  if (allSponsors.length === 0) return null;
+                  if (chapterSponsors.length === 0) return null;
 
                   return (
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium text-muted-foreground capitalize px-1">
                         {labelText}
                       </h3>
-                      {allSponsors.map((sponsor) => (
+                      {chapterSponsors.map((sponsor) => (
                         <SponsorCard
                           key={sponsor.id}
                           sponsor={sponsor}
-                          label={singleLabel}
                         />
                       ))}
                     </div>

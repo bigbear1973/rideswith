@@ -115,7 +115,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.description !== undefined) updateData.description = body.description || null;
     if (body.website !== undefined) updateData.website = body.website;
     if (body.logo !== undefined) updateData.logo = body.logo || null;
+    if (body.backdrop !== undefined) updateData.backdrop = body.backdrop || null;
     if (body.primaryColor !== undefined) updateData.primaryColor = body.primaryColor || null;
+    if (body.displaySize !== undefined) updateData.displaySize = body.displaySize;
     if (body.isActive !== undefined) updateData.isActive = body.isActive;
     if (body.displayOrder !== undefined) updateData.displayOrder = body.displayOrder;
 

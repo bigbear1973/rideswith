@@ -108,7 +108,9 @@ Brand (e.g., Straede)
 ### URL Structure
 - `/communities` - Browse all communities (brands, clubs, groups)
 - `/communities/[slug]` - Community profile (e.g., /communities/straede)
+- `/communities/[slug]/edit` - Edit community settings, manage community-level sponsors
 - `/communities/[slug]/[chapter]` - Chapter page (e.g., /communities/straede/leipzig)
+- `/communities/[slug]/[chapter]/edit` - Chapter settings, manage chapter sponsors
 - `/communities/create` - Register a new community
 - `/communities/[slug]/create-chapter` - Start a chapter
 
@@ -188,6 +190,61 @@ Replaced fixed pace categories (Casual/Moderate/Fast/Race) with custom speed inp
 - Past rides load on-demand when expanded (API: `?includePastRides=true`)
 - Shows up to 20 most recent past rides
 - Displays with slightly faded styling to distinguish from upcoming rides
+
+### Community Sponsors/Partners/Ads (IMPLEMENTED)
+Communities and chapters can manage sponsors that display on ride detail pages.
+
+**Hierarchy:**
+- Chapters manage their own sponsors (no inheritance from community)
+- Chapters can inherit the sponsor *label* from the community, or set their own
+- Label options: "sponsors", "partners", or "ads"
+
+**Display Sizes:**
+- **SMALL** - Logo + name only (compact)
+- **MEDIUM** - Logo + name + description (up to 150 chars ad copy)
+- **LARGE** - Featured with backdrop image + logo + name + description
+
+**Database Model:**
+```prisma
+model Sponsor {
+  id          String      @id @default(cuid())
+  brandId     String?     // Community-level sponsor
+  chapterId   String?     // Chapter-level sponsor
+  name        String
+  domain      String?     // For Brand.dev lookup
+  description String?     @db.VarChar(150)
+  website     String      // Click-through URL
+  logo        String?
+  backdrop    String?     // Wide banner for LARGE display
+  primaryColor String?
+  displaySize SponsorSize @default(SMALL)
+  isActive    Boolean     @default(true)
+  displayOrder Int        @default(0)
+}
+
+enum SponsorSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+```
+
+**Key Files:**
+- `src/components/communities/sponsor-card.tsx` - Renders sponsors in Small/Medium/Large formats
+- `src/components/communities/sponsor-form.tsx` - Add/edit sponsor with size selector, image uploads
+- `src/app/communities/[slug]/edit/page.tsx` - Community sponsor management
+- `src/app/communities/[slug]/[chapter]/edit/page.tsx` - Chapter settings with sponsor management
+
+**API Endpoints:**
+- `GET/POST /api/communities/[slug]/sponsors` - Community-level sponsors
+- `PUT/DELETE /api/communities/[slug]/sponsors/[id]` - Update/delete community sponsor
+- `GET/POST /api/communities/[slug]/[chapter]/sponsors` - Chapter-level sponsors
+- `PUT/DELETE /api/communities/[slug]/[chapter]/sponsors/[id]` - Update/delete chapter sponsor
+
+**Ride Display:**
+- Sponsors appear in the sidebar on ride detail pages (for branded rides)
+- Only chapter-specific sponsors are shown (not inherited from community)
+- Section header uses the chapter's label (or inherited from community)
 
 ---
 
@@ -452,6 +509,9 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Community Sponsors/Partners/Ads - chapters can manage sponsors with Small/Medium/Large display sizes
+- [x] Chapter settings page - `/communities/[slug]/[chapter]/edit` for managing sponsors and settings
+- [x] Sponsor display sizes - Small (logo+name), Medium (+description), Large (+backdrop image)
 - [x] Team community type - 4th option (Brand/Club/Team/Group) with Trophy icon and orange badge
 - [x] Sidebar Discussion on ride detail pages - questions, links, threaded replies
 - [x] Threaded comment replies - nested replies with inline reply forms

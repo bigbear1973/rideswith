@@ -36,8 +36,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
     }
 
-    // Get chapter-specific sponsors
-    const chapterSponsors = await prisma.sponsor.findMany({
+    // Get chapter-specific sponsors only (chapters don't inherit brand sponsors)
+    const sponsors = await prisma.sponsor.findMany({
       where: {
         chapterId: chapter.id,
         ...(showAll ? {} : { isActive: true }),
@@ -45,26 +45,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       orderBy: { displayOrder: "asc" },
     });
 
-    // Get brand-level sponsors (apply to all chapters)
-    const brandSponsors = await prisma.sponsor.findMany({
-      where: {
-        brandId: chapter.brand.id,
-        chapterId: null, // Only brand-level sponsors
-        ...(showAll ? {} : { isActive: true }),
-      },
-      orderBy: { displayOrder: "asc" },
-    });
-
-    // Combine: chapter sponsors first, then brand sponsors
-    const allSponsors = [...chapterSponsors, ...brandSponsors];
-
     // Use chapter's label if set, otherwise inherit from brand
     const sponsorLabel = chapter.sponsorLabel || chapter.brand.sponsorLabel || "sponsors";
 
     return NextResponse.json({
-      sponsors: allSponsors,
-      chapterSponsors,
-      brandSponsors,
+      sponsors,
       sponsorLabel,
     });
   } catch (error) {
@@ -156,7 +141,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         description: body.description || null,
         website: body.website,
         logo: body.logo || brandAssets?.logo || null,
+        backdrop: body.backdrop || null,
         primaryColor: body.primaryColor || brandAssets?.primaryColor || null,
+        displaySize: body.displaySize || 'SMALL',
         isActive: body.isActive !== false,
         displayOrder: body.displayOrder ?? nextOrder,
       },

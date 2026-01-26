@@ -53,7 +53,9 @@ interface Sponsor {
   description: string | null;
   website: string;
   logo: string | null;
+  backdrop: string | null;
   primaryColor: string | null;
+  displaySize: 'SMALL' | 'MEDIUM' | 'LARGE';
   isActive: boolean;
   displayOrder: number;
 }
@@ -704,7 +706,6 @@ export default function EditBrandPage() {
                       <SponsorListItem
                         key={sponsor.id}
                         sponsor={sponsor}
-                        label={sponsorLabel.slice(0, -1)}
                         onEdit={(s) => {
                           setEditingSponsor(s);
                           setShowSponsorForm(true);

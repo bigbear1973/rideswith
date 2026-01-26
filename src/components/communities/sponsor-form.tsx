@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, RefreshCw, Trash2, GripVertical, ExternalLink, Upload } from 'lucide-react';
+import { Loader2, RefreshCw, Trash2, GripVertical, ExternalLink, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+type SponsorSize = 'SMALL' | 'MEDIUM' | 'LARGE';
 
 interface Sponsor {
   id: string;
@@ -16,7 +18,9 @@ interface Sponsor {
   description: string | null;
   website: string;
   logo: string | null;
+  backdrop: string | null;
   primaryColor: string | null;
+  displaySize: SponsorSize;
   isActive: boolean;
   displayOrder: number;
 }
@@ -30,16 +34,26 @@ interface SponsorFormProps {
   onDelete?: () => void;
 }
 
+const SIZE_OPTIONS: { value: SponsorSize; label: string; description: string }[] = [
+  { value: 'SMALL', label: 'Small', description: 'Logo and name only' },
+  { value: 'MEDIUM', label: 'Medium', description: 'Logo, name, and description' },
+  { value: 'LARGE', label: 'Large', description: 'Featured with backdrop image' },
+];
+
 export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel, onDelete }: SponsorFormProps) {
   const [name, setName] = useState(sponsor?.name || '');
   const [domain, setDomain] = useState(sponsor?.domain || '');
   const [website, setWebsite] = useState(sponsor?.website || '');
   const [logo, setLogo] = useState(sponsor?.logo || '');
+  const [backdrop, setBackdrop] = useState(sponsor?.backdrop || '');
+  const [description, setDescription] = useState(sponsor?.description || '');
   const [primaryColor, setPrimaryColor] = useState(sponsor?.primaryColor || '');
+  const [displaySize, setDisplaySize] = useState<SponsorSize>(sponsor?.displaySize || 'SMALL');
   const [isActive, setIsActive] = useState(sponsor?.isActive ?? true);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingBackdrop, setIsUploadingBackdrop] = useState(false);
   const [error, setError] = useState('');
 
   const isEditing = !!sponsor;
@@ -90,15 +104,16 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
     }
   };
 
-  const handleLogoUpload = async (file: File) => {
-    setIsUploadingLogo(true);
+  const handleImageUpload = async (file: File, type: 'logo' | 'backdrop') => {
+    if (type === 'logo') setIsUploadingLogo(true);
+    else setIsUploadingBackdrop(true);
     setError('');
 
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', 'brand_assets');
-      formData.append('folder', 'sponsor-logos');
+      formData.append('folder', type === 'logo' ? 'sponsor-logos' : 'sponsor-backdrops');
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -108,11 +123,13 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
       if (!response.ok) throw new Error('Upload failed');
 
       const data = await response.json();
-      setLogo(data.secure_url);
+      if (type === 'logo') setLogo(data.secure_url);
+      else setBackdrop(data.secure_url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload logo');
+      setError(err instanceof Error ? err.message : `Failed to upload ${type}`);
     } finally {
-      setIsUploadingLogo(false);
+      if (type === 'logo') setIsUploadingLogo(false);
+      else setIsUploadingBackdrop(false);
     }
   };
 
@@ -131,9 +148,12 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
         body: JSON.stringify({
           name,
           domain: domain || null,
+          description: description || null,
           website,
           logo: logo || null,
+          backdrop: backdrop || null,
           primaryColor: primaryColor || null,
+          displaySize,
           isActive,
         }),
       });
@@ -184,6 +204,28 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
         </div>
       )}
 
+      {/* Display Size Selector */}
+      <div className="space-y-2">
+        <Label>Display Size</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {SIZE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setDisplaySize(option.value)}
+              className={`p-3 rounded-lg border text-left transition-colors ${
+                displaySize === option.value
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <p className="font-medium text-sm">{option.label}</p>
+              <p className="text-xs text-muted-foreground">{option.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Name *</Label>
@@ -208,6 +250,23 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
           />
         </div>
       </div>
+
+      {/* Description - for Medium and Large */}
+      {(displaySize === 'MEDIUM' || displaySize === 'LARGE') && (
+        <div className="space-y-2">
+          <Label htmlFor="description">Ad Copy / Description</Label>
+          <Input
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value.slice(0, 150))}
+            placeholder="Short description or tagline (max 150 chars)"
+            maxLength={150}
+          />
+          <p className="text-xs text-muted-foreground text-right">
+            {description.length}/150
+          </p>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="domain">Domain (for Brand.dev lookup)</Label>
@@ -237,6 +296,65 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
           Enter a domain to auto-fetch logo and colors from Brand.dev
         </p>
       </div>
+
+      {/* Backdrop Image - for Large only */}
+      {displaySize === 'LARGE' && (
+        <div className="space-y-2">
+          <Label>Backdrop Image</Label>
+          {backdrop ? (
+            <div className="relative">
+              <img
+                src={backdrop}
+                alt="Backdrop"
+                className="w-full h-24 object-cover rounded-lg"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 h-6 w-6"
+                onClick={() => setBackdrop('')}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div className="w-full h-24 rounded-lg border-2 border-dashed flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <Upload className="h-6 w-6 mx-auto mb-1" />
+                <span className="text-xs">Wide banner image</span>
+              </div>
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            id="backdrop-upload"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImageUpload(file, 'backdrop');
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => document.getElementById('backdrop-upload')?.click()}
+            disabled={isUploadingBackdrop}
+          >
+            {isUploadingBackdrop ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4 mr-2" />
+            )}
+            {backdrop ? 'Change Backdrop' : 'Upload Backdrop'}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Recommended: Wide image, 800x200px or larger
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -272,7 +390,7 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) handleLogoUpload(file);
+                  if (file) handleImageUpload(file, 'logo');
                 }}
               />
               <Button
@@ -358,11 +476,16 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
 
 interface SponsorListItemProps {
   sponsor: Sponsor;
-  label: string;
   onEdit: (sponsor: Sponsor) => void;
 }
 
-export function SponsorListItem({ sponsor, label, onEdit }: SponsorListItemProps) {
+const SIZE_LABELS: Record<SponsorSize, string> = {
+  SMALL: 'S',
+  MEDIUM: 'M',
+  LARGE: 'L',
+};
+
+export function SponsorListItem({ sponsor, onEdit }: SponsorListItemProps) {
   return (
     <Card
       className={`cursor-pointer hover:border-primary/50 transition-colors ${!sponsor.isActive ? 'opacity-60' : ''}`}
@@ -389,6 +512,9 @@ export function SponsorListItem({ sponsor, label, onEdit }: SponsorListItemProps
             <p className="font-medium text-sm truncate">{sponsor.name}</p>
             <p className="text-xs text-muted-foreground truncate">{sponsor.website}</p>
           </div>
+          <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-medium">
+            {SIZE_LABELS[sponsor.displaySize] || 'S'}
+          </span>
           {!sponsor.isActive && (
             <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
               Hidden

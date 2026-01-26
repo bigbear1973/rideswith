@@ -179,6 +179,12 @@ enum CommunityType {
   GROUP   // Informal group
 }
 
+enum SponsorSize {
+  SMALL   // Logo + name only (compact)
+  MEDIUM  // Logo + name + description (up to 150 chars)
+  LARGE   // Backdrop image + logo + name + description (featured)
+}
+
 // ============================================
 // App Models
 // ============================================
@@ -391,14 +397,16 @@ model Sponsor {
 
   name        String
   domain      String? // For Brand.dev lookup
-  description String?
+  description String? @db.VarChar(150) // Ad copy for medium/large (max 150 chars)
   website     String  // Click-through URL
 
   // Assets (from Brand.dev or manual upload)
   logo         String?
+  backdrop     String? // Wide banner image for large display
   primaryColor String?
 
   // Display settings
+  displaySize  SponsorSize @default(SMALL) // SMALL, MEDIUM, LARGE
   isActive     Boolean @default(true)
   displayOrder Int     @default(0)
 

@@ -151,6 +151,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.customLogo !== undefined) updateData.customLogo = body.customLogo;
     if (body.customColors !== undefined)
       updateData.customColors = body.customColors;
+    if (body.sponsorLabel !== undefined) updateData.sponsorLabel = body.sponsorLabel;
 
     const chapter = await prisma.chapter.update({
       where: { id },
