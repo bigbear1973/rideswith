@@ -127,9 +127,10 @@ Communities can display links to their social media profiles:
 - Smart URL handling: accepts handles (`@username`) or full URLs
 
 ### Community Types (IMPLEMENTED)
-Communities can be one of three types, displayed as badges:
+Communities can be one of four types, displayed as badges:
 - **BRAND** - Commercial cycling brand (Rapha, Straede) - purple badge
-- **CLUB** - Cycling club or team - blue badge
+- **CLUB** - Cycling club with members - blue badge
+- **TEAM** - Racing or competitive team - orange badge
 - **GROUP** - Informal riding group - green badge
 
 ### API Endpoints
@@ -177,8 +178,9 @@ Replaced fixed pace categories (Casual/Moderate/Fast/Race) with custom speed inp
 
 ### Ride Detail Page Layout
 - Ride Info card displayed in main content (under date/time and location)
-- Sidebar only appears for branded rides (with brand card)
-- Non-branded rides use single-column layout for cleaner appearance
+- Sidebar appears with brand card (for branded rides) and Discussion section
+- Discussion sidebar: users can ask questions, post links, and reply to comments
+- Non-branded rides still show sidebar for discussion
 - "Hosted by" links to the creator's user profile (/u/slug), not the organizer entity
 
 ### Past Rides on Chapter Pages (IMPLEMENTED)
@@ -194,7 +196,7 @@ Replaced fixed pace categories (Casual/Moderate/Fast/Race) with custom speed inp
 Post-ride social features that unlock after a ride's date has passed.
 
 ### Features
-- **Comments**: Users can post comments about the ride experience
+- **Comments**: Users can post comments about the ride experience, with threaded replies
 - **Media Gallery**: Upload photos and videos from the ride
 - **Lightbox**: Click to view full-size photos or play videos
 
@@ -215,7 +217,8 @@ Post-ride social features that unlock after a ride's date has passed.
 ### Database Models
 ```prisma
 model RideComment {
-  id, rideId, userId, content, createdAt, updatedAt
+  id, rideId, userId, content, parentId (for replies), createdAt, updatedAt
+  parent/replies relations for threading
   @@index([rideId, createdAt])
 }
 
@@ -413,6 +416,9 @@ Natural language / voice input to auto-fill ride details:
 - Some API endpoints (organizers)
 
 **Recently Completed:**
+- Team community type - 4th option (Brand/Club/Team/Group) with Trophy icon and orange badge
+- Sidebar Discussion on ride detail pages - users can ask questions, post links, reply to comments
+- Threaded comment replies - comments now support nested replies with inline reply forms
 - Custom speed range - organizers specify min/max speed (km/h) instead of pace categories
 - Profile image upload - users can upload their own profile photo via Cloudinary
 - Social icons improved - removed external link arrows, increased icon size 25%
@@ -446,8 +452,11 @@ Natural language / voice input to auto-fill ride details:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Team community type - 4th option (Brand/Club/Team/Group) with Trophy icon and orange badge
+- [x] Sidebar Discussion on ride detail pages - questions, links, threaded replies
+- [x] Threaded comment replies - nested replies with inline reply forms
 - [x] Custom speed range - replaced pace categories (Casual/Moderate/Fast/Race) with min/max speed inputs (km/h)
-- [x] URL rename: /brands → /communities with type badges (Brand/Club/Group)
+- [x] URL rename: /brands → /communities with type badges (Brand/Club/Team/Group)
 - [x] Profile image upload - users can upload their own profile photo
 - [x] Social icons - removed external link arrows, made icons 25% bigger
 - [x] "Hosted by" link now goes to user profile instead of organizer
@@ -456,7 +465,7 @@ Natural language / voice input to auto-fill ride details:
 - [x] User social links (Instagram, Strava) on profiles
 - [x] Community admin roles (Owner, Admin, Moderator) with backward compatibility
 - [x] Brand social links (Instagram, Twitter, Facebook, Strava, YouTube)
-- [x] Ride detail layout - Ride Info in main content, sidebar only for branded rides
+- [x] Ride detail layout - Ride Info in main content, sidebar with discussion
 - [x] "Cake & Coffee Stop" - post-ride comments and photo/video uploads
 - [x] Cloudinary integration for media uploads (unsigned preset)
 - [x] Brand & Chapter system with hierarchical organization
