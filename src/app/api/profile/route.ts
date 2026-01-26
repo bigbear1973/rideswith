@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, slug, bio, location, instagram, strava } = body;
+    const { name, slug, bio, location, instagram, strava, image } = body;
 
     // Validate slug if provided
     if (slug) {
@@ -96,6 +96,7 @@ export async function PUT(request: NextRequest) {
         location: location?.trim() || null,
         instagram: instagram?.trim() || null,
         strava: strava?.trim() || null,
+        ...(image !== undefined && { image: image || null }),
       },
       select: {
         id: true,

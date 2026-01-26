@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Instagram } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Instagram, Camera } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -43,7 +43,9 @@ export default function EditProfilePage() {
     location: '',
     instagram: '',
     strava: '',
+    image: '',
   });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -65,6 +67,7 @@ export default function EditProfilePage() {
             location: data.location || '',
             instagram: data.instagram || '',
             strava: data.strava || '',
+            image: data.image || '',
           });
         }
       } catch (err) {
@@ -107,6 +110,55 @@ export default function EditProfilePage() {
 
     return () => clearTimeout(timer);
   }, [formData.slug, profile?.slug]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setError(null);
+
+    try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      if (!cloudName) {
+        throw new Error('Image upload not configured');
+      }
+
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      uploadData.append('upload_preset', 'profile_photos');
+      uploadData.append('folder', 'profile-photos');
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        { method: 'POST', body: uploadData }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setFormData({ ...formData, image: data.secure_url });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,16 +230,34 @@ export default function EditProfilePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Avatar Preview */}
+              {/* Avatar Upload */}
               <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20">
-                  {profile.image && <AvatarImage src={profile.image} alt={profile.name || ''} />}
-                  <AvatarFallback className="text-xl">{initials}</AvatarFallback>
-                </Avatar>
+                <div className="relative group">
+                  <Avatar className="h-20 w-20">
+                    {(formData.image || profile.image) && (
+                      <AvatarImage src={formData.image || profile.image || ''} alt={profile.name || ''} />
+                    )}
+                    <AvatarFallback className="text-xl">{initials}</AvatarFallback>
+                  </Avatar>
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={isUploadingImage}
+                      className="hidden"
+                    />
+                    {isUploadingImage ? (
+                      <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    ) : (
+                      <Camera className="h-6 w-6 text-white" />
+                    )}
+                  </label>
+                </div>
                 <div>
                   <p className="font-medium">{profile.email}</p>
                   <p className="text-sm text-muted-foreground">
-                    Profile photo is synced from your sign-in provider
+                    Click the avatar to upload a new photo
                   </p>
                 </div>
               </div>
