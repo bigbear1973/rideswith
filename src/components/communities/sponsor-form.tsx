@@ -123,7 +123,7 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'brand_assets');
+      formData.append('upload_preset', 'group_rides');
       formData.append('folder', type === 'logo' ? 'sponsor-logos' : 'sponsor-backdrops');
 
       const response = await fetch(
@@ -131,7 +131,11 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
         { method: 'POST', body: formData }
       );
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Cloudinary upload error:', errorData);
+        throw new Error(errorData.error?.message || 'Upload failed');
+      }
 
       const data = await response.json();
       if (type === 'logo') setLogo(data.secure_url);
