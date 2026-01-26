@@ -72,30 +72,41 @@ export function SponsorForm({ brandSlug, chapterSlug, sponsor, onSave, onCancel,
     setError('');
 
     try {
-      const basePath = getBasePath();
-      const endpoint = isEditing ? `${basePath}/${sponsor.id}` : basePath;
+      // For editing, use PUT with refreshBranding flag
+      // For creating, we just fetch the assets directly without creating the sponsor
+      if (isEditing) {
+        const basePath = getBasePath();
+        const res = await fetch(`${basePath}/${sponsor.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshBranding: true }),
+        });
 
-      const method = isEditing ? 'PUT' : 'POST';
-      const body = isEditing
-        ? { refreshBranding: true }
-        : { name: name || domain, domain, website: website || `https://${domain}` };
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.logo) setLogo(data.logo);
-        if (data.primaryColor) setPrimaryColor(data.primaryColor);
-        if (!isEditing) {
-          onSave(data);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.logo) setLogo(data.logo);
+          if (data.backdrop) setBackdrop(data.backdrop);
+          if (data.primaryColor) setPrimaryColor(data.primaryColor);
+        } else {
+          const data = await res.json();
+          setError(data.error || 'Failed to fetch brand assets');
         }
       } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to fetch brand assets');
+        // For new sponsors, fetch assets via a dedicated endpoint that just returns assets
+        // Use the brandfetch API endpoint instead
+        const res = await fetch(`/api/brandfetch?domain=${encodeURIComponent(domain)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.logo) setLogo(data.logo);
+          if (data.backdrop) setBackdrop(data.backdrop);
+          if (data.primaryColor) setPrimaryColor(data.primaryColor);
+          // Auto-fill name if empty
+          if (!name && data.name) setName(data.name);
+          // Auto-fill website if empty
+          if (!website) setWebsite(`https://${domain}`);
+        } else {
+          setError('Failed to fetch brand assets');
+        }
       }
     } catch {
       setError('Failed to fetch brand assets');

@@ -100,6 +100,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           where: { id },
           data: {
             logo: brandAssets.logo || sponsor.logo,
+            backdrop: brandAssets.backdrop || sponsor.backdrop,
             primaryColor: brandAssets.primaryColor || sponsor.primaryColor,
           },
         });
