@@ -9,8 +9,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck } from 'lucide-react';
 import { SponsorForm, SponsorList } from '@/components/communities';
+
+interface ChapterMember {
+  id: string;
+  role: string;
+  userId: string;
+  user: {
+    id: string;
+    name: string | null;
+    email?: string;
+    image: string | null;
+    slug: string | null;
+  };
+}
 
 interface Chapter {
   id: string;
@@ -25,12 +38,17 @@ interface Chapter {
     slug: string;
     sponsorLabel: string | null;
     hidePresentedBy: boolean;
+    createdById: string | null;
   };
-  members: Array<{
-    id: string;
-    role: string;
-    userId: string;
-  }>;
+  members: ChapterMember[];
+}
+
+interface SearchUser {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  slug: string | null;
 }
 
 interface Sponsor {
@@ -69,6 +87,15 @@ export default function EditChapterPage() {
     name: '',
     city: '',
   });
+
+  // Member management state
+  const [members, setMembers] = useState<ChapterMember[]>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [memberError, setMemberError] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [isBrandOwner, setIsBrandOwner] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -113,8 +140,10 @@ export default function EditChapterPage() {
             slug: brandData.slug,
             sponsorLabel: brandData.sponsorLabel,
             hidePresentedBy: brandData.hidePresentedBy || false,
+            createdById: brandData.createdById,
           },
         });
+        setMembers(fullChapter.members || []);
         setFormData({
           name: fullChapter.name || '',
           city: fullChapter.city || '',
@@ -131,14 +160,17 @@ export default function EditChapterPage() {
         );
 
         // Check permission
-        const isAdmin = fullChapter.members?.some(
-          (m: { userId: string; role: string }) =>
-            m.userId === session?.user?.id &&
-            ['OWNER', 'ADMIN', 'LEAD'].includes(m.role)
+        const userMembership = fullChapter.members?.find(
+          (m: { userId: string; role: string }) => m.userId === session?.user?.id
         );
-        const isBrandOwner = brandData.createdById === session?.user?.id;
+        const userRole = userMembership?.role || null;
+        setCurrentUserRole(userRole);
 
-        if (!isAdmin && !isBrandOwner) {
+        const isAdminUser = userRole && ['OWNER', 'ADMIN', 'LEAD'].includes(userRole);
+        const isBrandOwnerUser = brandData.createdById === session?.user?.id;
+        setIsBrandOwner(isBrandOwnerUser);
+
+        if (!isAdminUser && !isBrandOwnerUser) {
           setError("You don't have permission to edit this chapter");
         }
 
@@ -192,6 +224,138 @@ export default function EditChapterPage() {
       setError(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Search for users to add as members
+  const handleUserSearch = async (query: string) => {
+    setUserSearch(query);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Filter out users who are already members
+        const memberIds = members.map((m) => m.userId);
+        setSearchResults(data.users.filter((u: SearchUser) => !memberIds.includes(u.id)));
+      }
+    } catch {
+      console.error('Failed to search users');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Add a new member
+  const handleAddMember = async (user: SearchUser, role: 'ADMIN' | 'MODERATOR') => {
+    if (!chapter) return;
+    setMemberError(null);
+
+    try {
+      const res = await fetch(`/api/chapters/${chapter.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, role }),
+      });
+
+      if (res.ok) {
+        const newMember = await res.json();
+        setMembers([...members, newMember]);
+        setUserSearch('');
+        setSearchResults([]);
+      } else {
+        const data = await res.json();
+        setMemberError(data.error || 'Failed to add member');
+      }
+    } catch {
+      setMemberError('Failed to add member');
+    }
+  };
+
+  // Update a member's role
+  const handleUpdateRole = async (userId: string, newRole: string) => {
+    if (!chapter) return;
+    setMemberError(null);
+
+    try {
+      const res = await fetch(`/api/chapters/${chapter.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role: newRole }),
+      });
+
+      if (res.ok) {
+        const updatedMember = await res.json();
+        setMembers(members.map((m) => (m.userId === userId ? updatedMember : m)));
+      } else {
+        const data = await res.json();
+        setMemberError(data.error || 'Failed to update role');
+      }
+    } catch {
+      setMemberError('Failed to update role');
+    }
+  };
+
+  // Remove a member
+  const handleRemoveMember = async (userId: string) => {
+    if (!chapter) return;
+    if (!confirm('Are you sure you want to remove this member?')) return;
+    setMemberError(null);
+
+    try {
+      const res = await fetch(`/api/chapters/${chapter.id}?userId=${userId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setMembers(members.filter((m) => m.userId !== userId));
+      } else {
+        const data = await res.json();
+        setMemberError(data.error || 'Failed to remove member');
+      }
+    } catch {
+      setMemberError('Failed to remove member');
+    }
+  };
+
+  // Check if current user can modify a specific member
+  const canModifyMember = (memberRole: string) => {
+    // Brand owner can do anything
+    if (isBrandOwner) return true;
+    // Owners can modify anyone
+    if (currentUserRole === 'OWNER' || currentUserRole === 'LEAD') return true;
+    // Admins can only modify moderators
+    if (currentUserRole === 'ADMIN' && memberRole === 'MODERATOR') return true;
+    return false;
+  };
+
+  // Check if current user can promote to a specific role
+  const canPromoteTo = (targetRole: string) => {
+    if (isBrandOwner) return true;
+    if (currentUserRole === 'OWNER' || currentUserRole === 'LEAD') return true;
+    // Admins can only add moderators
+    if (currentUserRole === 'ADMIN' && targetRole === 'MODERATOR') return true;
+    return false;
+  };
+
+  // Get role display info
+  const getRoleInfo = (role: string) => {
+    switch (role) {
+      case 'OWNER':
+      case 'LEAD':
+        return { label: 'Owner', icon: Crown, color: 'text-yellow-600' };
+      case 'ADMIN':
+        return { label: 'Admin', icon: Shield, color: 'text-blue-600' };
+      case 'MODERATOR':
+      case 'AMBASSADOR':
+        return { label: 'Moderator', icon: UserCheck, color: 'text-green-600' };
+      default:
+        return { label: role, icon: UserCheck, color: 'text-muted-foreground' };
     }
   };
 
@@ -317,6 +481,156 @@ export default function EditChapterPage() {
                 <p className="text-xs text-muted-foreground">
                   The sidebar card that links to your community&apos;s external website
                 </p>
+              </div>
+            </div>
+
+            {/* Team Members Section */}
+            <div className="space-y-4 border-t pt-6">
+              <div>
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Team Members
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Manage who can create rides and edit chapter settings
+                </p>
+              </div>
+
+              {memberError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{memberError}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Current Members List */}
+              <div className="space-y-2">
+                {members.map((member) => {
+                  const roleInfo = getRoleInfo(member.role);
+                  const RoleIcon = roleInfo.icon;
+                  const isCurrentUser = member.userId === session?.user?.id;
+
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+                    >
+                      {member.user.image ? (
+                        <img
+                          src={member.user.image}
+                          alt={member.user.name || ''}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                          {(member.user.name || member.user.email || '?').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {member.user.name || member.user.email}
+                          {isCurrentUser && (
+                            <span className="ml-2 text-xs text-muted-foreground">(you)</span>
+                          )}
+                        </p>
+                        <div className="flex items-center gap-1 text-xs">
+                          <RoleIcon className={`h-3 w-3 ${roleInfo.color}`} />
+                          <span className={roleInfo.color}>{roleInfo.label}</span>
+                        </div>
+                      </div>
+
+                      {/* Role change dropdown - only if can modify */}
+                      {canModifyMember(member.role) && !isCurrentUser && (
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={member.role === 'LEAD' ? 'OWNER' : member.role === 'AMBASSADOR' ? 'MODERATOR' : member.role}
+                            onChange={(e) => handleUpdateRole(member.userId, e.target.value)}
+                            className="text-xs border rounded px-2 py-1 bg-background"
+                          >
+                            {canPromoteTo('OWNER') && <option value="OWNER">Owner</option>}
+                            {canPromoteTo('ADMIN') && <option value="ADMIN">Admin</option>}
+                            {canPromoteTo('MODERATOR') && <option value="MODERATOR">Moderator</option>}
+                          </select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleRemoveMember(member.userId)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Add Member Search */}
+              <div className="space-y-2">
+                <Label className="text-sm">Add Team Member</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={userSearch}
+                    onChange={(e) => handleUserSearch(e.target.value)}
+                    placeholder="Search by name or email..."
+                    className="pl-9"
+                  />
+                  {isSearching && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="border rounded-lg divide-y">
+                    {searchResults.map((user) => (
+                      <div key={user.id} className="flex items-center gap-3 p-3">
+                        {user.image ? (
+                          <img
+                            src={user.image}
+                            alt={user.name || ''}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                            {(user.name || user.email).charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{user.name || user.email}</p>
+                          {user.name && (
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          {canPromoteTo('ADMIN') && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAddMember(user, 'ADMIN')}
+                            >
+                              Add as Admin
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            onClick={() => handleAddMember(user, 'MODERATOR')}
+                          >
+                            Add as Moderator
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {userSearch.length >= 2 && searchResults.length === 0 && !isSearching && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No users found. They need to sign in first to be added as a team member.
+                  </p>
+                )}
               </div>
             </div>
 
