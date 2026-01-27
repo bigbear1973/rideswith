@@ -29,6 +29,7 @@ interface Ride {
   title: string;
   date: string;
   location: string;
+  locationName?: string;
   distance: number | null;
   pace: string;
   latitude: number | null;
@@ -37,6 +38,13 @@ interface Ride {
     id: string;
     name: string;
   };
+  brand: {
+    name: string;
+    slug: string;
+    logo: string | null;
+    logoIcon: string | null;
+    primaryColor: string | null;
+  } | null;
   _count?: {
     rsvps: number;
   };
@@ -242,7 +250,22 @@ export default function PastRidesPage() {
                 <Card className="h-full hover:shadow-md transition-shadow cursor-pointer opacity-80 hover:opacity-100">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg line-clamp-2">{ride.title}</CardTitle>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {/* Brand logo for community rides */}
+                        {ride.brand?.logo && (
+                          <div
+                            className="h-7 w-7 rounded flex-shrink-0 p-0.5"
+                            style={{ backgroundColor: ride.brand.primaryColor || '#f3f4f6' }}
+                          >
+                            <img
+                              src={ride.brand.logoIcon || ride.brand.logo}
+                              alt={ride.brand.name}
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                        )}
+                        <CardTitle className="text-lg line-clamp-2">{ride.title}</CardTitle>
+                      </div>
                       <Badge className={paceColors[ride.pace] || "bg-gray-100"}>
                         {ride.pace}
                       </Badge>
@@ -255,7 +278,7 @@ export default function PastRidesPage() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">{ride.location}</span>
+                      <span className="truncate">{ride.locationName || ride.location}</span>
                     </div>
                     {ride.distance && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
