@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Map } from '@/components/maps';
 import { useUnits } from '@/components/providers/units-provider';
 
 const PACE_OPTIONS = [
@@ -225,12 +224,6 @@ export default function DiscoverPage() {
     return withinRadius && matchesPace && matchesDistance && matchesDateRange;
   });
 
-  const mapMarkers = filteredRides.map((ride) => ({
-    id: ride.id,
-    position: { lat: ride.latitude, lng: ride.longitude },
-    title: ride.title,
-  }));
-
   // Debounced search for locations using Nominatim (OpenStreetMap)
   const searchLocation = useCallback(async (query: string) => {
     if (query.length < 3) {
@@ -374,14 +367,22 @@ export default function DiscoverPage() {
               )}
             </div>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={useMyLocation}
-              title="Use my location"
-            >
-              <Navigation className="h-4 w-4" />
-            </Button>
+            {/* Current Location Button with Location Name */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={useMyLocation}
+                title="Use my location"
+                className="flex-shrink-0"
+              >
+                <Navigation className="h-4 w-4" />
+              </Button>
+              <span className="hidden sm:flex items-center text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
+                <span className="truncate max-w-48">{locationName}</span>
+              </span>
+            </div>
 
             {/* Radius Selector */}
             <Select value={searchRadius} onValueChange={setSearchRadius}>
@@ -486,8 +487,8 @@ export default function DiscoverPage() {
               )}
             </div>
 
-            {/* Current Location Display */}
-            <div className="flex-1 sm:flex-none flex items-center text-sm text-muted-foreground">
+            {/* Current Location Display (Mobile only) */}
+            <div className="flex-1 sm:hidden flex items-center text-sm text-muted-foreground">
               <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
               <span className="truncate">{locationName}</span>
             </div>
@@ -573,19 +574,9 @@ export default function DiscoverPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Map */}
-        <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 border-b lg:border-b-0 lg:border-r relative">
-          <Map
-            center={mapCenter}
-            zoom={10}
-            markers={mapMarkers}
-            className="h-full w-full"
-          />
-        </div>
-
+      <div className="flex-1 flex flex-col">
         {/* Ride List */}
-        <div className="flex-1 lg:flex-none lg:w-96 xl:w-[420px] flex flex-col">
+        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
           <div className="px-4 py-4 border-b bg-primary">
             <h2 className="font-bold text-primary-foreground text-lg">Upcoming Rides</h2>
             <p className="text-sm text-primary-foreground/80">
