@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { notifyNewRide } from '@/lib/push-notifications';
 import { addWeeks, addMonths, isBefore, startOfDay } from 'date-fns';
 import { RecurrencePattern } from '@prisma/client';
 
@@ -324,6 +325,21 @@ export async function POST(request: NextRequest) {
         status: 'GOING',
       },
     });
+
+    // Send push notifications to followers (fire and forget)
+    if (body.chapterId) {
+      notifyNewRide(
+        {
+          id: ride.id,
+          title: ride.title,
+          date: ride.date,
+          chapterId: body.chapterId,
+        },
+        userId
+      ).catch((err) => {
+        console.error('Failed to send new ride notifications:', err);
+      });
+    }
 
     return NextResponse.json(ride, { status: 201 });
   } catch (error) {

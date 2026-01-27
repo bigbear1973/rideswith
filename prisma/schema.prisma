@@ -29,16 +29,19 @@ model User {
   strava        String?   // Strava profile URL
 
   // Relations
-  accounts      Account[]
-  sessions      Session[]
-  organizers    OrganizerMember[]
-  chapters      ChapterMember[]
-  rsvps         Rsvp[]
-  brands        Brand[]
-  rideRoutes    RideRoute[]
-  rideComments  RideComment[]
-  ridePhotos    RidePhoto[]
-  rideSnippets  RideSnippet[]
+  accounts             Account[]
+  sessions             Session[]
+  organizers           OrganizerMember[]
+  chapters             ChapterMember[]
+  rsvps                Rsvp[]
+  brands               Brand[]
+  rideRoutes           RideRoute[]
+  rideComments         RideComment[]
+  ridePhotos           RidePhoto[]
+  rideSnippets         RideSnippet[]
+  follows              Follow[]
+  pushSubscriptions    PushSubscription[]
+  notificationSettings UserNotificationSettings?
 }
 
 model Account {
@@ -119,8 +122,9 @@ model Brand {
   updatedAt DateTime @updatedAt
 
   // Relations
-  chapters Chapter[]
-  sponsors Sponsor[]
+  chapters  Chapter[]
+  sponsors  Sponsor[]
+  followers Follow[]
 }
 
 model Chapter {
@@ -149,9 +153,10 @@ model Chapter {
   updatedAt DateTime @updatedAt
 
   // Relations
-  members  ChapterMember[]
-  rides    Ride[]
-  sponsors Sponsor[]
+  members   ChapterMember[]
+  rides     Ride[]
+  sponsors  Sponsor[]
+  followers Follow[]
 
   @@unique([brandId, slug])
 }
@@ -459,4 +464,51 @@ model RideSnippet {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+// ============================================
+// Push Notifications & Follows
+// ============================================
+
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String
+  brandId   String?  // Following a community
+  chapterId String?  // Following a chapter
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brand   Brand?   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, brandId])
+  @@unique([userId, chapterId])
+  @@index([brandId])
+  @@index([chapterId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String   // Public key
+  auth      String   // Auth secret
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model UserNotificationSettings {
+  id                       String  @id @default(cuid())
+  userId                   String  @unique
+  pushEnabled              Boolean @default(true)  // Master switch for push notifications
+  newRideNotifications     Boolean @default(true)  // New rides in followed communities
+  rideUpdateNotifications  Boolean @default(true)  // Updates to RSVPed rides
+  rideReminderNotifications Boolean @default(true) // Reminders before RSVPed rides
+  commentNotifications     Boolean @default(true)  // Replies to comments
+  autoFollowOnRsvp         Boolean @default(true)  // Auto-follow chapter when RSVP
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

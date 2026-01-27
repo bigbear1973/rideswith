@@ -49,6 +49,9 @@ npm run db:studio    # Open Prisma Studio
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name (client-side)
 - `CLOUDINARY_API_KEY` - Cloudinary API key (for deletions)
 - `CLOUDINARY_API_SECRET` - Cloudinary API secret (for deletions)
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - Web Push VAPID public key (for push notifications)
+- `VAPID_PRIVATE_KEY` - Web Push VAPID private key (for push notifications)
+- `VAPID_EMAIL` - Contact email for push service (optional, defaults to support@rideswith.com)
 
 ## Design Notes
 
@@ -439,86 +442,67 @@ Natural language / voice input to auto-fill ride details:
 - Optional voice input via Web Speech API
 - Environment variable: `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
 
-### Push Notifications Architecture (RESEARCHED)
-Enable push notifications when new rides are added to followed communities/chapters.
+### Push Notifications (IMPLEMENTED)
+Push notifications when new rides are added to followed communities/chapters.
+
+**Features:**
+- Web Push notifications for new rides in followed chapters
+- User notification settings (enable/disable per notification type)
+- Auto-follow chapters when RSVPing to their rides (configurable)
+- Service worker for receiving push notifications
 
 **Database Models:**
 ```prisma
 model Follow {
-  id          String   @id @default(cuid())
-  userId      String
-  brandId     String?  // Following a community
-  chapterId   String?  // Following a chapter
-  createdAt   DateTime @default(now())
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  brand   Brand?   @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, brandId])
-  @@unique([userId, chapterId])
-  @@index([brandId])
-  @@index([chapterId])
+  id        String   @id @default(cuid())
+  userId    String
+  brandId   String?  // Following a community
+  chapterId String?  // Following a chapter
+  createdAt DateTime @default(now())
+  // ... relations
 }
 
 model PushSubscription {
-  id           String   @id @default(cuid())
-  userId       String
-  endpoint     String   @unique
-  p256dh       String   // Public key
-  auth         String   // Auth secret
-  createdAt    DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String   // Public key
+  auth      String   // Auth secret
+  // ... relations
 }
 
 model UserNotificationSettings {
-  id                    String  @id @default(cuid())
-  userId                String  @unique
-  newRideNotifications  Boolean @default(true)
-  rideUpdateNotifications Boolean @default(true)
-  commentNotifications  Boolean @default(true)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                        String  @id @default(cuid())
+  userId                    String  @unique
+  pushEnabled               Boolean @default(true)  // Master switch
+  newRideNotifications      Boolean @default(true)  // New rides in followed chapters
+  rideUpdateNotifications   Boolean @default(true)  // Updates to RSVPed rides
+  rideReminderNotifications Boolean @default(true)  // Reminders before rides
+  commentNotifications      Boolean @default(true)  // Replies to comments
+  autoFollowOnRsvp          Boolean @default(true)  // Auto-follow on RSVP
 }
 ```
 
-**Auto-Follow Logic:**
-- When user RSVPs to a ride (going/maybe), auto-follow the chapter if not already following
-- Add setting in user preferences to disable auto-follow
-- Show "Following" badge on chapter pages for followed chapters
-- Unfollow available via chapter page or settings
-
-**Implementation Approach:**
-1. Use `web-push` npm package for sending notifications
-2. Generate VAPID keys (store in env vars: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`)
-3. Service Worker registers on client, stores subscription via API
-4. When ride is created, query followers and send notifications in background
-
-**API Endpoints:**
-- `POST /api/push/subscribe` - Store push subscription
-- `DELETE /api/push/subscribe` - Remove subscription
-- `GET/POST /api/follows` - List/create follows
-- `DELETE /api/follows/[id]` - Unfollow
-- `GET/PUT /api/notifications/settings` - User notification preferences
-
-**Notification Triggers:**
-- New ride added to followed chapter
-- Ride update (time/location change) for RSVPed rides
-- Ride cancellation for RSVPed rides
-- New comment on ride user created or RSVPed to
-
-**Key Files (to create):**
+**Key Files:**
 - `src/lib/push-notifications.ts` - Send notification helper
 - `public/sw.js` - Service Worker for receiving push
-- `src/components/notifications/push-permission.tsx` - Request permission UI
-- `src/app/settings/notifications/page.tsx` - Notification preferences
+- `src/components/notifications/push-permission.tsx` - Request permission banner/button
+- `src/app/settings/notifications/page.tsx` - Notification preferences UI
+- `src/app/api/notifications/settings/route.ts` - Notification settings API
+- `src/app/api/push/subscribe/route.ts` - Push subscription API
+- `src/app/api/follows/route.ts` - Follow/unfollow API
 
-**Environment Variables (needed):**
-- `VAPID_PUBLIC_KEY` - Web Push public key
-- `VAPID_PRIVATE_KEY` - Web Push private key
-- `VAPID_EMAIL` - Contact email for push service
+**API Endpoints:**
+- `GET/PUT /api/notifications/settings` - User notification preferences
+- `POST/DELETE /api/push/subscribe` - Manage push subscriptions
+- `GET/POST/DELETE /api/follows` - Follow/unfollow communities/chapters
+
+**Environment Variables (needed for push to work):**
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - Web Push VAPID public key
+- `VAPID_PRIVATE_KEY` - Web Push VAPID private key
+- `VAPID_EMAIL` - Contact email for push service (optional)
+
+**Generate VAPID keys:** Run `node -e "console.log(require('web-push').generateVAPIDKeys())"`
 
 ---
 
@@ -532,6 +516,8 @@ model UserNotificationSettings {
 | `/discover/past` | `src/app/discover/past/page.tsx` | Past rides archive |
 | `/create` | `src/app/create/page.tsx` | Fully working (requires auth) |
 | `/settings` | `src/app/settings/page.tsx` | Fully working |
+| `/settings/notifications` | `src/app/settings/notifications/page.tsx` | Push notification preferences |
+| `/settings/snippets` | `src/app/settings/snippets/page.tsx` | Ride description snippets |
 | `/profile` | `src/app/profile/page.tsx` | User profile with ride history |
 | `/profile/edit` | `src/app/profile/edit/page.tsx` | Edit profile with custom URL |
 | `/u/[slug]` | `src/app/u/[slug]/page.tsx` | Public profile by custom URL |
@@ -671,6 +657,9 @@ All footer links now have pages:
 - /about, /privacy, /terms pages created
 
 **Recently Completed:**
+- Web Push notifications - get notified when new rides are added to followed communities
+- Follow system - auto-follow chapters on RSVP, notification settings page
+- Notification preferences UI - control push notifications and auto-follow behavior
 - Ride description snippets - save and reuse text blocks (etiquette, safety, what to bring)
 - Recurring ride bulk delete - delete this ride, this and following, or entire series
 - Chapter-level sponsor toggles in admin panel (expandable community rows)
@@ -775,10 +764,10 @@ All footer links now have pages:
 - [ ] Advanced search (location radius)
 - [ ] Social sharing
 
-### Future Features (Research Done)
-- [ ] Push Notifications - notify users when new rides are added to followed communities/chapters
-  - Auto-follow on RSVP, with settings to unfollow
-  - See "Push Notifications Architecture" section below for implementation details
+### Future Features
+- [x] Push Notifications - IMPLEMENTED (see "Push Notifications" section above)
+- [ ] Ride reminders - send push notification before rides user RSVPed to
+- [ ] Follow/unfollow UI on chapter pages
 
 ---
 

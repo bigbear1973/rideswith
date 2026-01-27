@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useUnits, Language } from '@/components/providers/units-provider';
-import { Globe, Thermometer, Ruler, Clock, FileText, ChevronRight } from 'lucide-react';
+import { Globe, Thermometer, Ruler, Clock, FileText, Bell, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -228,6 +228,28 @@ export default function SettingsPage() {
                 ))}
               </SelectContent>
             </Select>
+          </CardContent>
+        </Card>
+
+        {/* Notifications */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notifications
+            </CardTitle>
+            <CardDescription>
+              Manage push notifications for ride updates
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/settings/notifications"
+              className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+            >
+              <span className="text-sm">Configure notification preferences</span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </Link>
           </CardContent>
         </Card>
 

@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         id: true,
         status: true,
         maxAttendees: true,
+        chapterId: true,
         _count: {
           select: {
             rsvps: {
@@ -126,6 +127,34 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Auto-follow chapter when RSVPing (if enabled in user settings)
+    if ((status === 'GOING' || status === 'MAYBE') && ride.chapterId) {
+      // Check user's notification settings
+      const settings = await prisma.userNotificationSettings.findUnique({
+        where: { userId: session.user.id },
+      });
+
+      // Auto-follow is enabled by default (if no settings exist, or if autoFollowOnRsvp is true)
+      if (!settings || settings.autoFollowOnRsvp) {
+        // Create follow if not already following (upsert to handle race conditions)
+        await prisma.follow.upsert({
+          where: {
+            userId_chapterId: {
+              userId: session.user.id,
+              chapterId: ride.chapterId,
+            },
+          },
+          update: {},
+          create: {
+            userId: session.user.id,
+            chapterId: ride.chapterId,
+          },
+        }).catch(() => {
+          // Ignore errors (e.g., if constraint fails)
+        });
+      }
+    }
 
     return NextResponse.json(rsvp);
   } catch (error) {
