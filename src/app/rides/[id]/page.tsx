@@ -202,6 +202,10 @@ export default async function RidePage({ params }: RidePageProps) {
   const rideUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/rides/${id}`;
   // Shorten address: take first 2-3 parts (e.g., "Phoenix Park, Dublin" instead of full address)
   const shortAddress = ride.locationAddress.split(',').slice(0, 2).join(',').trim();
+  // Only include short address if it's different from location name (avoid duplication)
+  const showAddress = shortAddress.toLowerCase() !== ride.locationName.toLowerCase() &&
+    !ride.locationName.toLowerCase().includes(shortAddress.toLowerCase()) &&
+    !shortAddress.toLowerCase().includes(ride.locationName.toLowerCase());
   const rideInfoText = [
     `${ride.title}`,
     ``,
@@ -209,7 +213,7 @@ export default async function RidePage({ params }: RidePageProps) {
     `${formattedStartTime}${formattedEndTime ? ` - ${formattedEndTime}` : ''}`,
     ``,
     `${ride.locationName}`,
-    shortAddress,
+    showAddress ? shortAddress : null,
     ``,
     ride.distance ? `Distance: ${ride.distance} km` : null,
     ride.elevation ? `Elevation: ${ride.elevation} m` : null,
