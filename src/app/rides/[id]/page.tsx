@@ -235,10 +235,10 @@ export default async function RidePage({ params }: RidePageProps) {
           rel="noopener noreferrer"
           className="block group"
         >
-          {/* Backdrop image - full width, no overlay */}
+          {/* Backdrop image - full width, no overlay - hidden on mobile */}
           {brand.backdrop && (
             <div
-              className="h-40 md:h-48 bg-cover bg-center"
+              className="hidden md:block h-40 md:h-48 bg-cover bg-center"
               style={{ backgroundImage: `url(${brand.backdrop})` }}
             />
           )}
