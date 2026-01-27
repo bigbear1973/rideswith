@@ -419,7 +419,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Cannot remove the last Owner (includes legacy LEAD role)
+    // Handle last owner leaving - auto-promote next highest member
     if (isOwner(targetMembership.role)) {
       const ownerCount = await prisma.chapterMember.count({
         where: {
@@ -429,10 +429,33 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       });
 
       if (ownerCount <= 1) {
-        return NextResponse.json(
-          { error: "Cannot remove the last owner. Transfer ownership first." },
-          { status: 400 }
-        );
+        // Find the next highest-ranking member to promote
+        // Priority: ADMIN > MODERATOR (legacy: AMBASSADOR), ordered by join date
+        const nextMember = await prisma.chapterMember.findFirst({
+          where: {
+            chapterId: id,
+            userId: { not: targetUserId },
+            role: { in: ["ADMIN", "MODERATOR", "AMBASSADOR"] },
+          },
+          orderBy: [
+            { role: "asc" }, // ADMIN comes before MODERATOR alphabetically
+            { joinedAt: "asc" }, // Earliest joiner gets promoted
+          ],
+        });
+
+        if (!nextMember) {
+          // No other members to promote - cannot leave
+          return NextResponse.json(
+            { error: "Cannot leave as the last member. Delete the chapter instead, or add another member first." },
+            { status: 400 }
+          );
+        }
+
+        // Promote the next member to Owner
+        await prisma.chapterMember.update({
+          where: { id: nextMember.id },
+          data: { role: "OWNER" },
+        });
       }
     }
 
