@@ -20,6 +20,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             slug: true,
           },
         },
+        chapter: {
+          select: {
+            slug: true,
+            brand: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             rsvps: {
@@ -56,6 +66,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       price: ride.price,
       routeUrl: ride.routeUrl,
       organizer: ride.organizer,
+      // Chapter info for navigation
+      chapter: ride.chapter,
       attendeeCount: ride._count.rsvps,
       // Recurrence fields
       recurrencePattern: ride.recurrencePattern,

@@ -96,6 +96,9 @@ export default function EditRidePage({ params }: EditRidePageProps) {
   const [followingCount, setFollowingCount] = useState(0);
   const [rideDate, setRideDate] = useState<Date | null>(null);
 
+  // Chapter info for redirect after delete
+  const [chapterInfo, setChapterInfo] = useState<{ brandSlug: string; chapterSlug: string } | null>(null);
+
   // Delete dialog state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -168,6 +171,14 @@ export default function EditRidePage({ params }: EditRidePageProps) {
         setIsLive(ride.isLive || false);
         setLiveLocationUrl(ride.liveLocationUrl || '');
         setRideDate(rideDate);
+
+        // Store chapter info for redirect after delete
+        if (ride.chapter?.brand?.slug && ride.chapter?.slug) {
+          setChapterInfo({
+            brandSlug: ride.chapter.brand.slug,
+            chapterSlug: ride.chapter.slug,
+          });
+        }
 
         // If this is a recurring ride, fetch series counts
         if (ride.recurrenceSeriesId) {
@@ -326,7 +337,12 @@ export default function EditRidePage({ params }: EditRidePageProps) {
       }
 
       setShowDeleteDialog(false);
-      router.push('/discover');
+      // Redirect to chapter page if ride belonged to a chapter, otherwise discover
+      if (chapterInfo) {
+        router.push(`/communities/${chapterInfo.brandSlug}/${chapterInfo.chapterSlug}`);
+      } else {
+        router.push('/discover');
+      }
     } catch (err) {
       console.error('Delete ride error:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete ride');
