@@ -35,6 +35,7 @@ import {
   Trash2,
   ChevronLeft,
   Copy,
+  Check,
 } from 'lucide-react';
 
 interface Snippet {
@@ -66,6 +67,7 @@ export default function SnippetsPage() {
   const [category, setCategory] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -306,10 +308,17 @@ export default function SnippetsPage() {
                               size="icon"
                               onClick={() => {
                                 navigator.clipboard.writeText(snippet.content);
+                                setCopiedId(snippet.id);
+                                setTimeout(() => setCopiedId(null), 2000);
                               }}
                               title="Copy content"
+                              className={copiedId === snippet.id ? 'text-green-600' : ''}
                             >
-                              <Copy className="h-4 w-4" />
+                              {copiedId === snippet.id ? (
+                                <Check className="h-4 w-4" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
                             </Button>
                             <Button
                               variant="ghost"
