@@ -5,34 +5,22 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const iconsDir = join(__dirname, '../public/icons');
 
-// Source image path - the Gemini generated icon
-const sourceImage = '/Users/rogerbyrne/Downloads/Gemini_Generated_Image_v3icprv3icprv3ic.png';
+// Source image path - the new peloton-style icon
+const sourceImage = '/Users/rogerbyrne/Downloads/rideswith-icon-peloton-512x512 (2).png';
 
 async function processIcon() {
   // First, get the image metadata to understand its dimensions
   const metadata = await sharp(sourceImage).metadata();
   console.log('Source image:', metadata.width, 'x', metadata.height);
+  console.log('Has alpha channel:', metadata.hasAlpha);
 
-  // The icon appears to be centered with black padding around it
-  // We need to extract just the app icon (the rounded square with gradient)
-  // Based on the image, the icon is roughly centered with some padding
+  // This icon already has rounded corners and gradient background
+  // We just need to resize it to different sizes while preserving transparency
+  const sourceBuffer = await sharp(sourceImage)
+    .ensureAlpha() // Ensure alpha channel exists
+    .toBuffer();
 
-  // Load the image and extract the center portion (the actual app icon)
-  // The icon in the image appears to be about 70-80% of the total image size
-  const iconSize = Math.min(metadata.width, metadata.height);
-  const padding = Math.floor(iconSize * 0.08); // ~8% padding on each side
-  const extractSize = iconSize - (padding * 2);
-
-  // Extract the center portion (the app icon without black background)
-  const extracted = sharp(sourceImage)
-    .extract({
-      left: padding,
-      top: padding,
-      width: extractSize,
-      height: extractSize
-    });
-
-  // Generate different sizes
+  // Generate different sizes - preserving PNG transparency
   const sizes = [
     { size: 512, name: 'icon-512.png' },
     { size: 192, name: 'icon-192.png' },
@@ -43,23 +31,27 @@ async function processIcon() {
 
   for (const { size, name } of sizes) {
     const outputPath = join(iconsDir, name);
-    await extracted
-      .clone()
-      .resize(size, size, { fit: 'cover' })
-      .png()
+    await sharp(sourceBuffer)
+      .resize(size, size, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 } // Transparent background
+      })
+      .png({ compressionLevel: 9 })
       .toFile(outputPath);
     console.log(`Generated: ${name} (${size}x${size})`);
   }
 
   // Also copy apple-touch-icon to public root
-  await extracted
-    .clone()
-    .resize(180, 180, { fit: 'cover' })
-    .png()
+  await sharp(sourceBuffer)
+    .resize(180, 180, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    })
+    .png({ compressionLevel: 9 })
     .toFile(join(__dirname, '../public/apple-touch-icon.png'));
   console.log('Copied apple-touch-icon.png to public root');
 
-  console.log('\nAll icons generated successfully!');
+  console.log('\nAll icons generated successfully with transparent backgrounds!');
 }
 
 processIcon().catch(console.error);
