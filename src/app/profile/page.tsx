@@ -172,7 +172,7 @@ export default async function ProfilePage() {
                       </p>
                     )}
                     {user.bio && (
-                      <p className="mt-2 text-sm">{user.bio}</p>
+                      <p className="mt-2 text-sm whitespace-pre-line">{user.bio}</p>
                     )}
                     {user.location && (
                       <p className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">

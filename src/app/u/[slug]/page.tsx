@@ -152,7 +152,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                   </a>
                 )}
                 {user.bio && (
-                  <p className="mt-2 text-muted-foreground">{user.bio}</p>
+                  <p className="mt-2 text-muted-foreground whitespace-pre-line">{user.bio}</p>
                 )}
                 {user.location && (
                   <p className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
