@@ -23,6 +23,7 @@ import {
   ChevronDown,
   ChevronRight,
   MapPin,
+  BarChart3,
 } from 'lucide-react';
 
 interface Chapter {
@@ -262,6 +263,14 @@ export default function AdminCommunitiesPage() {
           <p className="text-muted-foreground">
             Manage communities and control feature access
           </p>
+          <div className="flex gap-2 mt-3">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/analytics">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Analytics
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {error && (
