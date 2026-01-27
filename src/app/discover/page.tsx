@@ -575,17 +575,19 @@ export default function DiscoverPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Ride List */}
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
-          <div className="px-4 py-4 border-b bg-primary">
+        {/* Header */}
+        <div className="bg-primary">
+          <div className="mx-auto max-w-6xl px-4 py-4">
             <h2 className="font-bold text-primary-foreground text-lg">Upcoming Rides</h2>
             <p className="text-sm text-primary-foreground/80">
               {isLoadingRides ? 'Loading...' : `${filteredRides.length} ride${filteredRides.length !== 1 ? 's' : ''} within ${formatRadius(searchRadius)}`}
             </p>
           </div>
+        </div>
 
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-3">
+        {/* Ride List */}
+        <ScrollArea className="flex-1">
+          <div className="mx-auto max-w-6xl px-4 py-4 space-y-3">
               {isLoadingRides ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Loader2 className="h-10 w-10 mx-auto mb-3 animate-spin" />
@@ -654,20 +656,19 @@ export default function DiscoverPage() {
                 ))
               )}
 
-              {/* Link to past rides archive */}
-              {!isLoadingRides && filteredRides.length > 0 && (
-                <div className="pt-4 pb-2 border-t mt-4">
-                  <Link href="/discover/past">
-                    <Button variant="ghost" size="sm" className="w-full text-muted-foreground hover:text-foreground">
-                      <History className="h-4 w-4 mr-2" />
-                      Browse past rides archive
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
+            {/* Link to past rides archive */}
+            {!isLoadingRides && filteredRides.length > 0 && (
+              <div className="pt-4 pb-2 border-t mt-4">
+                <Link href="/discover/past">
+                  <Button variant="ghost" size="sm" className="w-full text-muted-foreground hover:text-foreground">
+                    <History className="h-4 w-4 mr-2" />
+                    Browse past rides archive
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
