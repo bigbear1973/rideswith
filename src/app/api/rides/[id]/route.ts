@@ -180,6 +180,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const userId = session.user.id;
 
+    // Get scope from query params: 'this' (default), 'following', or 'all'
+    const { searchParams } = new URL(request.url);
+    const scope = searchParams.get('scope') || 'this';
+
     // Find the ride and check ownership
     const ride = await prisma.ride.findUnique({
       where: { id },
@@ -206,18 +210,48 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'You do not have permission to delete this ride' }, { status: 403 });
     }
 
-    // Delete the ride
-    await prisma.ride.delete({
-      where: { id },
-    });
+    let deletedCount = 1;
+
+    // Handle recurring ride deletion based on scope
+    if (ride.recurrenceSeriesId && scope !== 'this') {
+      if (scope === 'all') {
+        // Delete all rides in the series
+        const result = await prisma.ride.deleteMany({
+          where: { recurrenceSeriesId: ride.recurrenceSeriesId },
+        });
+        deletedCount = result.count;
+      } else if (scope === 'following') {
+        // Delete this ride and all future rides in the series
+        const result = await prisma.ride.deleteMany({
+          where: {
+            recurrenceSeriesId: ride.recurrenceSeriesId,
+            date: { gte: ride.date },
+          },
+        });
+        deletedCount = result.count;
+      }
+    } else {
+      // Delete just this ride
+      await prisma.ride.delete({
+        where: { id },
+      });
+    }
 
     // Update organizer ride count
     await prisma.organizer.update({
       where: { id: ride.organizerId },
-      data: { rideCount: { decrement: 1 } },
+      data: { rideCount: { decrement: deletedCount } },
     });
 
-    return NextResponse.json({ success: true });
+    // Also update chapter ride count if applicable
+    if (ride.chapterId) {
+      await prisma.chapter.update({
+        where: { id: ride.chapterId },
+        data: { rideCount: { decrement: deletedCount } },
+      });
+    }
+
+    return NextResponse.json({ success: true, deletedCount });
   } catch (error) {
     console.error('DELETE /api/rides/[id] error:', error);
     return NextResponse.json({ error: 'Failed to delete ride' }, { status: 500 });

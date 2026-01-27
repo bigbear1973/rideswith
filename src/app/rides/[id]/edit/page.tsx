@@ -18,17 +18,7 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { DeleteSeriesDialog, DeleteScope } from '@/components/rides/delete-series-dialog';
 import {
   MapPin,
   Calendar,
@@ -46,6 +36,7 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useUnits } from '@/components/providers/units-provider';
+import { SnippetPicker } from '@/components/rides/snippet-picker';
 
 interface LocationResult {
   place_id: number;
@@ -101,6 +92,12 @@ export default function EditRidePage({ params }: EditRidePageProps) {
   // Recurrence info (read-only for edit form)
   const [recurrenceSeriesId, setRecurrenceSeriesId] = useState<string | null>(null);
   const [recurrencePattern, setRecurrencePattern] = useState<string | null>(null);
+  const [seriesCount, setSeriesCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [rideDate, setRideDate] = useState<Date | null>(null);
+
+  // Delete dialog state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Live location tracking
   const [isLive, setIsLive] = useState(false);
@@ -170,6 +167,22 @@ export default function EditRidePage({ params }: EditRidePageProps) {
         setRecurrencePattern(ride.recurrencePattern || null);
         setIsLive(ride.isLive || false);
         setLiveLocationUrl(ride.liveLocationUrl || '');
+        setRideDate(rideDate);
+
+        // If this is a recurring ride, fetch series counts
+        if (ride.recurrenceSeriesId) {
+          try {
+            const seriesResponse = await fetch(`/api/rides/series/${ride.recurrenceSeriesId}/count?date=${rideDate.toISOString()}`);
+            if (seriesResponse.ok) {
+              const counts = await seriesResponse.json();
+              setSeriesCount(counts.total);
+              setFollowingCount(counts.following);
+            }
+          } catch (err) {
+            // Non-critical, just use defaults
+            console.error('Failed to fetch series counts:', err);
+          }
+        }
       } catch (err) {
         setLoadError('Failed to load ride');
       } finally {
@@ -300,10 +313,10 @@ export default function EditRidePage({ params }: EditRidePageProps) {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (scope: DeleteScope = 'this') => {
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/rides/${id}`, {
+      const response = await fetch(`/api/rides/${id}?scope=${scope}`, {
         method: 'DELETE',
       });
 
@@ -312,6 +325,7 @@ export default function EditRidePage({ params }: EditRidePageProps) {
         throw new Error(data.error || 'Failed to delete ride');
       }
 
+      setShowDeleteDialog(false);
       router.push('/discover');
     } catch (err) {
       console.error('Delete ride error:', err);
@@ -360,39 +374,23 @@ export default function EditRidePage({ params }: EditRidePageProps) {
               </Button>
               <h1 className="text-lg font-semibold">Edit Ride</h1>
             </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this ride?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. All RSVPs and ride data will be permanently deleted.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Deleting...
-                      </>
-                    ) : (
-                      'Delete Ride'
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+            <DeleteSeriesDialog
+              open={showDeleteDialog}
+              onOpenChange={setShowDeleteDialog}
+              onConfirm={handleDelete}
+              rideTitle={title}
+              isRecurring={!!recurrenceSeriesId}
+              seriesCount={seriesCount}
+              followingCount={followingCount}
+            />
           </div>
         </div>
       </div>
@@ -428,7 +426,16 @@ export default function EditRidePage({ params }: EditRidePageProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Description</Label>
+                  <SnippetPicker
+                    onInsert={(content) => {
+                      setDescription(prev =>
+                        prev ? `${prev}\n\n${content}` : content
+                      );
+                    }}
+                  />
+                </div>
                 <textarea
                   id="description"
                   placeholder="Tell riders what to expect..."

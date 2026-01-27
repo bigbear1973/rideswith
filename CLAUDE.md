@@ -221,6 +221,40 @@ isRecurringTemplate Boolean            // True for the template ride
 **UI:**
 - Create form has "Make this a recurring ride" toggle
 - Edit form shows info banner if ride is part of a series
+- Delete dialog for recurring rides offers: "This ride only", "This and following", "All rides in series"
+
+### Ride Description Snippets (IMPLEMENTED)
+Ride creators can save and reuse text blocks (snippets) for ride descriptions.
+
+**Features:**
+- Create, edit, delete reusable text snippets
+- Organize by category (e.g., "Etiquette", "Safety", "Gear")
+- Insert snippets into ride descriptions via picker button
+- Great for standardizing ride etiquette, what to bring, safety guidelines, etc.
+
+**Database Model:**
+```prisma
+model RideSnippet {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   // e.g., "Group Ride Etiquette"
+  content   String   @db.Text
+  category  String?  // Optional grouping
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+**Key Files:**
+- `src/app/settings/snippets/page.tsx` - Snippet management UI
+- `src/components/rides/snippet-picker.tsx` - Insert snippet button/dialog
+- `src/app/api/snippets/route.ts` - List/create snippets
+- `src/app/api/snippets/[id]/route.ts` - Get/update/delete snippet
+
+**UI Locations:**
+- Settings → Ride Snippets: Manage all snippets
+- Create/Edit Ride → "Insert Snippet" button next to description field
 
 ### Add to Calendar (IMPLEMENTED)
 Users can export rides to their calendar app.
@@ -405,6 +439,87 @@ Natural language / voice input to auto-fill ride details:
 - Optional voice input via Web Speech API
 - Environment variable: `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
 
+### Push Notifications Architecture (RESEARCHED)
+Enable push notifications when new rides are added to followed communities/chapters.
+
+**Database Models:**
+```prisma
+model Follow {
+  id          String   @id @default(cuid())
+  userId      String
+  brandId     String?  // Following a community
+  chapterId   String?  // Following a chapter
+  createdAt   DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brand   Brand?   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, brandId])
+  @@unique([userId, chapterId])
+  @@index([brandId])
+  @@index([chapterId])
+}
+
+model PushSubscription {
+  id           String   @id @default(cuid())
+  userId       String
+  endpoint     String   @unique
+  p256dh       String   // Public key
+  auth         String   // Auth secret
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model UserNotificationSettings {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  newRideNotifications  Boolean @default(true)
+  rideUpdateNotifications Boolean @default(true)
+  commentNotifications  Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+```
+
+**Auto-Follow Logic:**
+- When user RSVPs to a ride (going/maybe), auto-follow the chapter if not already following
+- Add setting in user preferences to disable auto-follow
+- Show "Following" badge on chapter pages for followed chapters
+- Unfollow available via chapter page or settings
+
+**Implementation Approach:**
+1. Use `web-push` npm package for sending notifications
+2. Generate VAPID keys (store in env vars: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`)
+3. Service Worker registers on client, stores subscription via API
+4. When ride is created, query followers and send notifications in background
+
+**API Endpoints:**
+- `POST /api/push/subscribe` - Store push subscription
+- `DELETE /api/push/subscribe` - Remove subscription
+- `GET/POST /api/follows` - List/create follows
+- `DELETE /api/follows/[id]` - Unfollow
+- `GET/PUT /api/notifications/settings` - User notification preferences
+
+**Notification Triggers:**
+- New ride added to followed chapter
+- Ride update (time/location change) for RSVPed rides
+- Ride cancellation for RSVPed rides
+- New comment on ride user created or RSVPed to
+
+**Key Files (to create):**
+- `src/lib/push-notifications.ts` - Send notification helper
+- `public/sw.js` - Service Worker for receiving push
+- `src/components/notifications/push-permission.tsx` - Request permission UI
+- `src/app/settings/notifications/page.tsx` - Notification preferences
+
+**Environment Variables (needed):**
+- `VAPID_PUBLIC_KEY` - Web Push public key
+- `VAPID_PRIVATE_KEY` - Web Push private key
+- `VAPID_EMAIL` - Contact email for push service
+
 ---
 
 ## Site Structure & 404 Analysis
@@ -432,13 +547,12 @@ Natural language / voice input to auto-fill ride details:
 | `/communities/[slug]/create-chapter` | `src/app/communities/[slug]/create-chapter/page.tsx` | Start a chapter |
 | `/admin/communities` | `src/app/admin/communities/page.tsx` | Platform admin panel (admin only) |
 
-### Broken Links (404s)
-| Link | Referenced In | Priority |
-|------|---------------|----------|
-| `/privacy` | Footer + Sign-in page | MEDIUM - legal requirement |
-| `/terms` | Footer + Sign-in page | MEDIUM - legal requirement |
-| `/about` | Footer | LOW |
-| `/how-it-works` | Footer | LOW |
+### All Pages Working
+All footer links now have pages:
+- `/about` - About page with mission and how it works
+- `/privacy` - Privacy policy
+- `/terms` - Terms of service
+- `/how-it-works` - Removed from footer (covered in About page)
 
 ### Pages Needing Work
 | Page | Current State | What's Needed |
@@ -457,8 +571,9 @@ Natural language / voice input to auto-fill ride details:
 
 ### 1. Fix Critical 404s
 - [x] Create `/profile` page (user profile)
-- [ ] Create `/privacy` page (privacy policy)
-- [ ] Create `/terms` page (terms of service)
+- [x] Create `/privacy` page (privacy policy)
+- [x] Create `/terms` page (terms of service)
+- [x] Create `/about` page (about, mission, how it works)
 
 ### 2. Complete Placeholder Pages
 - [x] `/create` - Full form with location search, API endpoint
@@ -496,9 +611,9 @@ Natural language / voice input to auto-fill ride details:
 - [x] Unit switcher (km/mi) with context
 - [x] C40.org-inspired redesign (green/cyan/black, bold typography, outlined buttons)
 
-### Phase 3: Fix Basics (MOSTLY COMPLETE)
+### Phase 3: Fix Basics (COMPLETE)
 - [x] Create profile pages (/profile, /profile/edit, /u/[slug])
-- [ ] Create missing pages (privacy, terms)
+- [x] Create missing pages (about, privacy, terms)
 - [x] Enable create ride form
 - [x] Wire pages to database (discover, rides)
 - [x] Wire homepage to database (latest rides from /api/rides/latest)
@@ -552,11 +667,12 @@ Natural language / voice input to auto-fill ride details:
 **Recently Wired to DB:**
 - Homepage "Latest rides" section (fetches from /api/rides/latest)
 
-**Broken (404s):**
-- /privacy, /terms
-- /about, /how-it-works
+**All Footer Links Working:**
+- /about, /privacy, /terms pages created
 
 **Recently Completed:**
+- Ride description snippets - save and reuse text blocks (etiquette, safety, what to bring)
+- Recurring ride bulk delete - delete this ride, this and following, or entire series
 - Chapter-level sponsor toggles in admin panel (expandable community rows)
 - Share button changed to always copy to clipboard with tooltip
 - Date/time pickers auto-close after selection
@@ -652,15 +768,17 @@ Natural language / voice input to auto-fill ride details:
 - [ ] Show verified badges on ride cards for chapter members
 
 ### Medium Priority
-- [ ] Create /privacy page (privacy policy)
-- [ ] Create /terms page (terms of service)
 - [ ] GPX route upload + map visualization
 - [ ] Email notifications (ride reminders, updates)
 
 ### Low Priority
 - [ ] Advanced search (location radius)
-- [ ] Follow users/communities
 - [ ] Social sharing
+
+### Future Features (Research Done)
+- [ ] Push Notifications - notify users when new rides are added to followed communities/chapters
+  - Auto-follow on RSVP, with settings to unfollow
+  - See "Push Notifications Architecture" section below for implementation details
 
 ---
 

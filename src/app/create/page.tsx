@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 import { DatePicker, TimePicker } from '@/components/ui/date-time-picker';
+import { SnippetPicker } from '@/components/rides/snippet-picker';
 
 interface LocationResult {
   place_id: number;
@@ -359,7 +360,16 @@ export default function CreateRidePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Description</Label>
+                  <SnippetPicker
+                    onInsert={(content) => {
+                      setDescription(prev =>
+                        prev ? `${prev}\n\n${content}` : content
+                      );
+                    }}
+                  />
+                </div>
                 <textarea
                   id="description"
                   placeholder="Tell riders what to expect - route highlights, what to bring, coffee stops, etc."

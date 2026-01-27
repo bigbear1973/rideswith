@@ -14,7 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useUnits, Language } from '@/components/providers/units-provider';
-import { Globe, Thermometer, Ruler, Clock } from 'lucide-react';
+import { Globe, Thermometer, Ruler, Clock, FileText, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 const LANGUAGES: { value: Language; label: string }[] = [
   { value: 'en', label: 'English' },
@@ -227,6 +228,28 @@ export default function SettingsPage() {
                 ))}
               </SelectContent>
             </Select>
+          </CardContent>
+        </Card>
+
+        {/* Ride Snippets */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Ride Snippets
+            </CardTitle>
+            <CardDescription>
+              Create reusable text blocks for ride descriptions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/settings/snippets"
+              className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+            >
+              <span className="text-sm">Manage your ride description snippets</span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </Link>
           </CardContent>
         </Card>
 

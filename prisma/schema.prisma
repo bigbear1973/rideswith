@@ -38,6 +38,7 @@ model User {
   rideRoutes    RideRoute[]
   rideComments  RideComment[]
   ridePhotos    RidePhoto[]
+  rideSnippets  RideSnippet[]
 }
 
 model Account {
@@ -438,4 +439,24 @@ model Sponsor {
 
   @@index([brandId, isActive])
   @@index([chapterId, isActive])
+}
+
+// ============================================
+// Ride Description Snippets (reusable text blocks)
+// ============================================
+
+model RideSnippet {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String   // Short name, e.g., "Group Ride Etiquette"
+  content   String   @db.Text // The actual text content
+  category  String?  // Optional grouping: "Etiquette", "Safety", "What to Bring"
+  sortOrder Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
