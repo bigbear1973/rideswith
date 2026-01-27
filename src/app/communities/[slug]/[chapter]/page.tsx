@@ -24,6 +24,10 @@ import {
   ChevronUp,
   Settings,
   MessageCircle,
+  Instagram,
+  Twitter,
+  Facebook,
+  Youtube,
 } from "lucide-react";
 import { useUnits } from "@/components/providers/units-provider";
 import { CopyableUrl } from "@/components/ui/copyable-url";
@@ -60,6 +64,13 @@ interface ChapterData {
   whatsapp: string | null;
   discord: string | null;
   signal: string | null;
+  // Social links
+  inheritSocialLinks: boolean;
+  instagram: string | null;
+  twitter: string | null;
+  facebook: string | null;
+  strava: string | null;
+  youtube: string | null;
   brand: {
     id: string;
     name: string;
@@ -68,6 +79,12 @@ interface ChapterData {
     primaryColor: string | null;
     secondaryColor: string | null;
     domain: string | null;
+    // Brand social links (for inheritance)
+    instagram: string | null;
+    twitter: string | null;
+    facebook: string | null;
+    strava: string | null;
+    youtube: string | null;
   };
   members: Array<{
     id: string;
@@ -133,7 +150,18 @@ export default function ChapterPage({ params }: PageProps) {
         }
 
         const fullChapter = await chapterRes.json();
-        setChapter(fullChapter);
+        // Merge brand social links from the brand API response
+        setChapter({
+          ...fullChapter,
+          brand: {
+            ...fullChapter.brand,
+            instagram: brand.instagram || null,
+            twitter: brand.twitter || null,
+            facebook: brand.facebook || null,
+            strava: brand.strava || null,
+            youtube: brand.youtube || null,
+          },
+        });
       } catch (err) {
         console.error("Error loading chapter:", err);
         setError("Failed to load chapter");
@@ -316,6 +344,117 @@ export default function ChapterPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Social Links Row */}
+      {(() => {
+        // Determine which social links to display (inherited or custom)
+        const socialLinks = chapter.inheritSocialLinks !== false
+          ? {
+              instagram: chapter.brand.instagram,
+              twitter: chapter.brand.twitter,
+              facebook: chapter.brand.facebook,
+              strava: chapter.brand.strava,
+              youtube: chapter.brand.youtube,
+            }
+          : {
+              instagram: chapter.instagram,
+              twitter: chapter.twitter,
+              facebook: chapter.facebook,
+              strava: chapter.strava,
+              youtube: chapter.youtube,
+            };
+
+        const hasSocialLinks = socialLinks.instagram || socialLinks.twitter || socialLinks.facebook || socialLinks.strava || socialLinks.youtube;
+
+        if (!hasSocialLinks) return null;
+
+        // Helper to normalize URLs
+        const normalizeUrl = (value: string | null, platform: string) => {
+          if (!value) return null;
+          if (value.startsWith('http')) return value;
+          // Handle handles/usernames
+          switch (platform) {
+            case 'instagram':
+              return `https://instagram.com/${value.replace('@', '')}`;
+            case 'twitter':
+              return `https://twitter.com/${value.replace('@', '')}`;
+            case 'facebook':
+              return `https://facebook.com/${value}`;
+            case 'strava':
+              return value; // Strava should be a full URL
+            case 'youtube':
+              return value; // YouTube should be a full URL
+            default:
+              return value;
+          }
+        };
+
+        return (
+          <div className="bg-muted/30 border-b">
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex items-center justify-center gap-4">
+                {socialLinks.instagram && (
+                  <a
+                    href={normalizeUrl(socialLinks.instagram, 'instagram') || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    title="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks.twitter && (
+                  <a
+                    href={normalizeUrl(socialLinks.twitter, 'twitter') || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    title="X / Twitter"
+                  >
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks.facebook && (
+                  <a
+                    href={normalizeUrl(socialLinks.facebook, 'facebook') || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    title="Facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {socialLinks.strava && (
+                  <a
+                    href={normalizeUrl(socialLinks.strava, 'strava') || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    title="Strava Club"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                    </svg>
+                  </a>
+                )}
+                {socialLinks.youtube && (
+                  <a
+                    href={normalizeUrl(socialLinks.youtube, 'youtube') || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    title="YouTube"
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Community Chat Links */}
       {(chapter.telegram || chapter.whatsapp || chapter.discord || chapter.signal) && (

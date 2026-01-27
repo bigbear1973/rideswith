@@ -160,6 +160,14 @@ model Chapter {
   discord   String? // Discord server invite link
   signal    String? // Signal group link
 
+  // Social links (can override brand-level settings, null = inherit from brand)
+  inheritSocialLinks Boolean @default(true) // If true, use brand's social links
+  instagram          String? // Instagram handle or URL
+  twitter            String? // Twitter/X handle or URL
+  facebook           String? // Facebook page URL
+  strava             String? // Strava club URL
+  youtube            String? // YouTube channel URL
+
   // Stats (managed counters)
   memberCount Int @default(0)
   rideCount   Int @default(0)

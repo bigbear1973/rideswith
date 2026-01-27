@@ -159,6 +159,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.whatsapp !== undefined) updateData.whatsapp = body.whatsapp;
     if (body.discord !== undefined) updateData.discord = body.discord;
     if (body.signal !== undefined) updateData.signal = body.signal;
+    // Social links
+    if (body.inheritSocialLinks !== undefined) updateData.inheritSocialLinks = body.inheritSocialLinks;
+    if (body.instagram !== undefined) updateData.instagram = body.instagram;
+    if (body.twitter !== undefined) updateData.twitter = body.twitter;
+    if (body.facebook !== undefined) updateData.facebook = body.facebook;
+    if (body.strava !== undefined) updateData.strava = body.strava;
+    if (body.youtube !== undefined) updateData.youtube = body.youtube;
 
     const chapter = await prisma.chapter.update({
       where: { id },

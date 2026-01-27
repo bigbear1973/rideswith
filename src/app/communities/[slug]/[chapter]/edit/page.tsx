@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle, Trash2 } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle, Trash2, Link2, Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
 import { SponsorForm, SponsorList } from '@/components/communities';
 
 interface ChapterMember {
@@ -37,6 +37,13 @@ interface Chapter {
   whatsapp: string | null;
   discord: string | null;
   signal: string | null;
+  // Social links
+  inheritSocialLinks: boolean;
+  instagram: string | null;
+  twitter: string | null;
+  facebook: string | null;
+  strava: string | null;
+  youtube: string | null;
   brand: {
     id: string;
     name: string;
@@ -45,6 +52,12 @@ interface Chapter {
     hidePresentedBy: boolean;
     createdById: string | null;
     sponsorsEnabled: boolean;
+    // Brand social links (for inheritance display)
+    instagram: string | null;
+    twitter: string | null;
+    facebook: string | null;
+    strava: string | null;
+    youtube: string | null;
   };
   members: ChapterMember[];
 }
@@ -96,6 +109,13 @@ export default function EditChapterPage() {
     whatsapp: '',
     discord: '',
     signal: '',
+    // Social links
+    inheritSocialLinks: true,
+    instagram: '',
+    twitter: '',
+    facebook: '',
+    strava: '',
+    youtube: '',
   });
 
   // Member management state
@@ -158,6 +178,11 @@ export default function EditChapterPage() {
             hidePresentedBy: brandData.hidePresentedBy || false,
             createdById: brandData.createdById,
             sponsorsEnabled: brandData.sponsorsEnabled || false,
+            instagram: brandData.instagram || null,
+            twitter: brandData.twitter || null,
+            facebook: brandData.facebook || null,
+            strava: brandData.strava || null,
+            youtube: brandData.youtube || null,
           },
         });
         setBrandSponsorsEnabled(brandData.sponsorsEnabled || false);
@@ -169,6 +194,12 @@ export default function EditChapterPage() {
           whatsapp: fullChapter.whatsapp || '',
           discord: fullChapter.discord || '',
           signal: fullChapter.signal || '',
+          inheritSocialLinks: fullChapter.inheritSocialLinks !== false, // Default to true
+          instagram: fullChapter.instagram || '',
+          twitter: fullChapter.twitter || '',
+          facebook: fullChapter.facebook || '',
+          strava: fullChapter.strava || '',
+          youtube: fullChapter.youtube || '',
         });
         // Set sponsor label - 'inherit' if null
         setSponsorLabel(fullChapter.sponsorLabel || 'inherit');
@@ -249,6 +280,13 @@ export default function EditChapterPage() {
             chapterSponsorsEnabled === 'inherit'
               ? null
               : chapterSponsorsEnabled === 'enabled',
+          // Social links
+          inheritSocialLinks: formData.inheritSocialLinks,
+          instagram: formData.instagram || null,
+          twitter: formData.twitter || null,
+          facebook: formData.facebook || null,
+          strava: formData.strava || null,
+          youtube: formData.youtube || null,
         }),
       });
 
@@ -578,6 +616,157 @@ export default function EditChapterPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="space-y-4 border-t pt-6">
+              <div>
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <Link2 className="h-4 w-4" />
+                  Social Links
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Add links to your chapter&apos;s social profiles, or inherit from the community
+                </p>
+              </div>
+
+              {/* Inherit toggle */}
+              <div className="space-y-2">
+                <Label className="text-sm">Social Links Source</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={formData.inheritSocialLinks ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, inheritSocialLinks: true })}
+                  >
+                    Inherit from community
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={!formData.inheritSocialLinks ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, inheritSocialLinks: false })}
+                  >
+                    Custom links
+                  </Button>
+                </div>
+              </div>
+
+              {formData.inheritSocialLinks ? (
+                // Show inherited links preview
+                <div className="rounded-lg border p-4 bg-muted/50">
+                  <p className="text-sm font-medium mb-2">Inherited from {chapter.brand.name}:</p>
+                  {(chapter.brand.instagram || chapter.brand.twitter || chapter.brand.facebook || chapter.brand.strava || chapter.brand.youtube) ? (
+                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      {chapter.brand.instagram && (
+                        <span className="flex items-center gap-1">
+                          <Instagram className="h-4 w-4" />
+                          Instagram
+                        </span>
+                      )}
+                      {chapter.brand.twitter && (
+                        <span className="flex items-center gap-1">
+                          <Twitter className="h-4 w-4" />
+                          X/Twitter
+                        </span>
+                      )}
+                      {chapter.brand.facebook && (
+                        <span className="flex items-center gap-1">
+                          <Facebook className="h-4 w-4" />
+                          Facebook
+                        </span>
+                      )}
+                      {chapter.brand.strava && (
+                        <span className="flex items-center gap-1">
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                          </svg>
+                          Strava
+                        </span>
+                      )}
+                      {chapter.brand.youtube && (
+                        <span className="flex items-center gap-1">
+                          <Youtube className="h-4 w-4" />
+                          YouTube
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No social links set on community</p>
+                  )}
+                </div>
+              ) : (
+                // Show custom social link inputs
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram" className="flex items-center gap-2">
+                      <Instagram className="h-4 w-4" />
+                      Instagram
+                    </Label>
+                    <Input
+                      id="instagram"
+                      value={formData.instagram}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      placeholder="@handle or URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter" className="flex items-center gap-2">
+                      <Twitter className="h-4 w-4" />
+                      X / Twitter
+                    </Label>
+                    <Input
+                      id="twitter"
+                      value={formData.twitter}
+                      onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
+                      placeholder="@handle or URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="facebook" className="flex items-center gap-2">
+                      <Facebook className="h-4 w-4" />
+                      Facebook
+                    </Label>
+                    <Input
+                      id="facebook"
+                      value={formData.facebook}
+                      onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                      placeholder="Page URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="strava" className="flex items-center gap-2">
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                      </svg>
+                      Strava Club
+                    </Label>
+                    <Input
+                      id="strava"
+                      value={formData.strava}
+                      onChange={(e) => setFormData({ ...formData, strava: e.target.value })}
+                      placeholder="Strava club URL"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="youtube" className="flex items-center gap-2">
+                      <Youtube className="h-4 w-4" />
+                      YouTube
+                    </Label>
+                    <Input
+                      id="youtube"
+                      value={formData.youtube}
+                      onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                      placeholder="Channel URL"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Ride Page Display Settings */}
