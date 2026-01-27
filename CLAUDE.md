@@ -790,3 +790,47 @@ The Discover page supports multiple filters for finding rides:
 - Mobile: Filter sheet (bottom drawer) with button groups
 - Active filter count badge on filter button
 - "Clear filters" button when filters are active
+- Location name displayed next to location button (desktop) and in filters row (mobile)
+
+### Map Removed (January 2026)
+
+The interactive map was removed from the Discover page to simplify the UI. The ride list now takes full width. Location-based filtering still works using the search radius.
+
+**To restore the map**, add the following changes to `src/app/discover/page.tsx`:
+
+1. Add the Map import:
+```typescript
+import { Map } from '@/components/maps';
+```
+
+2. Add mapMarkers computation after the `filteredRides` filter (around line 226):
+```typescript
+const mapMarkers = filteredRides.map((ride) => ({
+  id: ride.id,
+  position: { lat: ride.latitude, lng: ride.longitude },
+  title: ride.title,
+}));
+```
+
+3. Replace the Main Content section with a split layout:
+```tsx
+{/* Main Content */}
+<div className="flex-1 flex flex-col lg:flex-row">
+  {/* Map */}
+  <div className="h-48 sm:h-64 lg:h-auto lg:flex-1 border-b lg:border-b-0 lg:border-r relative">
+    <Map
+      center={mapCenter}
+      zoom={10}
+      markers={mapMarkers}
+      className="h-full w-full"
+    />
+  </div>
+
+  {/* Ride List */}
+  <div className="flex-1 lg:flex-none lg:w-96 xl:w-[420px] flex flex-col">
+    {/* ... existing ride list content ... */}
+  </div>
+</div>
+```
+
+The Map component is in `src/components/maps/` and uses Leaflet + OpenStreetMap (no API key needed).
