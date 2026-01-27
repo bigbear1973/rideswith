@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Instagram, Camera } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Instagram, Camera, Mail } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 interface UserProfile {
   id: string;
@@ -23,6 +24,7 @@ interface UserProfile {
   location: string | null;
   instagram: string | null;
   strava: string | null;
+  showEmail: boolean;
 }
 
 export default function EditProfilePage() {
@@ -44,6 +46,7 @@ export default function EditProfilePage() {
     instagram: '',
     strava: '',
     image: '',
+    showEmail: false,
   });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -68,6 +71,7 @@ export default function EditProfilePage() {
             instagram: data.instagram || '',
             strava: data.strava || '',
             image: data.image || '',
+            showEmail: data.showEmail || false,
           });
         }
       } catch (err) {
@@ -327,6 +331,27 @@ export default function EditProfilePage() {
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="City, Country"
                 />
+              </div>
+
+              {/* Privacy Settings */}
+              <div className="space-y-4">
+                <Label className="text-base font-semibold">Privacy</Label>
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="showEmail" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Show email on profile
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Display your email address on your public profile
+                    </p>
+                  </div>
+                  <Switch
+                    id="showEmail"
+                    checked={formData.showEmail}
+                    onCheckedChange={(checked) => setFormData({ ...formData, showEmail: checked })}
+                  />
+                </div>
               </div>
 
               {/* Social Links */}

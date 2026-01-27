@@ -21,6 +21,7 @@ export async function GET() {
         location: true,
         instagram: true,
         strava: true,
+        showEmail: true,
       },
     });
 
@@ -43,7 +44,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, slug, bio, location, instagram, strava, image } = body;
+    const { name, slug, bio, location, instagram, strava, image, showEmail } = body;
 
     // Validate slug if provided
     if (slug) {
@@ -97,6 +98,7 @@ export async function PUT(request: NextRequest) {
         instagram: instagram?.trim() || null,
         strava: strava?.trim() || null,
         ...(image !== undefined && { image: image || null }),
+        ...(showEmail !== undefined && { showEmail: Boolean(showEmail) }),
       },
       select: {
         id: true,
@@ -108,6 +110,7 @@ export async function PUT(request: NextRequest) {
         location: true,
         instagram: true,
         strava: true,
+        showEmail: true,
       },
     });
 

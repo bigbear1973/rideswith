@@ -14,6 +14,7 @@ import {
   Route,
   History,
   Instagram,
+  Mail,
 } from 'lucide-react';
 
 const PACE_STYLES: Record<string, string> = {
@@ -58,6 +59,21 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           organizer: true,
         },
       },
+      chapters: {
+        include: {
+          chapter: {
+            include: {
+              brand: {
+                select: { name: true, slug: true, logo: true, logoIcon: true, primaryColor: true },
+              },
+              _count: {
+                select: { rides: true, members: true },
+              },
+            },
+          },
+        },
+        orderBy: { joinedAt: 'desc' },
+      },
     },
   });
 
@@ -84,7 +100,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
   // Calculate stats
   const totalRides = user.rsvps.length;
   const totalDistance = pastRides.reduce((sum, rsvp) => sum + (rsvp.ride.distance || 0), 0);
-  const organizerCount = user.organizers.length;
+  const communityCount = user.chapters.length;
 
   return (
     <div className="min-h-screen pb-8">
@@ -99,6 +115,14 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </Avatar>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold">{user.name || 'Anonymous Rider'}</h1>
+                {user.showEmail && user.email && (
+                  <a
+                    href={`mailto:${user.email}`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {user.email}
+                  </a>
+                )}
                 {user.bio && (
                   <p className="mt-2 text-muted-foreground">{user.bio}</p>
                 )}
@@ -154,8 +178,8 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                 <p className="text-sm text-muted-foreground">km Ridden</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">{organizerCount}</p>
-                <p className="text-sm text-muted-foreground">Groups</p>
+                <p className="text-2xl font-bold">{communityCount}</p>
+                <p className="text-sm text-muted-foreground">Communities</p>
               </div>
             </div>
           </CardContent>
@@ -256,32 +280,40 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           </Card>
         )}
 
-        {/* Groups */}
-        {user.organizers.length > 0 && (
+        {/* Communities */}
+        {user.chapters.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Groups
+                Communities
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {user.organizers.map((membership) => (
-                  <Link key={membership.id} href={`/organizers/${membership.organizer.id}`}>
+                {user.chapters.map((membership) => (
+                  <Link
+                    key={membership.id}
+                    href={`/communities/${membership.chapter.brand?.slug}/${membership.chapter.slug}`}
+                  >
                     <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                       <Avatar className="h-10 w-10">
-                        {membership.organizer.logoUrl && (
-                          <AvatarImage src={membership.organizer.logoUrl} />
+                        {membership.chapter.brand?.logo && (
+                          <AvatarImage
+                            src={membership.chapter.brand.logoIcon || membership.chapter.brand.logo}
+                            style={{ backgroundColor: membership.chapter.brand.primaryColor || undefined }}
+                          />
                         )}
                         <AvatarFallback>
-                          {membership.organizer.name.slice(0, 2).toUpperCase()}
+                          {membership.chapter.city.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <h4 className="font-medium">{membership.organizer.name}</h4>
+                        <h4 className="font-medium">
+                          {membership.chapter.brand?.name} {membership.chapter.city}
+                        </h4>
                         <p className="text-sm text-muted-foreground">
-                          {membership.organizer.rideCount} rides · {membership.organizer.memberCount} members
+                          {membership.chapter._count.rides} rides · {membership.chapter._count.members} members
                         </p>
                       </div>
                     </div>
@@ -293,7 +325,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         )}
 
         {/* Empty state if no rides */}
-        {totalRides === 0 && user.organizers.length === 0 && (
+        {totalRides === 0 && user.chapters.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
               <Route className="h-12 w-12 mx-auto mb-4 opacity-50" />

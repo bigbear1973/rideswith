@@ -60,6 +60,21 @@ export default async function ProfilePage() {
           organizer: true,
         },
       },
+      chapters: {
+        include: {
+          chapter: {
+            include: {
+              brand: {
+                select: { name: true, slug: true, logo: true, logoIcon: true, primaryColor: true },
+              },
+              _count: {
+                select: { rides: true, members: true },
+              },
+            },
+          },
+        },
+        orderBy: { joinedAt: 'desc' },
+      },
       brands: {
         include: {
           _count: {
@@ -93,7 +108,12 @@ export default async function ProfilePage() {
   // Calculate stats
   const totalRides = user.rsvps.length;
   const totalDistance = pastRides.reduce((sum, rsvp) => sum + (rsvp.ride.distance || 0), 0);
-  const organizerCount = user.organizers.length;
+  // Count communities: brands owned + chapters member of (minus overlap for chapters in owned brands)
+  const ownedBrandSlugs = user.brands.map(b => b.slug);
+  const chapterMemberships = user.chapters.filter(
+    m => !ownedBrandSlugs.includes(m.chapter.brand?.slug || '')
+  );
+  const communityCount = user.brands.length + chapterMemberships.length;
 
   return (
     <div className="min-h-screen pb-8">
@@ -184,8 +204,8 @@ export default async function ProfilePage() {
                 <p className="text-sm text-muted-foreground">km Ridden</p>
               </div>
               <div>
-                <p className="text-2xl font-bold">{organizerCount}</p>
-                <p className="text-sm text-muted-foreground">Groups</p>
+                <p className="text-2xl font-bold">{communityCount}</p>
+                <p className="text-sm text-muted-foreground">Communities</p>
               </div>
             </div>
           </CardContent>
@@ -364,32 +384,40 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Organizer Memberships */}
-        {user.organizers.length > 0 && (
+        {/* Chapter Memberships */}
+        {chapterMemberships.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                My Groups ({user.organizers.length})
+                My Chapters ({chapterMemberships.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {user.organizers.map((membership) => (
-                  <Link key={membership.id} href={`/organizers/${membership.organizer.id}`}>
+                {chapterMemberships.map((membership) => (
+                  <Link
+                    key={membership.id}
+                    href={`/communities/${membership.chapter.brand?.slug}/${membership.chapter.slug}`}
+                  >
                     <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                       <Avatar className="h-10 w-10">
-                        {membership.organizer.logoUrl && (
-                          <AvatarImage src={membership.organizer.logoUrl} />
+                        {membership.chapter.brand?.logo && (
+                          <AvatarImage
+                            src={membership.chapter.brand.logoIcon || membership.chapter.brand.logo}
+                            style={{ backgroundColor: membership.chapter.brand.primaryColor || undefined }}
+                          />
                         )}
                         <AvatarFallback>
-                          {membership.organizer.name.slice(0, 2).toUpperCase()}
+                          {membership.chapter.city.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <h4 className="font-medium">{membership.organizer.name}</h4>
+                        <h4 className="font-medium">
+                          {membership.chapter.brand?.name} {membership.chapter.city}
+                        </h4>
                         <p className="text-sm text-muted-foreground">
-                          {membership.organizer.rideCount} rides · {membership.organizer.memberCount} members
+                          {membership.chapter._count.rides} rides · {membership.chapter._count.members} members
                         </p>
                       </div>
                       <Badge variant="outline">{membership.role.toLowerCase()}</Badge>
