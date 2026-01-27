@@ -13,9 +13,8 @@ import {
   Users,
   Route,
   History,
-  Instagram,
-  Mail,
 } from 'lucide-react';
+import { SocialIconsDisplay } from '@/components/profile/social-links-picker';
 
 const PACE_STYLES: Record<string, string> = {
   casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -37,7 +36,26 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
   const user = await prisma.user.findUnique({
     where: { slug },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      slug: true,
+      bio: true,
+      location: true,
+      showEmail: true,
+      createdAt: true,
+      // Social links
+      instagram: true,
+      strava: true,
+      twitter: true,
+      youtube: true,
+      tiktok: true,
+      patreon: true,
+      kofi: true,
+      website: true,
+      // Relations
       rsvps: {
         where: { status: 'GOING' },
         include: {
@@ -133,32 +151,19 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                   </p>
                 )}
                 {/* Social Links */}
-                {(user.instagram || user.strava) && (
-                  <div className="flex items-center gap-3 mt-3">
-                    {user.instagram && (
-                      <a
-                        href={user.instagram.startsWith('http') ? user.instagram : `https://instagram.com/${user.instagram.replace('@', '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Instagram className="h-5 w-5" />
-                      </a>
-                    )}
-                    {user.strava && (
-                      <a
-                        href={user.strava.startsWith('http') ? user.strava : `https://strava.com/athletes/${user.strava}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                        </svg>
-                      </a>
-                    )}
-                  </div>
-                )}
+                <SocialIconsDisplay
+                  links={{
+                    instagram: user.instagram,
+                    strava: user.strava,
+                    twitter: user.twitter,
+                    youtube: user.youtube,
+                    tiktok: user.tiktok,
+                    patreon: user.patreon,
+                    kofi: user.kofi,
+                    website: user.website,
+                  }}
+                  className="mt-3"
+                />
                 <p className="text-sm text-muted-foreground mt-2">
                   Member since {format(new Date(user.createdAt), 'MMMM yyyy')}
                 </p>

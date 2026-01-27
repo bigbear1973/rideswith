@@ -11,8 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Instagram, Camera, Mail } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Camera, Mail } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { SocialLinksPicker, SocialPlatformKey } from '@/components/profile/social-links-picker';
 
 interface UserProfile {
   id: string;
@@ -24,6 +25,12 @@ interface UserProfile {
   location: string | null;
   instagram: string | null;
   strava: string | null;
+  twitter: string | null;
+  youtube: string | null;
+  tiktok: string | null;
+  patreon: string | null;
+  kofi: string | null;
+  website: string | null;
   showEmail: boolean;
 }
 
@@ -45,6 +52,12 @@ export default function EditProfilePage() {
     location: '',
     instagram: '',
     strava: '',
+    twitter: '',
+    youtube: '',
+    tiktok: '',
+    patreon: '',
+    kofi: '',
+    website: '',
     image: '',
     showEmail: false,
   });
@@ -70,6 +83,12 @@ export default function EditProfilePage() {
             location: data.location || '',
             instagram: data.instagram || '',
             strava: data.strava || '',
+            twitter: data.twitter || '',
+            youtube: data.youtube || '',
+            tiktok: data.tiktok || '',
+            patreon: data.patreon || '',
+            kofi: data.kofi || '',
+            website: data.website || '',
             image: data.image || '',
             showEmail: data.showEmail || false,
           });
@@ -355,42 +374,21 @@ export default function EditProfilePage() {
               </div>
 
               {/* Social Links */}
-              <div className="space-y-4">
-                <Label className="text-base font-semibold">Social Links</Label>
-                <p className="text-sm text-muted-foreground -mt-2">
-                  Connect your cycling profiles
-                </p>
-
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="instagram" className="flex items-center gap-2">
-                      <Instagram className="h-4 w-4" />
-                      Instagram
-                    </Label>
-                    <Input
-                      id="instagram"
-                      value={formData.instagram}
-                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                      placeholder="@username or profile URL"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="strava" className="flex items-center gap-2">
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                      </svg>
-                      Strava
-                    </Label>
-                    <Input
-                      id="strava"
-                      value={formData.strava}
-                      onChange={(e) => setFormData({ ...formData, strava: e.target.value })}
-                      placeholder="Strava profile URL"
-                    />
-                  </div>
-                </div>
-              </div>
+              <SocialLinksPicker
+                values={{
+                  instagram: formData.instagram,
+                  strava: formData.strava,
+                  twitter: formData.twitter,
+                  youtube: formData.youtube,
+                  tiktok: formData.tiktok,
+                  patreon: formData.patreon,
+                  kofi: formData.kofi,
+                  website: formData.website,
+                }}
+                onChange={(key: SocialPlatformKey, value: string) => {
+                  setFormData({ ...formData, [key]: value });
+                }}
+              />
 
               {/* Error/Success Messages */}
               {error && (

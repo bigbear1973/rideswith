@@ -154,6 +154,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.sponsorLabel !== undefined) updateData.sponsorLabel = body.sponsorLabel;
     if (body.hidePresentedBy !== undefined) updateData.hidePresentedBy = body.hidePresentedBy;
     if (body.sponsorsEnabled !== undefined) updateData.sponsorsEnabled = body.sponsorsEnabled;
+    // Chat links
+    if (body.telegram !== undefined) updateData.telegram = body.telegram;
+    if (body.whatsapp !== undefined) updateData.whatsapp = body.whatsapp;
+    if (body.discord !== undefined) updateData.discord = body.discord;
+    if (body.signal !== undefined) updateData.signal = body.signal;
 
     const chapter = await prisma.chapter.update({
       where: { id },

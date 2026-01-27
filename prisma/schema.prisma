@@ -30,6 +30,12 @@ model User {
   // Social links
   instagram     String?   // Instagram handle or URL
   strava        String?   // Strava profile URL
+  twitter       String?   // Twitter/X handle or URL
+  youtube       String?   // YouTube channel URL
+  tiktok        String?   // TikTok handle or URL
+  patreon       String?   // Patreon page URL
+  kofi          String?   // Ko-fi page URL
+  website       String?   // Personal website URL
 
   // Relations
   accounts             Account[]
@@ -147,6 +153,12 @@ model Chapter {
   sponsorLabel    String?  // "sponsors" | "partners" | "ads" - inherits from brand if null
   hidePresentedBy Boolean? // Hide "Presented by" card - inherits from brand if null
   sponsorsEnabled Boolean? // Chapter can disable sponsors even if brand has them enabled (null = inherit from brand)
+
+  // Community chat links
+  telegram  String? // Telegram group link or @username
+  whatsapp  String? // WhatsApp group invite link
+  discord   String? // Discord server invite link
+  signal    String? // Signal group link
 
   // Stats (managed counters)
   memberCount Int @default(0)

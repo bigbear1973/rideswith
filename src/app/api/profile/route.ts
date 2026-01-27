@@ -21,6 +21,12 @@ export async function GET() {
         location: true,
         instagram: true,
         strava: true,
+        twitter: true,
+        youtube: true,
+        tiktok: true,
+        patreon: true,
+        kofi: true,
+        website: true,
         showEmail: true,
       },
     });
@@ -44,7 +50,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, slug, bio, location, instagram, strava, image, showEmail } = body;
+    const { name, slug, bio, location, instagram, strava, twitter, youtube, tiktok, patreon, kofi, website, image, showEmail } = body;
 
     // Validate slug if provided
     if (slug) {
@@ -97,6 +103,12 @@ export async function PUT(request: NextRequest) {
         location: location?.trim() || null,
         instagram: instagram?.trim() || null,
         strava: strava?.trim() || null,
+        twitter: twitter?.trim() || null,
+        youtube: youtube?.trim() || null,
+        tiktok: tiktok?.trim() || null,
+        patreon: patreon?.trim() || null,
+        kofi: kofi?.trim() || null,
+        website: website?.trim() || null,
         ...(image !== undefined && { image: image || null }),
         ...(showEmail !== undefined && { showEmail: Boolean(showEmail) }),
       },
@@ -110,6 +122,12 @@ export async function PUT(request: NextRequest) {
         location: true,
         instagram: true,
         strava: true,
+        twitter: true,
+        youtube: true,
+        tiktok: true,
+        patreon: true,
+        kofi: true,
+        website: true,
         showEmail: true,
       },
     });
