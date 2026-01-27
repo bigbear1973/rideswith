@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00D26A"/>
+      <stop offset="100%" style="stop-color:#00B8D4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle with gradient -->
+  <circle cx="256" cy="256" r="256" fill="url(#bgGradient)"/>
+
+  <!-- Stylized "RW" with bike wheel integration -->
+  <g fill="#ffffff">
+    <!-- Letter R -->
+    <path d="M120 140 h60 c35 0 60 25 60 55 c0 25-15 45-40 52 l50 83 h-45 l-45-75 h-10 v75 h-30 v-190 z M150 225 h25 c20 0 35-12 35-30 c0-18-15-30-35-30 h-25 v60 z"/>
+
+    <!-- Letter W -->
+    <path d="M260 140 h30 l25 120 l30-120 h25 l30 120 l25-120 h30 l-45 190 h-30 l-30-115 l-30 115 h-30 z"/>
+  </g>
+
+  <!-- Small bike wheel accent at bottom -->
+  <g stroke="#ffffff" stroke-width="4" fill="none" opacity="0.7">
+    <circle cx="256" cy="400" r="35"/>
+    <circle cx="256" cy="400" r="8" fill="#ffffff"/>
+    <!-- Spokes -->
+    <line x1="256" y1="365" x2="256" y2="373"/>
+    <line x1="256" y1="427" x2="256" y2="435"/>
+    <line x1="221" y1="400" x2="229" y2="400"/>
+    <line x1="283" y1="400" x2="291" y2="400"/>
+    <line x1="231" y1="375" x2="237" y2="381"/>
+    <line x1="275" y1="419" x2="281" y2="425"/>
+    <line x1="231" y1="425" x2="237" y2="419"/>
+    <line x1="275" y1="381" x2="281" y2="375"/>
+  </g>
+</svg>

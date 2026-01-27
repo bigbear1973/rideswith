@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { DEFAULT_SNIPPETS } from '@/lib/default-snippets';
 
 // GET /api/snippets - List user's snippets
 export async function GET() {
@@ -10,7 +11,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const snippets = await prisma.rideSnippet.findMany({
+    // Check if user has any snippets
+    let snippets = await prisma.rideSnippet.findMany({
       where: { userId: session.user.id },
       orderBy: [
         { category: 'asc' },
@@ -18,6 +20,24 @@ export async function GET() {
         { title: 'asc' },
       ],
     });
+
+    // If user has no snippets, create the default ones
+    if (snippets.length === 0) {
+      const createdSnippets = await Promise.all(
+        DEFAULT_SNIPPETS.map((snippet, index) =>
+          prisma.rideSnippet.create({
+            data: {
+              userId: session.user.id,
+              title: snippet.title,
+              content: snippet.content,
+              category: snippet.category,
+              sortOrder: index,
+            },
+          })
+        )
+      );
+      snippets = createdSnippets;
+    }
 
     return NextResponse.json({ snippets });
   } catch (error) {
