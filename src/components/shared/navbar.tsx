@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Menu, Sun, Moon, MapPin, PlusCircle, Building2, User, Settings, LogOut, Shield } from 'lucide-react';
+import { Menu, Sun, Moon, MapPin, PlusCircle, Building2, User, Settings, LogOut, Shield, BarChart3 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -211,16 +211,28 @@ export function Navbar() {
                       </Link>
                     </Button>
                     {session.user.role === 'PLATFORM_ADMIN' && (
-                      <Button
-                        variant={pathname.startsWith('/admin') ? 'secondary' : 'ghost'}
-                        className="justify-start gap-3 h-12"
-                        asChild
-                      >
-                        <Link href="/admin/communities" onClick={closeMobileMenu}>
-                          <Shield className="h-5 w-5" />
-                          Admin
-                        </Link>
-                      </Button>
+                      <>
+                        <Button
+                          variant={pathname === '/admin/analytics' ? 'secondary' : 'ghost'}
+                          className="justify-start gap-3 h-12"
+                          asChild
+                        >
+                          <Link href="/admin/analytics" onClick={closeMobileMenu}>
+                            <BarChart3 className="h-5 w-5" />
+                            Admin: Analytics
+                          </Link>
+                        </Button>
+                        <Button
+                          variant={pathname === '/admin/communities' ? 'secondary' : 'ghost'}
+                          className="justify-start gap-3 h-12"
+                          asChild
+                        >
+                          <Link href="/admin/communities" onClick={closeMobileMenu}>
+                            <Shield className="h-5 w-5" />
+                            Admin: Communities
+                          </Link>
+                        </Button>
+                      </>
                     )}
                     <Button
                       variant="ghost"

@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Settings, LogOut, Loader2, Shield } from 'lucide-react';
+import { User, Settings, LogOut, Loader2, Shield, BarChart3 } from 'lucide-react';
 
 export function UserMenu() {
   const { data: session, status } = useSession();
@@ -72,6 +72,12 @@ export function UserMenu() {
         {session.user.role === 'PLATFORM_ADMIN' && (
           <>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin/analytics" className="cursor-pointer">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Admin: Analytics
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/admin/communities" className="cursor-pointer">
                 <Shield className="h-4 w-4 mr-2" />
