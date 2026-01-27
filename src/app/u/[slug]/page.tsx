@@ -15,6 +15,7 @@ import {
   History,
 } from 'lucide-react';
 import { SocialIconsDisplay } from '@/components/profile/social-links-picker';
+import { CopyableUrl } from '@/components/ui/copyable-url';
 
 const PACE_STYLES: Record<string, string> = {
   casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -133,10 +134,17 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </Avatar>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold">{user.name || 'Anonymous Rider'}</h1>
+                {user.slug && (
+                  <CopyableUrl
+                    url={`https://rideswith.com/u/${user.slug}`}
+                    displayUrl={`rideswith.com/u/${user.slug}`}
+                    className="mt-1"
+                  />
+                )}
                 {user.showEmail && user.email && (
                   <a
                     href={`mailto:${user.email}`}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors block mt-1"
                   >
                     {user.email}
                   </a>

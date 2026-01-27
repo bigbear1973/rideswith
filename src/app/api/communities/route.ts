@@ -7,6 +7,7 @@ import {
   generateBrandSlug,
   cleanDomain,
 } from "@/lib/brand-dev";
+import { isReservedSlug } from "@/lib/reserved-slugs";
 
 // GET /api/communities - List all communities
 export async function GET() {
@@ -73,6 +74,12 @@ export async function POST(request: NextRequest) {
 
     // Generate slug
     let slug = generateBrandSlug(name.trim());
+
+    // Check if slug is reserved (conflicts with app routes)
+    if (isReservedSlug(slug)) {
+      // Append suffix to avoid conflict with app routes
+      slug = `${slug}-community`;
+    }
 
     // Check if slug already exists
     const existingBrand = await prisma.brand.findUnique({

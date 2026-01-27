@@ -24,7 +24,9 @@ import {
   Youtube,
   Building2,
   Trophy,
+  Link as LinkIcon,
 } from "lucide-react";
+import { CopyableUrl } from "@/components/ui/copyable-url";
 
 const COMMUNITY_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2; color: string }> = {
   BRAND: { label: "Brand", icon: Building2, color: "bg-white/20 text-white" },
@@ -133,7 +135,14 @@ export default async function BrandPage({ params }: PageProps) {
                   </Badge>
                 )}
               </div>
-              <div className="flex flex-wrap items-center gap-4">
+              {/* Vanity URL */}
+              <div className="mt-2 [&_a]:text-white/70 [&_a:hover]:text-white [&_button]:text-white/70 [&_button:hover]:text-white">
+                <CopyableUrl
+                  url={`https://rideswith.com/${brand.slug}`}
+                  displayUrl={`rideswith.com/${brand.slug}`}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-4 mt-2">
                 {brand.domain && (
                   <a
                     href={`https://${brand.domain}`}

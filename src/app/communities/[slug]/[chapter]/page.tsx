@@ -26,6 +26,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useUnits } from "@/components/providers/units-provider";
+import { CopyableUrl } from "@/components/ui/copyable-url";
 
 interface PageProps {
   params: Promise<{ slug: string; chapter: string }>;
@@ -242,6 +243,13 @@ export default function ChapterPage({ params }: PageProps) {
                   <MapPin className="h-4 w-4" />
                   {chapter.city}
                 </p>
+                {/* Vanity URL */}
+                <div className="mt-2 [&_a]:text-white/70 [&_a:hover]:text-white [&_button]:text-white/70 [&_button:hover]:text-white">
+                  <CopyableUrl
+                    url={`https://rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
+                    displayUrl={`rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
+                  />
+                </div>
               </div>
             </div>
             {canEdit && (
