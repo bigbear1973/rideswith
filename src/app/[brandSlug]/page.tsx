@@ -2,6 +2,9 @@ import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { isReservedSlug } from '@/lib/reserved-slugs';
 
+// Force dynamic rendering - database queries can't run at build time
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ brandSlug: string }>;
 }
@@ -27,17 +30,4 @@ export default async function BrandVanityPage({ params }: PageProps) {
   // Redirect to the full community URL
   // This ensures the actual page component handles rendering
   redirect(`/communities/${brandSlug}`);
-}
-
-// Generate static params for known brands (optional optimization)
-export async function generateStaticParams() {
-  const brands = await prisma.brand.findMany({
-    select: { slug: true },
-  });
-
-  return brands
-    .filter((brand) => !isReservedSlug(brand.slug))
-    .map((brand) => ({
-      brandSlug: brand.slug,
-    }));
 }

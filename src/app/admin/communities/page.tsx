@@ -331,97 +331,99 @@ export default function AdminCommunitiesPage() {
                   return (
                     <div key={community.id} className="rounded-lg border bg-card overflow-hidden">
                       {/* Community Row */}
-                      <div className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
-                        {/* Expand toggle */}
-                        {hasChapters ? (
-                          <button
-                            onClick={() => toggleExpanded(community.id)}
-                            className="p-1 hover:bg-muted rounded"
-                          >
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
+                      <div className="p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          {/* Expand toggle */}
+                          {hasChapters ? (
+                            <button
+                              onClick={() => toggleExpanded(community.id)}
+                              className="p-1 hover:bg-muted rounded mt-1 shrink-0"
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </button>
+                          ) : (
+                            <div className="w-6 shrink-0" />
+                          )}
+
+                          {/* Logo */}
+                          <div className="shrink-0">
+                            {community.logo ? (
+                              <img
+                                src={community.logo}
+                                alt={community.name}
+                                className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg object-contain"
+                              />
                             ) : (
-                              <ChevronRight className="h-4 w-4" />
+                              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-muted flex items-center justify-center">
+                                <TypeIcon className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
+                              </div>
                             )}
-                          </button>
-                        ) : (
-                          <div className="w-6" />
-                        )}
-
-                        {/* Logo */}
-                        {community.logo ? (
-                          <img
-                            src={community.logo}
-                            alt={community.name}
-                            className="h-12 w-12 rounded-lg object-contain"
-                          />
-                        ) : (
-                          <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
-                            <TypeIcon className="h-6 w-6 text-muted-foreground" />
                           </div>
-                        )}
 
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          {/* Info - stacks on mobile */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <Badge
+                                variant="secondary"
+                                className={`text-xs ${COMMUNITY_TYPE_COLORS[community.type]}`}
+                              >
+                                {community.type}
+                              </Badge>
+                              <Link
+                                href={`/communities/${community.slug}`}
+                                target="_blank"
+                                className="text-muted-foreground hover:text-foreground"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </Link>
+                            </div>
                             <Link
                               href={`/communities/${community.slug}`}
-                              className="font-medium hover:underline truncate"
+                              className="font-medium hover:underline line-clamp-1"
                             >
                               {community.name}
                             </Link>
-                            <Badge
-                              variant="secondary"
-                              className={COMMUNITY_TYPE_COLORS[community.type]}
-                            >
-                              {community.type}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                            <span>/{community.slug}</span>
-                            {hasChapters && (
-                              <span>{community.chapters.length} chapters</span>
-                            )}
-                            {community.createdBy && (
-                              <span className="truncate">
-                                Owner: {community.createdBy.name || community.createdBy.email}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground mt-1">
+                              <span className="font-mono">/{community.slug}</span>
+                              {hasChapters && (
+                                <span className="hidden sm:inline">{community.chapters.length} chapters</span>
+                              )}
+                            </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-3">
-                          <Link
-                            href={`/communities/${community.slug}`}
-                            target="_blank"
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
-
-                          {/* Sponsors Toggle */}
-                          <Button
-                            variant={community.sponsorsEnabled ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => toggleSponsorsEnabled(community.id, community.sponsorsEnabled)}
-                            disabled={updating === community.id}
-                            className={community.sponsorsEnabled ? 'bg-green-600 hover:bg-green-700' : ''}
-                          >
-                            {updating === community.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : community.sponsorsEnabled ? (
-                              <>
-                                <Check className="h-4 w-4 mr-1" />
-                                Sponsors On
-                              </>
-                            ) : (
-                              <>
-                                <X className="h-4 w-4 mr-1" />
-                                Sponsors Off
-                              </>
-                            )}
-                          </Button>
+                            {/* Sponsor toggle on mobile - below info */}
+                            <div className="mt-3">
+                              <Button
+                                variant={community.sponsorsEnabled ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => toggleSponsorsEnabled(community.id, community.sponsorsEnabled)}
+                                disabled={updating === community.id}
+                                className={community.sponsorsEnabled ? 'bg-green-600 hover:bg-green-700' : ''}
+                              >
+                                {updating === community.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : community.sponsorsEnabled ? (
+                                  <>
+                                    <Check className="h-4 w-4 mr-1" />
+                                    Sponsors On
+                                  </>
+                                ) : (
+                                  <>
+                                    <X className="h-4 w-4 mr-1" />
+                                    Sponsors Off
+                                  </>
+                                )}
+                              </Button>
+                              {hasChapters && (
+                                <span className="ml-2 text-xs text-muted-foreground sm:hidden">
+                                  {community.chapters.length} chapters
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -433,53 +435,54 @@ export default function AdminCommunitiesPage() {
                             return (
                               <div
                                 key={chapter.id}
-                                className="flex items-center gap-4 px-4 py-3 pl-16 border-b last:border-b-0 hover:bg-muted/50"
+                                className="px-4 py-3 pl-8 sm:pl-16 border-b last:border-b-0 hover:bg-muted/50"
                               >
-                                {/* Chapter icon */}
-                                <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                                </div>
+                                <div className="flex items-start gap-3">
+                                  {/* Chapter icon */}
+                                  <div className="h-8 w-8 rounded bg-muted flex items-center justify-center shrink-0">
+                                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                                  </div>
 
-                                {/* Chapter info */}
-                                <div className="flex-1 min-w-0">
-                                  <Link
-                                    href={`/communities/${community.slug}/${chapter.slug}`}
-                                    className="font-medium text-sm hover:underline"
-                                  >
-                                    {chapter.name}
-                                  </Link>
-                                  {chapter.city && (
-                                    <p className="text-xs text-muted-foreground">{chapter.city}</p>
-                                  )}
-                                </div>
-
-                                {/* Chapter sponsor status */}
-                                <div className="flex items-center gap-3">
-                                  <span className={`text-xs ${chapterStatus.color}`}>
-                                    {chapterStatus.label}
-                                  </span>
-
-                                  <Button
-                                    variant={chapter.sponsorsEnabled === false ? 'outline' : 'default'}
-                                    size="sm"
-                                    onClick={() =>
-                                      toggleChapterSponsors(
-                                        community.id,
-                                        chapter.id,
-                                        chapter.sponsorsEnabled
-                                      )
-                                    }
-                                    disabled={updating === chapter.id}
-                                    className={chapter.sponsorsEnabled !== false ? 'bg-green-600 hover:bg-green-700' : ''}
-                                  >
-                                    {updating === chapter.id ? (
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                    ) : chapter.sponsorsEnabled === false ? (
-                                      'Enable'
-                                    ) : (
-                                      'Disable'
+                                  {/* Chapter info and actions */}
+                                  <div className="flex-1 min-w-0">
+                                    <Link
+                                      href={`/communities/${community.slug}/${chapter.slug}`}
+                                      className="font-medium text-sm hover:underline"
+                                    >
+                                      {chapter.name}
+                                    </Link>
+                                    {chapter.city && (
+                                      <p className="text-xs text-muted-foreground">{chapter.city}</p>
                                     )}
-                                  </Button>
+
+                                    {/* Chapter sponsor controls - below info on mobile */}
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                      <span className={`text-xs ${chapterStatus.color}`}>
+                                        {chapterStatus.label}
+                                      </span>
+                                      <Button
+                                        variant={chapter.sponsorsEnabled === false ? 'outline' : 'default'}
+                                        size="sm"
+                                        onClick={() =>
+                                          toggleChapterSponsors(
+                                            community.id,
+                                            chapter.id,
+                                            chapter.sponsorsEnabled
+                                          )
+                                        }
+                                        disabled={updating === chapter.id}
+                                        className={`h-7 text-xs ${chapter.sponsorsEnabled !== false ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                      >
+                                        {updating === chapter.id ? (
+                                          <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : chapter.sponsorsEnabled === false ? (
+                                          'Enable'
+                                        ) : (
+                                          'Disable'
+                                        )}
+                                      </Button>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             );

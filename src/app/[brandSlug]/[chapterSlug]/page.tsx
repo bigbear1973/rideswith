@@ -2,6 +2,9 @@ import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { isReservedSlug } from '@/lib/reserved-slugs';
 
+// Force dynamic rendering - database queries can't run at build time
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ brandSlug: string; chapterSlug: string }>;
 }
@@ -37,23 +40,4 @@ export default async function ChapterVanityPage({ params }: PageProps) {
 
   // Redirect to the full community/chapter URL
   redirect(`/communities/${brandSlug}/${chapterSlug}`);
-}
-
-// Generate static params for known brand/chapter combinations
-export async function generateStaticParams() {
-  const chapters = await prisma.chapter.findMany({
-    select: {
-      slug: true,
-      brand: {
-        select: { slug: true },
-      },
-    },
-  });
-
-  return chapters
-    .filter((chapter) => !isReservedSlug(chapter.brand.slug))
-    .map((chapter) => ({
-      brandSlug: chapter.brand.slug,
-      chapterSlug: chapter.slug,
-    }));
 }
