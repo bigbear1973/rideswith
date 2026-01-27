@@ -286,12 +286,75 @@ export default function ChapterPage({ params }: PageProps) {
                   <MapPin className="h-4 w-4 shrink-0" />
                   {chapter.city}
                 </p>
-                {/* Vanity URL */}
-                <div className="mt-2 [&_a]:text-white/70 [&_a:hover]:text-white [&_button]:text-white/70 [&_button:hover]:text-white">
-                  <CopyableUrl
-                    url={`https://rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
-                    displayUrl={`rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
-                  />
+                {/* Vanity URL and Social Links */}
+                <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2">
+                  <div className="[&_a]:text-white/70 [&_a:hover]:text-white [&_button]:text-white/70 [&_button:hover]:text-white">
+                    <CopyableUrl
+                      url={`https://rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
+                      displayUrl={`rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
+                    />
+                  </div>
+                  {/* Social Links */}
+                  {(() => {
+                    const socialLinks = chapter.inheritSocialLinks !== false
+                      ? {
+                          instagram: chapter.brand.instagram,
+                          twitter: chapter.brand.twitter,
+                          facebook: chapter.brand.facebook,
+                          strava: chapter.brand.strava,
+                          youtube: chapter.brand.youtube,
+                        }
+                      : {
+                          instagram: chapter.instagram,
+                          twitter: chapter.twitter,
+                          facebook: chapter.facebook,
+                          strava: chapter.strava,
+                          youtube: chapter.youtube,
+                        };
+                    const hasSocialLinks = socialLinks.instagram || socialLinks.twitter || socialLinks.facebook || socialLinks.strava || socialLinks.youtube;
+                    if (!hasSocialLinks) return null;
+                    const normalizeUrl = (value: string | null, platform: string) => {
+                      if (!value) return null;
+                      if (value.startsWith('http')) return value;
+                      switch (platform) {
+                        case 'instagram': return `https://instagram.com/${value.replace('@', '')}`;
+                        case 'twitter': return `https://twitter.com/${value.replace('@', '')}`;
+                        case 'facebook': return `https://facebook.com/${value}`;
+                        default: return value;
+                      }
+                    };
+                    return (
+                      <div className="flex items-center gap-3">
+                        {socialLinks.instagram && (
+                          <a href={normalizeUrl(socialLinks.instagram, 'instagram') || '#'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="Instagram">
+                            <Instagram className="h-5 w-5" />
+                          </a>
+                        )}
+                        {socialLinks.twitter && (
+                          <a href={normalizeUrl(socialLinks.twitter, 'twitter') || '#'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="X / Twitter">
+                            <Twitter className="h-5 w-5" />
+                          </a>
+                        )}
+                        {socialLinks.facebook && (
+                          <a href={normalizeUrl(socialLinks.facebook, 'facebook') || '#'} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="Facebook">
+                            <Facebook className="h-5 w-5" />
+                          </a>
+                        )}
+                        {socialLinks.strava && (
+                          <a href={socialLinks.strava} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="Strava Club">
+                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                            </svg>
+                          </a>
+                        )}
+                        {socialLinks.youtube && (
+                          <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors" title="YouTube">
+                            <Youtube className="h-5 w-5" />
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -344,117 +407,6 @@ export default function ChapterPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-
-      {/* Social Links Row */}
-      {(() => {
-        // Determine which social links to display (inherited or custom)
-        const socialLinks = chapter.inheritSocialLinks !== false
-          ? {
-              instagram: chapter.brand.instagram,
-              twitter: chapter.brand.twitter,
-              facebook: chapter.brand.facebook,
-              strava: chapter.brand.strava,
-              youtube: chapter.brand.youtube,
-            }
-          : {
-              instagram: chapter.instagram,
-              twitter: chapter.twitter,
-              facebook: chapter.facebook,
-              strava: chapter.strava,
-              youtube: chapter.youtube,
-            };
-
-        const hasSocialLinks = socialLinks.instagram || socialLinks.twitter || socialLinks.facebook || socialLinks.strava || socialLinks.youtube;
-
-        if (!hasSocialLinks) return null;
-
-        // Helper to normalize URLs
-        const normalizeUrl = (value: string | null, platform: string) => {
-          if (!value) return null;
-          if (value.startsWith('http')) return value;
-          // Handle handles/usernames
-          switch (platform) {
-            case 'instagram':
-              return `https://instagram.com/${value.replace('@', '')}`;
-            case 'twitter':
-              return `https://twitter.com/${value.replace('@', '')}`;
-            case 'facebook':
-              return `https://facebook.com/${value}`;
-            case 'strava':
-              return value; // Strava should be a full URL
-            case 'youtube':
-              return value; // YouTube should be a full URL
-            default:
-              return value;
-          }
-        };
-
-        return (
-          <div className="bg-muted/30 border-b">
-            <div className="container mx-auto px-4 py-3">
-              <div className="flex items-center justify-center gap-4">
-                {socialLinks.instagram && (
-                  <a
-                    href={normalizeUrl(socialLinks.instagram, 'instagram') || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    title="Instagram"
-                  >
-                    <Instagram className="h-5 w-5" />
-                  </a>
-                )}
-                {socialLinks.twitter && (
-                  <a
-                    href={normalizeUrl(socialLinks.twitter, 'twitter') || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    title="X / Twitter"
-                  >
-                    <Twitter className="h-5 w-5" />
-                  </a>
-                )}
-                {socialLinks.facebook && (
-                  <a
-                    href={normalizeUrl(socialLinks.facebook, 'facebook') || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    title="Facebook"
-                  >
-                    <Facebook className="h-5 w-5" />
-                  </a>
-                )}
-                {socialLinks.strava && (
-                  <a
-                    href={normalizeUrl(socialLinks.strava, 'strava') || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    title="Strava Club"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                    </svg>
-                  </a>
-                )}
-                {socialLinks.youtube && (
-                  <a
-                    href={normalizeUrl(socialLinks.youtube, 'youtube') || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    title="YouTube"
-                  >
-                    <Youtube className="h-5 w-5" />
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* Community Chat Links */}
       {(chapter.telegram || chapter.whatsapp || chapter.discord || chapter.signal) && (
