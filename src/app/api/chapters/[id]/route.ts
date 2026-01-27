@@ -293,7 +293,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/chapters/[id]/members - Remove a member
+// DELETE /api/chapters/[id] - Remove a member OR delete the chapter
+// Query params:
+//   - userId: Remove a specific member
+//   - deleteChapter=true: Delete the entire chapter (Owner only)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
@@ -305,7 +308,64 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const currentUserId = session.user.id;
     const { searchParams } = new URL(request.url);
     const targetUserId = searchParams.get("userId");
+    const deleteChapter = searchParams.get("deleteChapter") === "true";
 
+    // Handle chapter deletion
+    if (deleteChapter) {
+      // Check if user is Owner of this chapter or Brand owner
+      const chapter = await prisma.chapter.findUnique({
+        where: { id },
+        include: {
+          brand: { select: { createdById: true } },
+          members: { where: { userId: currentUserId } },
+        },
+      });
+
+      if (!chapter) {
+        return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+      }
+
+      const isBrandOwner = chapter.brand.createdById === currentUserId;
+      const isChapterOwner = chapter.members.some(m => isOwner(m.role));
+
+      if (!isBrandOwner && !isChapterOwner) {
+        return NextResponse.json(
+          { error: "Only chapter owners or community owners can delete a chapter" },
+          { status: 403 }
+        );
+      }
+
+      // Check if chapter has any rides
+      const rideCount = await prisma.ride.count({
+        where: { chapterId: id },
+      });
+
+      if (rideCount > 0) {
+        return NextResponse.json(
+          { error: `Cannot delete chapter with ${rideCount} ride(s). Remove all rides first.` },
+          { status: 400 }
+        );
+      }
+
+      // Delete all chapter members first
+      await prisma.chapterMember.deleteMany({
+        where: { chapterId: id },
+      });
+
+      // Delete all chapter sponsors
+      await prisma.sponsor.deleteMany({
+        where: { chapterId: id },
+      });
+
+      // Delete the chapter
+      await prisma.chapter.delete({
+        where: { id },
+      });
+
+      return NextResponse.json({ success: true, deleted: true });
+    }
+
+    // Handle member removal (existing logic)
     if (!targetUserId) {
       return NextResponse.json(
         { error: "User ID is required" },

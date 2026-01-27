@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle, Trash2 } from 'lucide-react';
 import { SponsorForm, SponsorList } from '@/components/communities';
 
 interface ChapterMember {
@@ -108,6 +108,9 @@ export default function EditChapterPage() {
   const [isBrandOwner, setIsBrandOwner] = useState(false);
   const [brandSponsorsEnabled, setBrandSponsorsEnabled] = useState(false);
   const [chapterSponsorsEnabled, setChapterSponsorsEnabled] = useState<'inherit' | 'enabled' | 'disabled'>('inherit');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const isPlatformAdmin = session?.user?.role === 'PLATFORM_ADMIN';
 
   useEffect(() => {
@@ -394,6 +397,35 @@ export default function EditChapterPage() {
         return { label: role, icon: UserCheck, color: 'text-muted-foreground' };
     }
   };
+
+  // Delete chapter handler
+  const handleDeleteChapter = async () => {
+    if (!chapter) return;
+    if (deleteConfirmText !== chapter.name) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/chapters/${chapter.id}?deleteChapter=true`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        router.push(`/communities/${brandSlug}`);
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Failed to delete chapter');
+        setShowDeleteConfirm(false);
+      }
+    } catch {
+      setError('Failed to delete chapter');
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Check if user can delete the chapter (Owner or Brand Owner)
+  const canDeleteChapter = isBrandOwner || currentUserRole === 'OWNER' || currentUserRole === 'LEAD';
 
   // Get effective label (chapter's own or inherited from brand)
   const effectiveLabel =
@@ -957,6 +989,82 @@ export default function EditChapterPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Danger Zone - Delete Chapter */}
+        {canDeleteChapter && (
+          <Card className="border-destructive/50">
+            <CardHeader>
+              <CardTitle className="text-destructive flex items-center gap-2">
+                <Trash2 className="h-5 w-5" />
+                Danger Zone
+              </CardTitle>
+              <CardDescription>
+                Irreversible actions that affect this chapter
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!showDeleteConfirm ? (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Delete this chapter</p>
+                    <p className="text-sm text-muted-foreground">
+                      Permanently delete this chapter and all its data
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    Delete Chapter
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      This action cannot be undone. This will permanently delete the
+                      <strong> {chapter.brand.name} {chapter.name}</strong> chapter,
+                      all team members, and sponsors.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm">
+                      Type <strong>{chapter.name}</strong> to confirm
+                    </Label>
+                    <Input
+                      id="confirm"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder={chapter.name}
+                    />
+                  </div>
+
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteConfirmText('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteChapter}
+                      disabled={deleteConfirmText !== chapter.name || isDeleting}
+                    >
+                      {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      Delete Chapter
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
