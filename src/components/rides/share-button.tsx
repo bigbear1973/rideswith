@@ -42,12 +42,12 @@ export function ShareButton({ rideInfo }: ShareButtonProps) {
             {copied ? (
               <>
                 <Check className="h-4 w-4 text-green-500" />
-                <span className="hidden sm:inline">Copied!</span>
+                <span className="text-green-500">Copied!</span>
               </>
             ) : (
               <>
                 <Copy className="h-4 w-4" />
-                <span className="hidden sm:inline">Share</span>
+                <span>Share</span>
               </>
             )}
           </Button>
