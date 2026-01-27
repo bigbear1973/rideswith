@@ -274,11 +274,21 @@ export default async function RidePage({ params }: RidePageProps) {
       <div className="sticky top-14 z-30 bg-background border-b px-4 py-3 lg:hidden">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/discover">
+            <Link href={hasBranding && brand && chapter ? `/communities/${brand.slug}/${chapter.slug}` : '/discover'}>
               <ChevronLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <span className="font-medium truncate flex-1">{ride.title}</span>
+          <div className="flex-1 min-w-0">
+            {hasBranding && brand && chapter ? (
+              <Link
+                href={`/communities/${brand.slug}/${chapter.slug}`}
+                className="text-xs text-muted-foreground hover:text-foreground block truncate"
+              >
+                {brand.name} {chapter.name}
+              </Link>
+            ) : null}
+            <span className="font-medium truncate block">{ride.title}</span>
+          </div>
           {canEdit && (
             <Button variant="outline" size="sm" asChild>
               <Link href={`/rides/${id}/edit`}>

@@ -210,37 +210,52 @@ export default function ChapterPage({ params }: PageProps) {
     <div className="min-h-screen bg-background">
       {/* Hero Section with Brand Colors */}
       <div
-        className="py-12 text-white"
+        className="py-8 md:py-12 text-white"
         style={{ backgroundColor: chapter.brand.primaryColor || "#00D26A" }}
       >
         <div className="container mx-auto px-4">
-          <Link
-            href={`/communities/${chapter.brand.slug}`}
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to {chapter.brand.name}
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href={`/communities/${chapter.brand.slug}`}
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to {chapter.brand.name}
+            </Link>
+            {/* Mobile: Settings button in header */}
+            {canEdit && (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="md:hidden bg-white/10 border-white/30 text-white hover:bg-white/20"
+              >
+                <Link href={`/communities/${chapter.brand.slug}/${chapter.slug}/edit`}>
+                  <Settings className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
+          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-start md:items-center gap-4 md:gap-6">
               {chapter.brand.logo ? (
                 <img
                   src={chapter.brand.logo}
                   alt={chapter.brand.name}
-                  className="h-16 w-16 object-contain rounded-lg bg-white p-2"
+                  className="h-12 w-12 md:h-16 md:w-16 object-contain rounded-lg bg-white p-1.5 md:p-2 shrink-0"
                 />
               ) : (
-                <div className="h-16 w-16 rounded-lg bg-white/20 flex items-center justify-center text-2xl font-bold">
+                <div className="h-12 w-12 md:h-16 md:w-16 rounded-lg bg-white/20 flex items-center justify-center text-xl md:text-2xl font-bold shrink-0">
                   {chapter.brand.name.charAt(0)}
                 </div>
               )}
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
                   {chapter.brand.name} {chapter.name}
                 </h1>
-                <p className="text-white/80 flex items-center gap-1 mt-1">
-                  <MapPin className="h-4 w-4" />
+                <p className="text-white/80 flex items-center gap-1 mt-1 text-sm md:text-base">
+                  <MapPin className="h-4 w-4 shrink-0" />
                   {chapter.city}
                 </p>
                 {/* Vanity URL */}
@@ -252,12 +267,13 @@ export default function ChapterPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
+            {/* Desktop: Settings button */}
             {canEdit && (
               <Button
                 asChild
                 variant="outline"
                 size="sm"
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                className="hidden md:flex bg-white/10 border-white/30 text-white hover:bg-white/20 shrink-0"
               >
                 <Link href={`/communities/${chapter.brand.slug}/${chapter.slug}/edit`}>
                   <Settings className="h-4 w-4 mr-2" />

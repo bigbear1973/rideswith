@@ -105,31 +105,47 @@ export default async function BrandPage({ params }: PageProps) {
     <div className="min-h-screen bg-background">
       {/* Hero Section with Brand Colors */}
       <div
-        className="py-16 text-white"
+        className="py-8 md:py-16 text-white"
         style={{ backgroundColor: brand.primaryColor || "#00D26A" }}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-6">
+          {/* Mobile: Edit button at top right */}
+          {isOwner && (
+            <div className="flex justify-end mb-4 md:hidden">
+              <Button
+                asChild
+                variant="secondary"
+                size="sm"
+              >
+                <Link href={`/communities/${brand.slug}/edit`}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Link>
+              </Button>
+            </div>
+          )}
+
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
             {brand.logo ? (
               <img
                 src={brand.logo}
                 alt={brand.name}
-                className="h-20 w-20 object-contain rounded-lg bg-white p-2"
+                className="h-16 w-16 md:h-20 md:w-20 object-contain rounded-lg bg-white p-2"
               />
             ) : (
-              <div className="h-20 w-20 rounded-lg bg-white/20 flex items-center justify-center text-3xl font-bold">
+              <div className="h-16 w-16 md:h-20 md:w-20 rounded-lg bg-white/20 flex items-center justify-center text-2xl md:text-3xl font-bold">
                 {brand.name.charAt(0)}
               </div>
             )}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-4xl md:text-5xl font-bold">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
                   {brand.name}
                 </h1>
                 {brand.type && COMMUNITY_TYPE_LABELS[brand.type] && (
                   <Badge
                     variant="secondary"
-                    className={`text-sm ${COMMUNITY_TYPE_LABELS[brand.type].color}`}
+                    className={`text-xs md:text-sm ${COMMUNITY_TYPE_LABELS[brand.type].color}`}
                   >
                     {COMMUNITY_TYPE_LABELS[brand.type].label}
                   </Badge>
@@ -142,13 +158,13 @@ export default async function BrandPage({ params }: PageProps) {
                   displayUrl={`rideswith.com/${brand.slug}`}
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-4 mt-2">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2">
                 {brand.domain && (
                   <a
                     href={`https://${brand.domain}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-white/80 hover:text-white"
+                    className="inline-flex items-center gap-1 text-white/80 hover:text-white text-sm md:text-base"
                   >
                     <Globe className="h-4 w-4" />
                     {brand.domain}
@@ -219,12 +235,13 @@ export default async function BrandPage({ params }: PageProps) {
                 )}
               </div>
             </div>
+            {/* Desktop: Edit button in header row */}
             {isOwner && (
               <Button
                 asChild
                 variant="secondary"
                 size="sm"
-                className="ml-auto"
+                className="hidden md:flex ml-auto shrink-0"
               >
                 <Link href={`/communities/${brand.slug}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
@@ -234,7 +251,7 @@ export default async function BrandPage({ params }: PageProps) {
             )}
           </div>
           {brand.description && (
-            <p className="mt-4 text-lg opacity-90 max-w-3xl">
+            <p className="mt-4 text-base md:text-lg opacity-90 max-w-3xl">
               {brand.description}
             </p>
           )}
