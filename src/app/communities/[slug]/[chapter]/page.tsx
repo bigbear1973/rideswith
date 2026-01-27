@@ -28,6 +28,8 @@ import {
   Twitter,
   Facebook,
   Youtube,
+  Globe,
+  ExternalLink,
 } from "lucide-react";
 import { useUnits } from "@/components/providers/units-provider";
 import { CopyableUrl } from "@/components/ui/copyable-url";
@@ -64,6 +66,8 @@ interface ChapterData {
   whatsapp: string | null;
   discord: string | null;
   signal: string | null;
+  // Website/domain
+  domain: string | null;
   // Social links
   inheritSocialLinks: boolean;
   instagram: string | null;
@@ -286,7 +290,7 @@ export default function ChapterPage({ params }: PageProps) {
                   <MapPin className="h-4 w-4 shrink-0" />
                   {chapter.city}
                 </p>
-                {/* Vanity URL and Social Links */}
+                {/* Vanity URL, Website, and Social Links */}
                 <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2">
                   <div className="[&_a]:text-white/70 [&_a:hover]:text-white [&_button]:text-white/70 [&_button:hover]:text-white">
                     <CopyableUrl
@@ -294,6 +298,25 @@ export default function ChapterPage({ params }: PageProps) {
                       displayUrl={`rideswith.com/${chapter.brand.slug}/${chapter.slug}`}
                     />
                   </div>
+                  {/* Website/Domain - inherited or custom */}
+                  {(() => {
+                    const domain = chapter.inheritSocialLinks !== false
+                      ? chapter.brand.domain
+                      : (chapter.domain || chapter.brand.domain);
+                    if (!domain) return null;
+                    return (
+                      <a
+                        href={`https://${domain}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-white/80 hover:text-white text-sm md:text-base"
+                      >
+                        <Globe className="h-4 w-4" />
+                        {domain}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    );
+                  })()}
                   {/* Social Links */}
                   {(() => {
                     const socialLinks = chapter.inheritSocialLinks !== false

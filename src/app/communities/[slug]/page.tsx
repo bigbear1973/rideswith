@@ -17,7 +17,7 @@ import {
   Globe,
   ExternalLink,
   BadgeCheck,
-  Edit,
+  Settings,
   Instagram,
   Twitter,
   Facebook,
@@ -109,7 +109,7 @@ export default async function BrandPage({ params }: PageProps) {
         style={{ backgroundColor: brand.primaryColor || "#00D26A" }}
       >
         <div className="container mx-auto px-4">
-          {/* Mobile: Edit button at top right */}
+          {/* Mobile: Settings button at top right */}
           {isOwner && (
             <div className="flex justify-end mb-4 md:hidden">
               <Button
@@ -118,8 +118,8 @@ export default async function BrandPage({ params }: PageProps) {
                 size="sm"
               >
                 <Link href={`/communities/${brand.slug}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
                 </Link>
               </Button>
             </div>
@@ -235,7 +235,7 @@ export default async function BrandPage({ params }: PageProps) {
                 )}
               </div>
             </div>
-            {/* Desktop: Edit button in header row */}
+            {/* Desktop: Settings button in header row */}
             {isOwner && (
               <Button
                 asChild
@@ -244,8 +244,8 @@ export default async function BrandPage({ params }: PageProps) {
                 className="hidden md:flex ml-auto shrink-0"
               >
                 <Link href={`/communities/${brand.slug}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
                 </Link>
               </Button>
             )}

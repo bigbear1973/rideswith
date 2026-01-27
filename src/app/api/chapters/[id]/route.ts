@@ -159,6 +159,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (body.whatsapp !== undefined) updateData.whatsapp = body.whatsapp;
     if (body.discord !== undefined) updateData.discord = body.discord;
     if (body.signal !== undefined) updateData.signal = body.signal;
+    // Website/domain
+    if (body.domain !== undefined) updateData.domain = body.domain;
     // Social links
     if (body.inheritSocialLinks !== undefined) updateData.inheritSocialLinks = body.inheritSocialLinks;
     if (body.instagram !== undefined) updateData.instagram = body.instagram;

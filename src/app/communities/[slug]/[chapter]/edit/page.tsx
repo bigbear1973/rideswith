@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle, Trash2, Link2, Instagram, Twitter, Facebook, Youtube } from 'lucide-react';
+import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle, Trash2, Link2, Instagram, Twitter, Facebook, Youtube, Globe } from 'lucide-react';
 import { SponsorForm, SponsorList } from '@/components/communities';
 
 interface ChapterMember {
@@ -37,6 +37,8 @@ interface Chapter {
   whatsapp: string | null;
   discord: string | null;
   signal: string | null;
+  // Website/domain
+  domain: string | null;
   // Social links
   inheritSocialLinks: boolean;
   instagram: string | null;
@@ -48,6 +50,7 @@ interface Chapter {
     id: string;
     name: string;
     slug: string;
+    domain: string | null;
     sponsorLabel: string | null;
     hidePresentedBy: boolean;
     createdById: string | null;
@@ -109,7 +112,8 @@ export default function EditChapterPage() {
     whatsapp: '',
     discord: '',
     signal: '',
-    // Social links
+    // Website/domain and Social links
+    domain: '',
     inheritSocialLinks: true,
     instagram: '',
     twitter: '',
@@ -174,6 +178,7 @@ export default function EditChapterPage() {
             id: brandData.id,
             name: brandData.name,
             slug: brandData.slug,
+            domain: brandData.domain || null,
             sponsorLabel: brandData.sponsorLabel,
             hidePresentedBy: brandData.hidePresentedBy || false,
             createdById: brandData.createdById,
@@ -194,6 +199,7 @@ export default function EditChapterPage() {
           whatsapp: fullChapter.whatsapp || '',
           discord: fullChapter.discord || '',
           signal: fullChapter.signal || '',
+          domain: fullChapter.domain || '',
           inheritSocialLinks: fullChapter.inheritSocialLinks !== false, // Default to true
           instagram: fullChapter.instagram || '',
           twitter: fullChapter.twitter || '',
@@ -280,7 +286,8 @@ export default function EditChapterPage() {
             chapterSponsorsEnabled === 'inherit'
               ? null
               : chapterSponsorsEnabled === 'enabled',
-          // Social links
+          // Website/domain and Social links
+          domain: formData.domain || null,
           inheritSocialLinks: formData.inheritSocialLinks,
           instagram: formData.instagram || null,
           twitter: formData.twitter || null,
@@ -618,21 +625,21 @@ export default function EditChapterPage() {
               </div>
             </div>
 
-            {/* Social Links */}
+            {/* Website & Social Links */}
             <div className="space-y-4 border-t pt-6">
               <div>
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <Link2 className="h-4 w-4" />
-                  Social Links
+                  Website & Social Links
                 </Label>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Add links to your chapter&apos;s social profiles, or inherit from the community
+                  Add your chapter&apos;s website and social profiles, or inherit from the community
                 </p>
               </div>
 
               {/* Inherit toggle */}
               <div className="space-y-2">
-                <Label className="text-sm">Social Links Source</Label>
+                <Label className="text-sm">Links Source</Label>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
@@ -657,8 +664,14 @@ export default function EditChapterPage() {
                 // Show inherited links preview
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <p className="text-sm font-medium mb-2">Inherited from {chapter.brand.name}:</p>
-                  {(chapter.brand.instagram || chapter.brand.twitter || chapter.brand.facebook || chapter.brand.strava || chapter.brand.youtube) ? (
+                  {(chapter.brand.domain || chapter.brand.instagram || chapter.brand.twitter || chapter.brand.facebook || chapter.brand.strava || chapter.brand.youtube) ? (
                     <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      {chapter.brand.domain && (
+                        <span className="flex items-center gap-1">
+                          <Globe className="h-4 w-4" />
+                          {chapter.brand.domain}
+                        </span>
+                      )}
                       {chapter.brand.instagram && (
                         <span className="flex items-center gap-1">
                           <Instagram className="h-4 w-4" />
@@ -693,12 +706,28 @@ export default function EditChapterPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No social links set on community</p>
+                    <p className="text-sm text-muted-foreground">No website or social links set on community</p>
                   )}
                 </div>
               ) : (
-                // Show custom social link inputs
+                // Show custom website and social link inputs
                 <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="domain" className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Website
+                    </Label>
+                    <Input
+                      id="domain"
+                      value={formData.domain}
+                      onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                      placeholder="example.com"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty to use the community website ({chapter.brand.domain || 'not set'})
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="instagram" className="flex items-center gap-2">
                       <Instagram className="h-4 w-4" />
