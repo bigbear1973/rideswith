@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -20,6 +21,80 @@ import {
 
 interface RidePageProps {
   params: Promise<{ id: string }>;
+}
+
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: RidePageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  const ride = await prisma.ride.findUnique({
+    where: { id },
+    select: {
+      title: true,
+      description: true,
+      date: true,
+      locationName: true,
+      locationAddress: true,
+      distance: true,
+      chapter: {
+        select: {
+          brand: {
+            select: {
+              name: true,
+              backdrop: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!ride) {
+    return {
+      title: 'Ride Not Found | RidesWith',
+    };
+  }
+
+  const formattedDate = format(ride.date, 'EEEE, MMMM d, yyyy');
+  const brandName = ride.chapter?.brand?.name;
+
+  // Create a compelling description for search results
+  const metaDescription = ride.description
+    ? ride.description.slice(0, 155) + (ride.description.length > 155 ? '...' : '')
+    : `Join this ${ride.distance ? `${ride.distance}km ` : ''}group cycling ride on ${formattedDate} starting from ${ride.locationName}${brandName ? ` with ${brandName}` : ''}.`;
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com';
+  const rideUrl = `${baseUrl}/rides/${id}`;
+  const ogImage = ride.chapter?.brand?.backdrop || `${baseUrl}/og-default.png`;
+
+  return {
+    title: `${ride.title} | RidesWith`,
+    description: metaDescription,
+    openGraph: {
+      title: ride.title,
+      description: metaDescription,
+      url: rideUrl,
+      siteName: 'RidesWith',
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: ride.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ride.title,
+      description: metaDescription,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: rideUrl,
+    },
+  };
 }
 
 // Helper function to format speed range display
@@ -225,8 +300,48 @@ export default async function RidePage({ params }: RidePageProps) {
     `Join the ride: ${rideUrl}`,
   ].filter(Boolean).join('\n');
 
+  // JSON-LD structured data for the ride (Event schema)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: ride.title,
+    description: ride.description || `Group cycling ride starting from ${ride.locationName}`,
+    startDate: ride.date.toISOString(),
+    endDate: ride.endTime?.toISOString() || new Date(ride.date.getTime() + 3 * 60 * 60 * 1000).toISOString(), // Default 3 hours
+    location: {
+      '@type': 'Place',
+      name: ride.locationName,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: ride.locationAddress,
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: ride.latitude,
+        longitude: ride.longitude,
+      },
+    },
+    organizer: {
+      '@type': 'Organization',
+      name: brand?.name || ride.organizer.name,
+      url: brand?.domain ? `https://${brand.domain}` : rideUrl,
+    },
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    ...(ride.maxAttendees && { maximumAttendeeCapacity: ride.maxAttendees }),
+    ...(brand?.backdrop && { image: brand.backdrop }),
+    sport: 'Cycling',
+    url: rideUrl,
+  };
+
   return (
     <div className="min-h-screen pb-8">
+      {/* JSON-LD structured data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Brand Header - shown for branded rides */}
       {hasBranding && brand && chapter && brand.domain && (
         <a

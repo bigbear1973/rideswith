@@ -1,10 +1,78 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const brand = await prisma.brand.findUnique({
+    where: { slug },
+    select: {
+      name: true,
+      description: true,
+      type: true,
+      logo: true,
+      backdrop: true,
+      slogan: true,
+      _count: {
+        select: {
+          chapters: true,
+        },
+      },
+    },
+  });
+
+  if (!brand) {
+    return {
+      title: 'Community Not Found | RidesWith',
+    };
+  }
+
+  const typeLabel = brand.type === 'BRAND' ? 'Brand' : brand.type === 'CLUB' ? 'Club' : brand.type === 'TEAM' ? 'Team' : 'Group';
+
+  const metaDescription = brand.description
+    ? brand.description.slice(0, 155) + (brand.description.length > 155 ? '...' : '')
+    : `${brand.name} is a cycling ${typeLabel.toLowerCase()} on RidesWith${brand.slogan ? `. ${brand.slogan}` : ''}. Join group rides and connect with fellow cyclists.`;
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com';
+  const communityUrl = `${baseUrl}/communities/${slug}`;
+  const ogImage = brand.backdrop || brand.logo || `${baseUrl}/og-default.png`;
+
+  return {
+    title: `${brand.name} | RidesWith`,
+    description: metaDescription,
+    openGraph: {
+      title: `${brand.name} - Cycling ${typeLabel}`,
+      description: metaDescription,
+      url: communityUrl,
+      siteName: 'RidesWith',
+      type: 'profile',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: brand.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${brand.name} - Cycling ${typeLabel}`,
+      description: metaDescription,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: communityUrl,
+    },
+  };
+}
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

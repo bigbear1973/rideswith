@@ -1,10 +1,79 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface PublicProfilePageProps {
+  params: Promise<{ slug: string }>;
+}
+
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: PublicProfilePageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const user = await prisma.user.findUnique({
+    where: { slug },
+    select: {
+      name: true,
+      bio: true,
+      image: true,
+      location: true,
+      _count: {
+        select: {
+          rsvps: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    return {
+      title: 'User Not Found | RidesWith',
+    };
+  }
+
+  const displayName = user.name || 'Cyclist';
+  const metaDescription = user.bio
+    ? user.bio.slice(0, 155) + (user.bio.length > 155 ? '...' : '')
+    : `${displayName}'s cycling profile on RidesWith${user.location ? ` from ${user.location}` : ''}. ${user._count.rsvps} rides attended.`;
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com';
+  const profileUrl = `${baseUrl}/u/${slug}`;
+  const ogImage = user.image || `${baseUrl}/og-default.png`;
+
+  return {
+    title: `${displayName} | RidesWith`,
+    description: metaDescription,
+    openGraph: {
+      title: `${displayName} - Cyclist Profile`,
+      description: metaDescription,
+      url: profileUrl,
+      siteName: 'RidesWith',
+      type: 'profile',
+      images: [
+        {
+          url: ogImage,
+          width: 400,
+          height: 400,
+          alt: displayName,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary',
+      title: `${displayName} - Cyclist Profile`,
+      description: metaDescription,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: profileUrl,
+    },
+  };
+}
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -25,10 +94,6 @@ const PACE_STYLES: Record<string, string> = {
   fast: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
   race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
-
-interface PublicProfilePageProps {
-  params: Promise<{ slug: string }>;
-}
 
 export default async function PublicProfilePage({ params }: PublicProfilePageProps) {
   const { slug } = await params;

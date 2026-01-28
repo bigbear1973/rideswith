@@ -34,6 +34,9 @@ import {
 import { useUnits } from "@/components/providers/units-provider";
 import { CopyableUrl } from "@/components/ui/copyable-url";
 
+// Note: generateMetadata is in layout.tsx for this client component
+// This allows server-side metadata generation while keeping the page interactive
+
 interface PageProps {
   params: Promise<{ slug: string; chapter: string }>;
 }

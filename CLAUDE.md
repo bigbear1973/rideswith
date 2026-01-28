@@ -432,6 +432,46 @@ model RidePhoto {
 
 ---
 
+## SEO & Metadata (IMPLEMENTED)
+
+Comprehensive SEO setup for Google indexing and social sharing.
+
+### Dynamic Metadata
+- **Rides**: Title, description, OG image from brand backdrop, canonical URL
+- **Communities**: Title, description, type badge, OG image from logo/backdrop
+- **Chapters**: Title with brand name, city location, member/ride counts
+- **User Profiles**: Name, bio, location, ride count
+
+### Static Files
+- `public/robots.txt` - Crawl directives, sitemap location
+- `src/app/sitemap.ts` - Dynamic sitemap with all public pages
+
+### JSON-LD Structured Data
+- Rides use `SportsEvent` schema with location, organizer, dates
+- Proper Schema.org markup for search engine rich snippets
+
+### Key Files
+- `src/app/rides/[id]/page.tsx` - `generateMetadata` + JSON-LD for rides
+- `src/app/communities/[slug]/page.tsx` - `generateMetadata` for communities
+- `src/app/communities/[slug]/[chapter]/layout.tsx` - Metadata for chapters
+- `src/app/u/[slug]/page.tsx` - `generateMetadata` for user profiles
+- `src/app/discover/layout.tsx` - Static metadata for discover page
+- `src/app/sitemap.ts` - Dynamic sitemap generator
+
+### Testing SEO
+```bash
+# View page source to check server-rendered HTML
+curl -s https://rideswith.com/rides/[id] | head -100
+
+# Check sitemap
+curl https://rideswith.com/sitemap.xml
+
+# Check robots.txt
+curl https://rideswith.com/robots.txt
+```
+
+---
+
 ## Planned Integrations
 
 ### AI-Assisted Ride Creation
