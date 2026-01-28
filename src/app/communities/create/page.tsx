@@ -137,19 +137,16 @@ export default function CreateBrandPage() {
                 </Alert>
               )}
 
-              {/* Domain Input */}
+              {/* Website/Link Input */}
               <div className="space-y-2">
                 <Label htmlFor="domain">
-                  Brand Website (optional)
-                  <span className="text-muted-foreground text-sm ml-2">
-                    We&apos;ll auto-fetch your logo and colors
-                  </span>
+                  Website or Link (optional)
                 </Label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="domain"
-                    placeholder="straede.cc"
+                    placeholder="straede.cc or instagram.com/yourgroup"
                     value={domain}
                     onChange={(e) => setDomain(e.target.value)}
                     onBlur={handleDomainBlur}
@@ -159,6 +156,9 @@ export default function CreateBrandPage() {
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  If you enter a domain, we&apos;ll try to auto-fetch branding from Brand.dev
+                </p>
                 {brandPreview && (
                   <div className="flex items-center gap-2 text-sm text-green-600">
                     <Sparkles className="h-4 w-4" />

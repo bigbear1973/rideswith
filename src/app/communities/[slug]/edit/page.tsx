@@ -417,17 +417,17 @@ export default function EditBrandPage() {
                 />
               </div>
 
-              {/* Domain */}
+              {/* Website/Link */}
               <div className="space-y-2">
-                <Label htmlFor="domain">Domain (for Brand.dev)</Label>
+                <Label htmlFor="domain">Website or Link</Label>
                 <Input
                   id="domain"
                   value={formData.domain}
                   onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
-                  placeholder="example.com"
+                  placeholder="example.com or instagram.com/yourgroup"
                 />
                 <p className="text-sm text-muted-foreground">
-                  Enter the brand&apos;s domain to auto-fetch logo and colors from Brand.dev
+                  Enter your website, social link, or domain. If it&apos;s a valid domain, the &quot;Refresh from Brand.dev&quot; button will fetch branding assets.
                 </p>
               </div>
 

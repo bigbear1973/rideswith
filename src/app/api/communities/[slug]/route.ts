@@ -96,9 +96,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // If refreshing from Brand.dev
-    if (body.refreshBranding && brand.domain) {
-      const brandAssets = await fetchBrandAssets(brand.domain);
+    // If refreshing from Brand.dev (only if domain looks valid)
+    if (body.refreshBranding && brand.domain && isValidDomain(brand.domain)) {
+      const brandAssets = await fetchBrandAssets(cleanDomain(brand.domain));
       if (brandAssets) {
         const updatedBrand = await prisma.brand.update({
           where: { slug },
@@ -123,14 +123,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (body.name) updateData.name = body.name;
     if (body.description !== undefined) updateData.description = body.description;
-    if (body.domain) {
-      if (!isValidDomain(body.domain)) {
-        return NextResponse.json(
-          { error: "Invalid domain format" },
-          { status: 400 }
-        );
-      }
-      updateData.domain = cleanDomain(body.domain);
+    // Handle domain/website - allow any URL or domain (used for Brand.dev lookup if valid domain)
+    if (body.domain !== undefined) {
+      // Store whatever the user enters - could be domain, full URL, or social link
+      updateData.domain = body.domain ? body.domain.trim() : null;
     }
 
     // Type field

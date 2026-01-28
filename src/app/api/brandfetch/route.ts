@@ -20,11 +20,21 @@ export async function GET(request: NextRequest) {
     console.log('[brandfetch] Domain:', domain);
     console.log('[brandfetch] Assets:', JSON.stringify(assets, null, 2));
 
+    // If Brand.dev doesn't have assets for this domain, return empty response
+    // instead of error - user can still add custom branding manually
     if (!assets) {
-      return NextResponse.json(
-        { error: 'Could not fetch brand assets for this domain' },
-        { status: 404 }
-      );
+      console.log('[brandfetch] No assets found for domain:', domain);
+      return NextResponse.json({
+        name: null,
+        logo: null,
+        logoIcon: null,
+        backdrop: null,
+        primaryColor: null,
+        secondaryColor: null,
+        description: null,
+        slogan: null,
+        notFound: true,
+      });
     }
 
     return NextResponse.json({

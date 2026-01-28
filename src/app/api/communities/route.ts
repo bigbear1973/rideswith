@@ -64,14 +64,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate domain if provided
-    if (domain && !isValidDomain(domain)) {
-      return NextResponse.json(
-        { error: "Invalid domain format" },
-        { status: 400 }
-      );
-    }
-
     // Generate slug
     let slug = generateBrandSlug(name.trim());
 
@@ -91,10 +83,10 @@ export async function POST(request: NextRequest) {
       slug = `${slug}-${Date.now().toString(36)}`;
     }
 
-    // Fetch brand assets from Brand.dev if domain provided
+    // Fetch brand assets from Brand.dev if domain looks like a valid domain
     let brandAssets = null;
-    if (domain) {
-      brandAssets = await fetchBrandAssets(domain);
+    if (domain && isValidDomain(domain)) {
+      brandAssets = await fetchBrandAssets(cleanDomain(domain));
     }
 
     // Validate type if provided
@@ -107,7 +99,7 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         slug,
         type: communityType,
-        domain: domain ? cleanDomain(domain) : null,
+        domain: domain?.trim() || null,
         description: brandAssets?.description || null,
         logo: brandAssets?.logo || null,
         logoDark: brandAssets?.logoDark || null,
