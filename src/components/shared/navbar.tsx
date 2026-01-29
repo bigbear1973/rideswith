@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Menu, Sun, Moon, MapPin, PlusCircle, Building2, User, Settings, LogOut, Shield, BarChart3 } from 'lucide-react';
+import { Menu, Sun, Moon, User, Settings, LogOut, Shield, BarChart3 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -21,17 +21,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 const navLinks = [
-  { href: '/discover', label: 'Discover', icon: MapPin },
-  { href: '/communities', label: 'Communities', icon: Building2 },
-  { href: '/create', label: 'Create Ride', icon: PlusCircle },
+  { href: '/discover', label: 'Discover' },
+  { href: '/communities', label: 'Communities' },
+  { href: '/create', label: 'Create Ride' },
 ];
 
 export function Navbar() {
@@ -44,8 +38,8 @@ export function Navbar() {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-[1000]">
-      <nav className="mx-auto max-w-6xl px-4 h-14 sm:h-16 flex items-center justify-between" aria-label="Main navigation">
+    <header className="border-b border-border bg-background sticky top-0 z-[1000]">
+      <nav className="mx-auto max-w-[1400px] px-6 md:px-[60px] h-16 md:h-20 flex items-center justify-between" aria-label="Main navigation">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           {brand?.logoUrl && !isLoading ? (
@@ -56,33 +50,28 @@ export function Navbar() {
               height={32}
               className="rounded"
             />
-          ) : (
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-              RW
-            </div>
-          )}
-          <span className="font-bold text-base sm:text-lg group-hover:text-primary transition-colors">
+          ) : null}
+          <span className="font-bold text-sm uppercase tracking-wider">
             {brand?.name || 'RidesWith'}
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
-            const Icon = link.icon;
             const isActive = pathname === link.href;
             return (
-              <Button
+              <Link
                 key={link.href}
-                variant={isActive ? 'secondary' : 'ghost'}
-                size="sm"
-                asChild
+                href={link.href}
+                className={`text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  isActive
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <Link href={link.href} className="gap-2">
-                  <Icon className="h-4 w-4" />
-                  {link.label}
-                </Link>
-              </Button>
+                {link.label}
+              </Link>
             );
           })}
 
@@ -90,63 +79,61 @@ export function Navbar() {
           {!session && <UnitSelector />}
 
           {/* Theme Toggle */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="ml-2">
-                <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="z-[1100]">
-              <DropdownMenuItem onClick={() => setTheme('light')}>
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('dark')}>
-                Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('system')}>
-                System
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Toggle theme"
+          >
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+          </button>
 
-          {/* User Menu */}
-          <UserMenu />
+          {/* User Menu / Sign In */}
+          {session ? (
+            <UserMenu />
+          ) : (
+            <Link
+              href="/auth/signin"
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Log In
+            </Link>
+          )}
         </div>
 
         {/* Mobile Navigation */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex md:hidden items-center gap-4">
           {/* Unit Selector - show for guests */}
           {!session && <UnitSelector />}
 
           {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Toggle theme"
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          </button>
 
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[320px] z-[1200]">
               <SheetHeader>
-                <SheetTitle className="text-left">Menu</SheetTitle>
+                <SheetTitle className="text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Menu
+                </SheetTitle>
               </SheetHeader>
 
               {/* User Info - shown when logged in */}
               {session?.user && (
-                <div className="mt-4 flex items-center gap-3 px-2 py-3 bg-muted/50 rounded-lg">
+                <div className="mt-6 flex items-center gap-3 pb-6 border-b border-border">
                   <Avatar className="h-10 w-10">
                     {session.user.image && (
                       <AvatarImage src={session.user.image} alt={session.user.name || ''} />
@@ -167,97 +154,102 @@ export function Navbar() {
                 </div>
               )}
 
-              <nav className="mt-4 flex flex-col gap-2">
+              <nav className="mt-6 flex flex-col gap-1">
                 {navLinks.map((link) => {
-                  const Icon = link.icon;
                   const isActive = pathname === link.href;
                   return (
-                    <Button
+                    <Link
                       key={link.href}
-                      variant={isActive ? 'secondary' : 'ghost'}
-                      className="justify-start gap-3 h-12"
-                      asChild
+                      href={link.href}
+                      onClick={closeMobileMenu}
+                      className={`py-3 text-sm uppercase tracking-wider transition-colors ${
+                        isActive
+                          ? 'text-foreground font-semibold'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
                     >
-                      <Link href={link.href} onClick={closeMobileMenu}>
-                        <Icon className="h-5 w-5" />
-                        {link.label}
-                      </Link>
-                    </Button>
+                      {link.label}
+                    </Link>
                   );
                 })}
 
                 {/* Account Section */}
                 {session?.user ? (
                   <>
-                    <Separator className="my-2" />
-                    <Button
-                      variant={pathname === '/profile' ? 'secondary' : 'ghost'}
-                      className="justify-start gap-3 h-12"
-                      asChild
+                    <Separator className="my-4" />
+                    <Link
+                      href="/profile"
+                      onClick={closeMobileMenu}
+                      className={`py-3 text-sm uppercase tracking-wider flex items-center gap-3 transition-colors ${
+                        pathname === '/profile'
+                          ? 'text-foreground font-semibold'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
                     >
-                      <Link href="/profile" onClick={closeMobileMenu}>
-                        <User className="h-5 w-5" />
-                        Profile
-                      </Link>
-                    </Button>
-                    <Button
-                      variant={pathname === '/settings' ? 'secondary' : 'ghost'}
-                      className="justify-start gap-3 h-12"
-                      asChild
+                      <User className="h-4 w-4" />
+                      Profile
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={closeMobileMenu}
+                      className={`py-3 text-sm uppercase tracking-wider flex items-center gap-3 transition-colors ${
+                        pathname === '/settings'
+                          ? 'text-foreground font-semibold'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
                     >
-                      <Link href="/settings" onClick={closeMobileMenu}>
-                        <Settings className="h-5 w-5" />
-                        Settings
-                      </Link>
-                    </Button>
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Link>
                     {session.user.role === 'PLATFORM_ADMIN' && (
                       <>
-                        <Button
-                          variant={pathname === '/admin/analytics' ? 'secondary' : 'ghost'}
-                          className="justify-start gap-3 h-12"
-                          asChild
+                        <Link
+                          href="/admin/analytics"
+                          onClick={closeMobileMenu}
+                          className={`py-3 text-sm uppercase tracking-wider flex items-center gap-3 transition-colors ${
+                            pathname === '/admin/analytics'
+                              ? 'text-foreground font-semibold'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
                         >
-                          <Link href="/admin/analytics" onClick={closeMobileMenu}>
-                            <BarChart3 className="h-5 w-5" />
-                            Admin: Analytics
-                          </Link>
-                        </Button>
-                        <Button
-                          variant={pathname === '/admin/communities' ? 'secondary' : 'ghost'}
-                          className="justify-start gap-3 h-12"
-                          asChild
+                          <BarChart3 className="h-4 w-4" />
+                          Admin: Analytics
+                        </Link>
+                        <Link
+                          href="/admin/communities"
+                          onClick={closeMobileMenu}
+                          className={`py-3 text-sm uppercase tracking-wider flex items-center gap-3 transition-colors ${
+                            pathname === '/admin/communities'
+                              ? 'text-foreground font-semibold'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
                         >
-                          <Link href="/admin/communities" onClick={closeMobileMenu}>
-                            <Shield className="h-5 w-5" />
-                            Admin: Communities
-                          </Link>
-                        </Button>
+                          <Shield className="h-4 w-4" />
+                          Admin: Communities
+                        </Link>
                       </>
                     )}
-                    <Button
-                      variant="ghost"
-                      className="justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    <button
                       onClick={() => {
                         closeMobileMenu();
                         signOut({ callbackUrl: '/' });
                       }}
+                      className="py-3 text-sm uppercase tracking-wider flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors text-left"
                     >
-                      <LogOut className="h-5 w-5" />
+                      <LogOut className="h-4 w-4" />
                       Sign out
-                    </Button>
+                    </button>
                   </>
                 ) : (
                   <>
-                    <Separator className="my-2" />
-                    <Button
-                      className="justify-start gap-3 h-12"
-                      asChild
+                    <Separator className="my-4" />
+                    <Link
+                      href="/auth/signin"
+                      onClick={closeMobileMenu}
+                      className="py-3 text-sm uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <Link href="/auth/signin" onClick={closeMobileMenu}>
-                        <User className="h-5 w-5" />
-                        Sign In
-                      </Link>
-                    </Button>
+                      Log In
+                    </Link>
                   </>
                 )}
               </nav>

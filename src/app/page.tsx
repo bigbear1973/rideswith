@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { StatsBanner } from '@/components/ui/stats-banner';
-import { MapPin, Users, ArrowRight, Bike, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { ArrowRight, Loader2, Bike } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 
 // Type for latest rides from API
@@ -32,78 +28,125 @@ interface LatestRide {
   } | null;
 }
 
-// Type for brand backdrop images
-interface BrandBackdrop {
-  backdrop: string;
-  name: string;
-  slug: string;
+// Arrow icon component
+const ArrowIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+// Down arrow icon for CTA
+const DownArrowIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-2.5 h-2.5">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <polyline points="19 12 12 19 5 12" />
+  </svg>
+);
+
+// Ride list item component
+function RideListItem({ ride, formatDistance }: { ride: LatestRide; formatDistance: (km: number) => string }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const rideDate = new Date(ride.date);
+  const formattedTime = format(rideDate, 'h:mm a').toUpperCase();
+
+  return (
+    <Link
+      href={`/rides/${ride.id}`}
+      className="list-item-editorial group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Time - hidden on mobile (shown in subtitle) */}
+      <div className="hidden md:block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {formattedTime}
+      </div>
+
+      {/* Content */}
+      <div className="pr-6">
+        {/* Mobile: Show time as label */}
+        <div className="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+          {formattedTime}
+        </div>
+        <div className="text-lg md:text-[22px] font-normal uppercase mb-1">
+          {ride.title}
+        </div>
+        <div className="text-sm text-muted-foreground flex flex-wrap gap-x-3 items-center">
+          {ride.distance && (
+            <span className="after:content-['•'] after:ml-3 after:opacity-40">
+              {formatDistance(ride.distance)}
+            </span>
+          )}
+          <span className="after:content-['•'] after:ml-3 after:opacity-40">
+            {ride.locationName}
+          </span>
+          <span>{ride.attendeeCount} Riders</span>
+        </div>
+      </div>
+
+      {/* Arrow button */}
+      <div
+        className={`icon-btn-circle transition-all ${
+          isHovered ? 'bg-foreground' : ''
+        }`}
+      >
+        <ArrowIcon
+          className={`w-4 h-4 transition-all ${
+            isHovered ? 'stroke-background' : 'stroke-foreground'
+          }`}
+        />
+      </div>
+    </Link>
+  );
 }
 
-// Fallback hero images when no brands registered
-const FALLBACK_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80', // Two cyclists on beach road
-  'https://images.unsplash.com/photo-1517649281203-dad836b4abe5?w=800&q=80', // Road cycling group
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', // Cycling club
-];
+// Stat row component
+function StatRow({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="stat-row">
+      <span className="stat-value">{value}</span>
+      <span className="stat-label">{label}</span>
+    </div>
+  );
+}
 
-// Default images for rides without images
-const RIDE_IMAGES = [
-  'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80',
-  'https://images.unsplash.com/photo-1544191696-102dbdaeeaa0?w=400&q=80',
-  'https://images.unsplash.com/photo-1605711285791-0219e80e43a3?w=400&q=80',
-];
-
-const PACE_STYLES: Record<string, string> = {
-  casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  moderate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  fast: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-};
+// Filter tab component
+function FilterTab({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={`filter-tab ${active ? 'active' : ''}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function HomePage() {
   const { formatDistance } = useUnits();
   const [latestRides, setLatestRides] = useState<LatestRide[]>([]);
   const [isLoadingRides, setIsLoadingRides] = useState(true);
-  const [brandBackdrops, setBrandBackdrops] = useState<BrandBackdrop[]>([]);
-  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
 
-  // Fetch brand backdrops for hero rotation
-  useEffect(() => {
-    async function fetchBrandBackdrops() {
-      try {
-        const res = await fetch('/api/communities/backdrops');
-        if (res.ok) {
-          const data = await res.json();
-          setBrandBackdrops(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch brand backdrops:', error);
-      }
-    }
-    fetchBrandBackdrops();
-  }, []);
-
-  // Rotate hero image every 5 seconds
-  useEffect(() => {
-    const imageCount = brandBackdrops.length > 0 ? brandBackdrops.length : FALLBACK_HERO_IMAGES.length;
-    if (imageCount <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentHeroIndex((prev) => (prev + 1) % imageCount);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [brandBackdrops.length]);
-
-  // Get current hero image
-  const currentHeroImage = brandBackdrops.length > 0
-    ? brandBackdrops[currentHeroIndex]?.backdrop
-    : FALLBACK_HERO_IMAGES[currentHeroIndex % FALLBACK_HERO_IMAGES.length];
+  const filters = [
+    { id: 'all', label: 'All Rides' },
+    { id: 'near', label: 'Near Me' },
+    { id: 'week', label: 'This Week' },
+    { id: 'club', label: 'Club Rides' },
+  ];
 
   useEffect(() => {
     async function fetchLatestRides() {
       try {
-        const res = await fetch('/api/rides/latest');
+        const res = await fetch('/api/rides/latest?limit=6');
         if (res.ok) {
           const data = await res.json();
           setLatestRides(data);
@@ -118,222 +161,125 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="flex flex-col">
-      {/* Hero Section - C40 inspired split layout */}
-      <section className="w-full py-16 md:py-24 lg:py-32">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
-            <div className="flex flex-col justify-center space-y-6">
-              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-                Find your{' '}
-                <span className="text-primary">ride</span>.
-                <br />
-                Find your{' '}
-                <span className="text-primary">people</span>.
-              </h1>
-              <p className="text-lg leading-relaxed text-muted-foreground md:text-xl">
-                Whatever your pace, from casual coffee rides to competitive training,
-                there are thousands of cyclists who share it on RidesWith.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="c40" size="lg" asChild>
-                  <Link href="/discover">
-                    FIND RIDES
-                  </Link>
-                </Button>
-                <Button variant="c40Green" size="lg" asChild>
-                  <Link href="/create">
-                    CREATE A RIDE
-                  </Link>
-                </Button>
-              </div>
-            </div>
+    <div className="min-h-screen">
+      {/* Main Container - Two column layout */}
+      <div className="max-w-[1400px] mx-auto px-6 md:px-[60px] py-12 md:py-[60px] grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-12 lg:gap-[120px]">
 
-            {/* Hero visual - rotating brand imagery */}
-            <div className="hidden md:flex items-center justify-center">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={currentHeroImage}
-                  alt="Group of cyclists riding together"
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-                />
-                {/* Brand attribution for brand images */}
-                {brandBackdrops.length > 0 && brandBackdrops[currentHeroIndex] && (
-                  <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                    {brandBackdrops[currentHeroIndex].name}
-                  </div>
-                )}
-                {/* Dot indicators */}
-                {(brandBackdrops.length > 1 || (brandBackdrops.length === 0 && FALLBACK_HERO_IMAGES.length > 1)) && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {(brandBackdrops.length > 0 ? brandBackdrops : FALLBACK_HERO_IMAGES).map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentHeroIndex(idx)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          idx === currentHeroIndex
-                            ? 'bg-white scale-110'
-                            : 'bg-white/50 hover:bg-white/75'
-                        }`}
-                        aria-label={`Show image ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        {/* Left Column - Ride Discovery */}
+        <main>
+          <span className="label-editorial block mb-6">Ride Discovery</span>
+          <h1 className="heading-display mb-10">
+            Find your ride.
+            <br />
+            Find your people.
+          </h1>
 
-      {/* Stats Banner - C40 green band */}
-      <StatsBanner
-        stats={[
-          { value: '500+', label: 'Active Rides' },
-          { value: '10,000+', label: 'Kilometers Ridden' },
-          { value: '2,000+', label: 'Cyclists' },
-          { value: '100+', label: 'Clubs' },
-        ]}
-      />
-
-      {/* Latest Rides */}
-      <section className="px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold sm:text-3xl">Latest rides</h2>
-              <p className="text-muted-foreground mt-2">
-                Recently added group rides
-              </p>
-            </div>
-            <Button variant="c40" size="lg" asChild className="hidden sm:flex">
-              <Link href="/discover">
-                SEE ALL
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+          {/* Filters */}
+          <div className="flex gap-6 mb-8 overflow-x-auto pb-2">
+            {filters.map((filter) => (
+              <FilterTab
+                key={filter.id}
+                active={activeFilter === filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+              >
+                {filter.label}
+              </FilterTab>
+            ))}
           </div>
 
-          {/* Loading state */}
-          {isLoadingRides && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          )}
+          {/* Ride List */}
+          <div className="w-full border-t border-border">
+            {/* Loading state */}
+            {isLoadingRides && (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            )}
 
-          {/* Empty state */}
-          {!isLoadingRides && latestRides.length === 0 && (
-            <div className="text-center py-12">
-              <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">No rides yet. Be the first to create one!</p>
-              <Button variant="c40" asChild>
-                <Link href="/create">CREATE A RIDE</Link>
-              </Button>
-            </div>
-          )}
+            {/* Empty state */}
+            {!isLoadingRides && latestRides.length === 0 && (
+              <div className="text-center py-16">
+                <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-6">No rides yet. Be the first to create one!</p>
+                <Link href="/create" className="cta-link">
+                  <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                    <ArrowRight className="w-2.5 h-2.5" />
+                  </div>
+                  Create a Ride
+                </Link>
+              </div>
+            )}
 
-          {/* Horizontal scroll on mobile, grid on desktop */}
-          {!isLoadingRides && latestRides.length > 0 && (
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible snap-x snap-mandatory sm:snap-none">
-              {latestRides.map((ride, index) => {
-                const rideDate = new Date(ride.date);
-                const formattedDate = rideDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                const formattedTime = rideDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                // Use brand backdrop if available and valid, otherwise fall back to default images
-                const hasBrandBackdrop = ride.brand?.backdrop && ride.brand.backdrop.length > 0;
-                const fallbackImage = RIDE_IMAGES[index % RIDE_IMAGES.length];
-
-                return (
-                  <Link
+            {/* Rides */}
+            {!isLoadingRides && latestRides.length > 0 && (
+              <>
+                {latestRides.map((ride) => (
+                  <RideListItem
                     key={ride.id}
-                    href={`/rides/${ride.id}`}
-                    className="flex-shrink-0 w-[280px] sm:w-auto snap-start"
-                  >
-                    <Card className="h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
-                      <div className="aspect-video bg-muted relative">
-                        {hasBrandBackdrop ? (
-                          // Use regular img for brand backdrops (external URLs)
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={ride.brand!.backdrop!}
-                            alt={ride.title}
-                            className="absolute inset-0 w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Image
-                            src={fallbackImage}
-                            alt={ride.title}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-                        {/* Brand logo overlay for branded rides */}
-                        {ride.brand?.logo && ride.brand.logo.length > 0 && (
-                          <div className="absolute top-2 left-2 h-8 w-8 rounded bg-white p-1 shadow-md">
-                            <img
-                              src={ride.brand.logo}
-                              alt={ride.brand.name}
-                              className="h-full w-full object-contain"
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                          <span>{formattedDate}</span>
-                          <span>·</span>
-                          <span>{formattedTime}</span>
-                        </div>
-                        <h3 className="font-bold line-clamp-2 mb-1">{ride.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-3">{ride.organizer.name}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">{ride.locationName}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
-                              {ride.pace}
-                            </Badge>
-                            {ride.distance && (
-                              <span className="text-xs text-muted-foreground">{formatDistance(ride.distance)}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Users className="h-3.5 w-3.5" />
-                            <span>{ride.attendeeCount}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="mt-6 sm:hidden">
-            <Button variant="c40" className="w-full" asChild>
-              <Link href="/discover">
-                SEE ALL RIDES
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+                    ride={ride}
+                    formatDistance={formatDistance}
+                  />
+                ))}
+              </>
+            )}
           </div>
-        </div>
-      </section>
 
-      {/* Final CTA */}
-      <StatsBanner
-        stats={[
-          { value: '50+', label: 'Cities' },
-          { value: '4.9★', label: 'App Rating' },
-          { value: '0', label: 'Cost to Join' },
-          { value: '∞', label: 'Adventures Ahead' },
-        ]}
-        className="mb-0"
-      />
+          {/* View all link */}
+          {!isLoadingRides && latestRides.length > 0 && (
+            <Link href="/discover" className="cta-link mt-8">
+              <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                <ArrowRight className="w-2.5 h-2.5" />
+              </div>
+              View All Rides
+            </Link>
+          )}
+        </main>
+
+        {/* Right Column - Sidebar */}
+        <aside className="lg:sticky lg:top-10 order-first lg:order-last">
+          <span className="label-editorial block mb-6">Our Purpose</span>
+
+          <p className="text-muted-foreground text-[15px] leading-relaxed mb-6 max-w-[420px]">
+            We connect and power a global cycling community that benefits everyone,
+            everywhere by making group rides accessible, safe, and social.
+          </p>
+          <p className="text-muted-foreground text-[15px] leading-relaxed mb-6 max-w-[420px]">
+            From local coffee spins to competitive gran fondos, our platform helps
+            individuals and clubs realize their greatest potential on two wheels.
+          </p>
+
+          <Link href="/about" className="cta-link">
+            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+              <DownArrowIcon />
+            </div>
+            Learn More About Us
+          </Link>
+
+          {/* Stats */}
+          <div className="mt-16">
+            <span className="label-editorial block mb-4">Platform Stats</span>
+
+            <StatRow value="500+" label="Active Rides" />
+            <StatRow value="2,000+" label="Cyclists" />
+            <StatRow value="10k+" label="Kilometers" />
+            <StatRow value="100+" label="Local Clubs" />
+          </div>
+
+          {/* CTA for creating */}
+          <div className="mt-12">
+            <span className="label-editorial block mb-4">Start Organizing</span>
+            <p className="text-muted-foreground text-[15px] leading-relaxed mb-6 max-w-[420px]">
+              Have a regular group ride? Create your community and start organizing rides today.
+            </p>
+            <Link href="/communities/create" className="cta-link">
+              <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                <ArrowRight className="w-2.5 h-2.5" />
+              </div>
+              Create Community
+            </Link>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

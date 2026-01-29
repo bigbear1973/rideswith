@@ -4,113 +4,115 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * RidesWith Design System
- * Mobile-first, accessible, C40.org-inspired bold design
+ * RidesWith Design System v2
+ * Minimalist, editorial, typography-focused
+ * Inspired by high-end editorial sites (Aesop, C40)
  */
 
 :root {
-  /* Core brand colors - C40.org-inspired vibrant green */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Core colors - Warm off-white background, rich blacks */
+  --background: oklch(0.98 0.005 90); /* #F9F8F6 warm off-white */
+  --foreground: oklch(0.15 0 0); /* #1A1A1A rich black */
+
+  /* Cards - slightly warmer than background */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.15 0 0);
 
-  /* Primary - Vibrant Green (#00D26A) */
-  --primary: oklch(0.75 0.2 155);
-  --primary-foreground: oklch(0.145 0 0);
+  /* Primary - Rich black for buttons and accents */
+  --primary: oklch(0.15 0 0);
+  --primary-foreground: oklch(0.98 0.005 90);
 
-  /* Secondary - Cyan/Teal (#00B8D4) */
-  --secondary: oklch(0.7 0.14 200);
-  --secondary-foreground: oklch(0.145 0 0);
+  /* Secondary - Warm gray */
+  --secondary: oklch(0.96 0.003 90);
+  --secondary-foreground: oklch(0.15 0 0);
+
+  /* Text hierarchy */
+  --text-primary: oklch(0.15 0 0); /* #1A1A1A */
+  --text-secondary: oklch(0.5 0 0); /* #767676 */
+  --text-tertiary: oklch(0.62 0 0); /* #999999 */
 
   /* Muted */
-  --muted: oklch(0.968 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted: oklch(0.96 0.003 90);
+  --muted-foreground: oklch(0.5 0 0);
 
-  /* Accent - Black for dark sections */
-  --accent: oklch(0.145 0 0);
-  --accent-foreground: oklch(1 0 0);
+  /* Accent - For highlights */
+  --accent: oklch(0.96 0.003 90);
+  --accent-foreground: oklch(0.15 0 0);
 
   /* Destructive */
   --destructive: oklch(0.577 0.245 27.325);
 
-  /* Border/Input */
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.75 0.2 155);
+  /* Borders - Warm gray */
+  --border: oklch(0.91 0.003 90); /* #E6E4E0 */
+  --input: oklch(0.91 0.003 90);
+  --ring: oklch(0.15 0 0);
 
-  /* Radius */
-  --radius: 0.5rem;
+  /* Radius - More minimal */
+  --radius: 0.375rem;
 
-  /* C40 Section colors for colored bands */
-  --c40-green: oklch(0.75 0.2 155);
-  --c40-cyan: oklch(0.7 0.14 200);
-  --c40-black: oklch(0.145 0 0);
-
-  /* Pace category colors */
-  --pace-casual: oklch(0.723 0.191 149.579);
-  --pace-moderate: oklch(0.623 0.214 259.815);
-  --pace-fast: oklch(0.795 0.184 86.047);
-  --pace-race: oklch(0.577 0.245 27.325);
-
-  /* Chart colors */
-  --chart-1: oklch(0.75 0.2 155);
-  --chart-2: oklch(0.7 0.14 200);
-  --chart-3: oklch(0.795 0.184 86.047);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.723 0.191 149.579);
+  /* Chart colors - Neutral tones */
+  --chart-1: oklch(0.15 0 0);
+  --chart-2: oklch(0.35 0 0);
+  --chart-3: oklch(0.5 0 0);
+  --chart-4: oklch(0.65 0 0);
+  --chart-5: oklch(0.8 0 0);
 
   /* Sidebar */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.75 0.2 155);
-  --sidebar-primary-foreground: oklch(0.145 0 0);
-  --sidebar-accent: oklch(0.968 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.75 0.2 155);
+  --sidebar: oklch(0.98 0.005 90);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.15 0 0);
+  --sidebar-primary-foreground: oklch(0.98 0.005 90);
+  --sidebar-accent: oklch(0.96 0.003 90);
+  --sidebar-accent-foreground: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.91 0.003 90);
+  --sidebar-ring: oklch(0.15 0 0);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.178 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.178 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  /* Dark mode - Rich dark backgrounds */
+  --background: oklch(0.12 0 0); /* Very dark gray */
+  --foreground: oklch(0.93 0.005 90); /* Off-white text */
 
-  /* Primary - Vibrant Green stays bold in dark mode */
-  --primary: oklch(0.78 0.2 155);
-  --primary-foreground: oklch(0.145 0 0);
+  --card: oklch(0.16 0 0);
+  --card-foreground: oklch(0.93 0.005 90);
+  --popover: oklch(0.16 0 0);
+  --popover-foreground: oklch(0.93 0.005 90);
 
-  /* Secondary - Cyan */
-  --secondary: oklch(0.72 0.14 200);
-  --secondary-foreground: oklch(0.145 0 0);
+  /* Primary - Off-white in dark mode */
+  --primary: oklch(0.93 0.005 90);
+  --primary-foreground: oklch(0.12 0 0);
 
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.985 0 0);
-  --accent-foreground: oklch(0.145 0 0);
+  /* Secondary */
+  --secondary: oklch(0.2 0 0);
+  --secondary-foreground: oklch(0.93 0.005 90);
+
+  /* Text hierarchy - inverted */
+  --text-primary: oklch(0.93 0.005 90);
+  --text-secondary: oklch(0.65 0 0);
+  --text-tertiary: oklch(0.5 0 0);
+
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.2 0 0);
+  --accent-foreground: oklch(0.93 0.005 90);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.3 0 0);
-  --input: oklch(0.3 0 0);
-  --ring: oklch(0.78 0.2 155);
 
-  /* C40 Section colors for dark mode */
-  --c40-green: oklch(0.78 0.2 155);
-  --c40-cyan: oklch(0.72 0.14 200);
-  --c40-black: oklch(0.08 0 0);
+  /* Borders */
+  --border: oklch(0.25 0 0);
+  --input: oklch(0.25 0 0);
+  --ring: oklch(0.93 0.005 90);
 
-  --sidebar: oklch(0.178 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.78 0.2 155);
-  --sidebar-primary-foreground: oklch(0.145 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.3 0 0);
-  --sidebar-ring: oklch(0.78 0.2 155);
+  /* Sidebar */
+  --sidebar: oklch(0.14 0 0);
+  --sidebar-foreground: oklch(0.93 0.005 90);
+  --sidebar-primary: oklch(0.93 0.005 90);
+  --sidebar-primary-foreground: oklch(0.12 0 0);
+  --sidebar-accent: oklch(0.2 0 0);
+  --sidebar-accent-foreground: oklch(0.93 0.005 90);
+  --sidebar-border: oklch(0.25 0 0);
+  --sidebar-ring: oklch(0.93 0.005 90);
 }
 
 @theme inline {
@@ -146,35 +148,38 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Pace colors */
-  --color-pace-casual: var(--pace-casual);
-  --color-pace-moderate: var(--pace-moderate);
-  --color-pace-fast: var(--pace-fast);
-  --color-pace-race: var(--pace-race);
-
-  /* C40 Section colors */
-  --color-c40-green: var(--c40-green);
-  --color-c40-cyan: var(--c40-cyan);
-  --color-c40-black: var(--c40-black);
+  /* Text colors */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
 
   /* Radius */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 10px);
 
-  /* Font */
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  /* Font - Helvetica-style sans-serif */
+  --font-sans: "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* Editorial typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+    text-wrap: balance;
   }
 }
 
@@ -201,27 +206,74 @@
   }
 }
 
-/* Pace category badge colors */
-.pace-casual {
-  background-color: var(--pace-casual);
-  color: white;
-}
-.pace-moderate {
-  background-color: var(--pace-moderate);
-  color: white;
-}
-.pace-fast {
-  background-color: var(--pace-fast);
-  color: black;
-}
-.pace-race {
-  background-color: var(--pace-race);
-  color: white;
+/* Editorial design system utilities */
+
+/* Label - Small uppercase text */
+.label-editorial {
+  @apply text-[11px] font-bold uppercase tracking-wider text-muted-foreground;
 }
 
-/* Card hover effect */
-.card-interactive {
-  @apply transition-shadow hover:shadow-lg;
+/* Heading styles - Uppercase, light weight */
+.heading-display {
+  @apply text-4xl md:text-5xl font-normal uppercase tracking-tight leading-tight;
+}
+
+.heading-section {
+  @apply text-xl md:text-2xl font-normal uppercase tracking-normal;
+}
+
+/* List item - Editorial style with hover */
+.list-item-editorial {
+  @apply grid items-center py-6 md:py-8 border-b border-border cursor-pointer transition-colors;
+  grid-template-columns: 80px 1fr auto;
+}
+
+.list-item-editorial:hover .icon-btn-circle {
+  @apply bg-foreground;
+}
+
+.list-item-editorial:hover .icon-btn-circle svg {
+  @apply stroke-background;
+}
+
+@media (max-width: 768px) {
+  .list-item-editorial {
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+  }
+}
+
+/* Circular icon button */
+.icon-btn-circle {
+  @apply w-11 h-11 border border-foreground rounded-full flex justify-center items-center transition-all;
+}
+
+/* Filter tabs */
+.filter-tab {
+  @apply text-xs font-semibold uppercase cursor-pointer pb-1 border-b-2 border-transparent text-muted-foreground transition-colors;
+}
+
+.filter-tab.active,
+.filter-tab:hover {
+  @apply text-foreground border-foreground;
+}
+
+/* Stat row */
+.stat-row {
+  @apply flex justify-between items-baseline border-b border-border py-4;
+}
+
+.stat-value {
+  @apply text-3xl font-normal tracking-tight;
+}
+
+.stat-label {
+  @apply text-[11px] uppercase tracking-wider text-muted-foreground;
+}
+
+/* CTA link with arrow */
+.cta-link {
+  @apply inline-flex items-center gap-3 no-underline text-foreground text-[13px] font-bold uppercase border-b border-foreground pb-1 transition-opacity hover:opacity-70;
 }
 
 /* Screen reader only */
@@ -237,4 +289,9 @@
 
 .safe-area-inset-top {
   padding-top: env(safe-area-inset-top);
+}
+
+/* Card hover effect */
+.card-interactive {
+  @apply transition-shadow hover:shadow-lg;
 }

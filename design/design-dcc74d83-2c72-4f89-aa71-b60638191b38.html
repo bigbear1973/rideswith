@@ -1,0 +1,503 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">RidesWith - Modern Refresh</title>
+    <style vid="5">
+        :root {
+            
+            --bg-color: #F9F8F6;
+            --text-primary: #1A1A1A;
+            --text-secondary: #767676;
+            --text-tertiary: #999999;
+            --border-color: #E6E4E0;
+            --accent-green: #2E2E2E; 
+            
+            
+            --font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+            --font-size-base: 16px;
+            --font-size-lg: 20px;
+            --font-size-xl: 32px;
+            --font-size-sm: 12px;
+            
+            
+            --spacing-unit: 8px;
+            --container-padding: 60px;
+            --list-item-height: 80px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--container-padding);
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 120px;
+        }
+
+        
+        .label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        .h1 {
+            font-size: 48px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            margin-bottom: 40px;
+            line-height: 1.1;
+        }
+
+        .h2 {
+            font-size: 20px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            max-width: 420px;
+        }
+
+        
+        header {
+            padding: 40px var(--container-padding);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid transparent;
+        }
+
+        .brand {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+
+        nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+        }
+
+        
+        .list-group {
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .list-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto; 
+            align-items: center;
+            padding: 32px 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            group: 'item';
+            position: relative;
+        }
+
+        .list-item:hover .arrow-icon {
+            transform: translateX(4px);
+        }
+
+        .list-meta {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .list-content {
+            padding-right: 24px;
+        }
+
+        .list-title {
+            font-size: 22px;
+            font-weight: 400;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .list-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .list-subtitle span::after {
+            content: "•";
+            margin-left: 12px;
+            opacity: 0.4;
+        }
+        .list-subtitle span:last-child::after {
+            display: none;
+        }
+
+        
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--text-primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .arrow-icon {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: var(--text-primary);
+            stroke-width: 1.5;
+            transition: transform 0.2s ease;
+        }
+
+        .list-item:hover .icon-btn {
+            background: var(--text-primary);
+        }
+        
+        .list-item:hover .arrow-icon {
+            stroke: white;
+            transform: none; 
+        }
+
+        
+        .panel {
+            position: sticky;
+            top: 40px;
+        }
+
+        .stat-block {
+            margin-top: 60px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 0;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 400;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+        }
+
+        .cta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--text-primary);
+            padding-bottom: 4px;
+        }
+        
+        .cta-icon {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--text-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cta-icon svg {
+            width: 10px;
+            height: 10px;
+            stroke: var(--text-primary);
+            stroke-width: 1.5;
+        }
+
+        
+        .filters {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .filter-item {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .filter-item.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary);
+        }
+
+        
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 60px;
+                padding: 40px 24px;
+            }
+            .panel {
+                position: static;
+                margin-bottom: 60px;
+                order: -1; 
+            }
+            .h1 {
+                font-size: 36px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .list-item {
+                grid-template-columns: 1fr auto;
+                gap: 12px;
+                padding: 24px 0;
+            }
+            .list-meta {
+                grid-column: 1 / -1;
+                margin-bottom: 4px;
+            }
+            .list-content {
+                grid-column: 1;
+            }
+            .icon-btn {
+                grid-column: 2;
+                grid-row: 2;
+            }
+        }
+    </style>
+</head>
+<body vid="6">
+
+    <header vid="7">
+        <div class="brand" vid="8">RidesWith</div>
+        <nav vid="9">
+            <a href="#" vid="10">Discover</a>
+            <a href="#" vid="11">Communities</a>
+            <a href="#" vid="12">Create Ride</a>
+            <a href="#" vid="13">Log In</a>
+        </nav>
+    </header>
+
+    <div class="container" vid="14">
+        
+        
+        <main vid="15">
+            <span class="label" vid="16">Ride Discovery</span>
+            <h1 class="h1" vid="17">Find your ride.<br vid="18">Find your people.</h1>
+
+            <div class="filters" vid="19">
+                <div class="filter-item active" vid="20">All Rides</div>
+                <div class="filter-item" vid="21">Near Me</div>
+                <div class="filter-item" vid="22">This Week</div>
+                <div class="filter-item" vid="23">Club Rides</div>
+            </div>
+
+            <div class="list-group" vid="24">
+                
+                <div class="list-item" vid="25">
+                    <div class="list-meta" vid="26">06:00 AM</div>
+                    <div class="list-content" vid="27">
+                        <div class="list-title" vid="28">Morning Espresso Loop</div>
+                        <div class="list-subtitle" vid="29">
+                            <span vid="30">45km</span>
+                            <span vid="31">Rolling Hills</span>
+                            <span vid="32">12 Riders</span>
+                        </div>
+                    </div>
+                    <div class="icon-btn" vid="33">
+                        <svg class="arrow-icon" viewBox="0 0 24 24" vid="34">
+                            <line x1="5" y1="12" x2="19" y2="12" vid="35"></line>
+                            <polyline points="12 5 19 12 12 19" vid="36"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                
+                <div class="list-item" vid="37">
+                    <div class="list-meta" vid="38">06:30 AM</div>
+                    <div class="list-content" vid="39">
+                        <div class="list-title" vid="40">Harbor Bridges Metric</div>
+                        <div class="list-subtitle" vid="41">
+                            <span vid="42">100km</span>
+                            <span vid="43">Elevation 800m</span>
+                            <span vid="44">Drop Ride</span>
+                        </div>
+                    </div>
+                    <div class="icon-btn" vid="45">
+                        <svg class="arrow-icon" viewBox="0 0 24 24" vid="46">
+                            <line x1="5" y1="12" x2="19" y2="12" vid="47"></line>
+                            <polyline points="12 5 19 12 12 19" vid="48"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                
+                <div class="list-item" vid="49">
+                    <div class="list-meta" vid="50">07:00 AM</div>
+                    <div class="list-content" vid="51">
+                        <div class="list-title" vid="52">Women's Social Spin</div>
+                        <div class="list-subtitle" vid="53">
+                            <span vid="54">30km</span>
+                            <span vid="55">No Drop</span>
+                            <span vid="56">Coffee Stop</span>
+                        </div>
+                    </div>
+                    <div class="icon-btn" vid="57">
+                        <svg class="arrow-icon" viewBox="0 0 24 24" vid="58">
+                            <line x1="5" y1="12" x2="19" y2="12" vid="59"></line>
+                            <polyline points="12 5 19 12 12 19" vid="60"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                
+                <div class="list-item" vid="61">
+                    <div class="list-meta" vid="62">05:30 PM</div>
+                    <div class="list-content" vid="63">
+                        <div class="list-title" vid="64">After Work Crit Practice</div>
+                        <div class="list-subtitle" vid="65">
+                            <span vid="66">1 hr</span>
+                            <span vid="67">High Intensity</span>
+                            <span vid="68">Centennial Park</span>
+                        </div>
+                    </div>
+                    <div class="icon-btn" vid="69">
+                        <svg class="arrow-icon" viewBox="0 0 24 24" vid="70">
+                            <line x1="5" y1="12" x2="19" y2="12" vid="71"></line>
+                            <polyline points="12 5 19 12 12 19" vid="72"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                
+                <div class="list-item" vid="73">
+                    <div class="list-meta" vid="74">SAT 8:00</div>
+                    <div class="list-content" vid="75">
+                        <div class="list-title" vid="76">Coastal Epic Gran Fondo</div>
+                        <div class="list-subtitle" vid="77">
+                            <span vid="78">160km</span>
+                            <span vid="79">Endurance</span>
+                            <span vid="80">3 Checkpoints</span>
+                        </div>
+                    </div>
+                    <div class="icon-btn" vid="81">
+                        <svg class="arrow-icon" viewBox="0 0 24 24" vid="82">
+                            <line x1="5" y1="12" x2="19" y2="12" vid="83"></line>
+                            <polyline points="12 5 19 12 12 19" vid="84"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        
+        <aside class="panel" vid="85">
+            <span class="label" vid="86">Our Purpose</span>
+            
+            <p vid="87">
+                We connect and power a global cycling community that benefits everyone, everywhere by making group rides accessible, safe, and social.
+            </p>
+            <p vid="88">
+                From local coffee spins to competitive gran fondos, our platform helps individuals and clubs realize their greatest potential on two wheels.
+            </p>
+
+            <a href="#" class="cta-link" vid="89">
+                <div class="cta-icon" vid="90">
+                    <svg viewBox="0 0 24 24" vid="91"><line x1="12" y1="5" x2="12" y2="19" vid="92"></line><polyline points="19 12 12 19 5 12" vid="93"></polyline></svg>
+                </div>
+                View Community Manifesto
+            </a>
+
+            <div class="stat-block" vid="94">
+                <span class="label" vid="95">Platform Stats</span>
+                
+                <div class="stat-row" vid="96">
+                    <span class="stat-value" vid="97">500+</span>
+                    <span class="stat-label" vid="98">Active Rides</span>
+                </div>
+                
+                <div class="stat-row" vid="99">
+                    <span class="stat-value" vid="100">2,000+</span>
+                    <span class="stat-label" vid="101">Cyclists</span>
+                </div>
+                
+                <div class="stat-row" vid="102">
+                    <span class="stat-value" vid="103">10k+</span>
+                    <span class="stat-label" vid="104">Kilometers</span>
+                </div>
+
+                <div class="stat-row" vid="105">
+                    <span class="stat-value" vid="106">100+</span>
+                    <span class="stat-label" vid="107">Local Clubs</span>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+
+</body></html>
