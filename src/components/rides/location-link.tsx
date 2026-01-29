@@ -39,6 +39,7 @@ interface LocationLinkProps {
   locationAddress: string;
   latitude: number;
   longitude: number;
+  compact?: boolean;
 }
 
 interface MapLink {
@@ -52,6 +53,7 @@ export function LocationLink({
   locationAddress,
   latitude,
   longitude,
+  compact = false,
 }: LocationLinkProps) {
   const coords = `${latitude},${longitude}`;
 
@@ -80,6 +82,44 @@ export function LocationLink({
 
   // Truncate address for display
   const displayAddress = locationAddress.split(',').slice(0, 3).join(',');
+
+  // Compact layout for editorial stat rows
+  if (compact) {
+    return (
+      <div className="text-right">
+        <p className="font-medium">{locationName}</p>
+        <p className="text-sm text-muted-foreground truncate">{displayAddress}</p>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <Navigation className="h-3 w-3 mr-1" />
+              Directions
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+              Open in...
+            </div>
+            {mapLinks.map((link) => (
+              <DropdownMenuItem
+                key={link.name}
+                onClick={() => handleSelect(link.url)}
+                className="cursor-pointer"
+              >
+                <span className="mr-2 text-muted-foreground">{link.icon}</span>
+                {link.name}
+                <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-start gap-3">

@@ -3,11 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { MapPin, Calendar, Clock, Users, X, Loader2, Navigation, Filter, History } from 'lucide-react';
+import { MapPin, Calendar, X, Loader2, Navigation, Filter, History, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
   SheetContent,
@@ -28,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useUnits } from '@/components/providers/units-provider';
 
 const PACE_OPTIONS = [
@@ -60,13 +57,6 @@ const DATE_RANGE_OPTIONS = [
   { value: '30', label: 'Next month', days: 30 },
   { value: '90', label: 'Next 3 months', days: 90 },
 ];
-
-const PACE_STYLES: Record<string, string> = {
-  casual: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  moderate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  fast: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  race: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-};
 
 interface Ride {
   id: string;
@@ -120,6 +110,96 @@ interface SearchResult {
   display_name: string;
   lat: string;
   lon: string;
+}
+
+// Arrow icon component
+const ArrowIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+// Ride list item component
+function RideListItem({ ride, formatDistance }: { ride: Ride; formatDistance: (km: number) => string }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const rideDate = new Date(ride.date);
+  const formattedDate = format(rideDate, 'EEE, MMM d').toUpperCase();
+  const formattedTime = format(rideDate, 'h:mm a').toUpperCase();
+
+  return (
+    <Link
+      href={`/rides/${ride.id}`}
+      className="list-item-editorial group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Date/Time - hidden on mobile */}
+      <div className="hidden md:block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div>{formattedDate}</div>
+        <div className="mt-1 text-foreground">{formattedTime}</div>
+      </div>
+
+      {/* Content */}
+      <div className="pr-6">
+        {/* Mobile: Show date/time as label */}
+        <div className="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+          {formattedDate} • {formattedTime}
+        </div>
+        <div className="text-lg md:text-[22px] font-normal uppercase mb-1">
+          {ride.title}
+        </div>
+        <div className="text-sm text-muted-foreground flex flex-wrap gap-x-3 items-center">
+          {ride.distance && (
+            <span className="after:content-['•'] after:ml-3 after:opacity-40">
+              {formatDistance(ride.distance)}
+            </span>
+          )}
+          <span className="after:content-['•'] after:ml-3 after:opacity-40">
+            {ride.locationName}
+          </span>
+          <span>{ride.attendeeCount} Riders</span>
+        </div>
+        {/* Organizer */}
+        <div className="text-xs text-muted-foreground mt-2">
+          Hosted by {ride.organizer.name}
+        </div>
+      </div>
+
+      {/* Arrow button */}
+      <div
+        className={`icon-btn-circle transition-all ${
+          isHovered ? 'bg-foreground' : ''
+        }`}
+      >
+        <ArrowIcon
+          className={`w-4 h-4 transition-all ${
+            isHovered ? 'stroke-background' : 'stroke-foreground'
+          }`}
+        />
+      </div>
+    </Link>
+  );
+}
+
+// Filter tab component
+function FilterTab({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={`filter-tab ${active ? 'active' : ''}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function DiscoverPage() {
@@ -319,74 +399,60 @@ export default function DiscoverPage() {
     return `${km} km`;
   };
 
-  // Format date for display
-  const formatRideDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return format(date, 'EEE, MMM d');
-  };
-
-  const formatRideTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return format(date, 'h:mm a');
-  };
-
   return (
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
-      {/* Search Bar - Sticky on mobile, with high z-index to stay above map */}
-      <div className="border-b bg-background/95 backdrop-blur sticky top-14 sm:top-16 z-[1000] px-4 py-3">
-        <div className="mx-auto max-w-6xl space-y-2">
-          {/* Location Search Row */}
+    <div className="min-h-screen">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-[60px] py-12 md:py-[60px]">
+        {/* Header */}
+        <span className="label-editorial block mb-6">Ride Discovery</span>
+        <h1 className="heading-display mb-10">
+          Find rides<br />near you.
+        </h1>
+
+        {/* Location Search */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8 pb-8 border-b border-border">
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search city or location..."
+              value={locationQuery}
+              onChange={(e) => setLocationQuery(e.target.value)}
+              onFocus={() => setShowResults(true)}
+              className="pl-9 border-foreground/20 focus:border-foreground"
+            />
+            {isSearching && (
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+
+            {/* Search Results Dropdown */}
+            {showResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-[1100] max-h-64 overflow-y-auto">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={index}
+                    onClick={() => selectLocation(result)}
+                    className="w-full px-4 py-3 text-left hover:bg-muted text-sm truncate border-b border-border last:border-b-0"
+                  >
+                    {result.display_name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2">
-            <div className="relative flex-1">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search city or location..."
-                value={locationQuery}
-                onChange={(e) => setLocationQuery(e.target.value)}
-                onFocus={() => setShowResults(true)}
-                className="pl-9"
-              />
-              {isSearching && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-              )}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={useMyLocation}
+              title="Use my location"
+              className="flex-shrink-0 border-foreground/20 hover:bg-foreground hover:text-background"
+            >
+              <Navigation className="h-4 w-4" />
+            </Button>
 
-              {/* Search Results Dropdown */}
-              {showResults && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-lg z-[1100] max-h-64 overflow-y-auto">
-                  {searchResults.map((result, index) => (
-                    <button
-                      key={index}
-                      onClick={() => selectLocation(result)}
-                      className="w-full px-4 py-2 text-left hover:bg-muted text-sm truncate"
-                    >
-                      {result.display_name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Current Location Button with Location Name */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={useMyLocation}
-                title="Use my location"
-                className="flex-shrink-0"
-              >
-                <Navigation className="h-4 w-4" />
-              </Button>
-              <span className="hidden sm:flex items-center text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-                <span className="truncate max-w-48">{locationName}</span>
-              </span>
-            </div>
-
-            {/* Radius Selector */}
             <Select value={searchRadius} onValueChange={setSearchRadius}>
-              <SelectTrigger className="w-28 sm:w-32">
+              <SelectTrigger className="w-28 border-foreground/20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="z-[1100]">
@@ -399,276 +465,221 @@ export default function DiscoverPage() {
             </Select>
           </div>
 
-          {/* Filters Row */}
-          <div className="flex gap-2">
-            {/* Desktop Filters */}
-            <div className="hidden sm:flex gap-2 flex-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={selectedPaces.length > 0 ? "default" : "outline"}
-                    size="sm"
-                    className="gap-2 font-semibold"
-                  >
-                    Pace
-                    {selectedPaces.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-primary-foreground text-primary">
-                        {selectedPaces.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48 z-[1100]">
-                  {PACE_OPTIONS.map((option) => (
-                    <DropdownMenuCheckboxItem
-                      key={option.value}
-                      checked={selectedPaces.includes(option.value)}
-                      onCheckedChange={() => togglePace(option.value)}
-                    >
-                      <span className="flex flex-col">
-                        <span>{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.desc}</span>
-                      </span>
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={selectedDistances.length > 0 ? "default" : "outline"}
-                    size="sm"
-                    className="gap-2 font-semibold"
-                  >
-                    Distance
-                    {selectedDistances.length > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-primary-foreground text-primary">
-                        {selectedDistances.length}
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48 z-[1100]">
-                  {DISTANCE_OPTIONS.map((option) => (
-                    <DropdownMenuCheckboxItem
-                      key={option.value}
-                      checked={selectedDistances.includes(option.value)}
-                      onCheckedChange={() => toggleDistance(option.value)}
-                    >
-                      <span className="flex flex-col">
-                        <span>{option.label}</span>
-                        <span className="text-xs text-muted-foreground">{option.desc}</span>
-                      </span>
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className={`w-44 ${dateRange !== 'all' ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' : ''}`}>
-                  <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="z-[1100]">
-                  {DATE_RANGE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {activeFilterCount > 0 && (
-                <Button variant="outline" size="sm" onClick={clearFilters} className="font-semibold">
-                  <X className="h-4 w-4 mr-1" />
-                  Clear filters
-                </Button>
-              )}
-            </div>
-
-            {/* Current Location Display (Mobile only) */}
-            <div className="flex-1 sm:hidden flex items-center text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-              <span className="truncate">{locationName}</span>
-            </div>
-
-            {/* Mobile Filter Button */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="sm:hidden relative z-[1000]">
-                  <Filter className="h-4 w-4" />
-                  {activeFilterCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[60vh] z-[1200]">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  {/* Pace */}
-                  <div>
-                    <h3 className="font-medium mb-3">Pace</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {PACE_OPTIONS.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={selectedPaces.includes(option.value) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => togglePace(option.value)}
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Distance */}
-                  <div>
-                    <h3 className="font-medium mb-3">Ride Distance</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {DISTANCE_OPTIONS.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={selectedDistances.includes(option.value) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => toggleDistance(option.value)}
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Date Range */}
-                  <div>
-                    <h3 className="font-medium mb-3">Date Range</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {DATE_RANGE_OPTIONS.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={dateRange === option.value ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setDateRange(option.value)}
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {activeFilterCount > 0 && (
-                    <Button variant="outline" className="w-full" onClick={clearFilters}>
-                      Clear all filters
-                    </Button>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
+          {/* Location display */}
+          <div className="flex items-center text-sm text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+            <span className="truncate">{locationName}</span>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="bg-primary">
-          <div className="mx-auto max-w-6xl px-4 py-4">
-            <h2 className="font-bold text-primary-foreground text-lg">Upcoming Rides</h2>
-            <p className="text-sm text-primary-foreground/80">
-              {isLoadingRides ? 'Loading...' : `${filteredRides.length} ride${filteredRides.length !== 1 ? 's' : ''} within ${formatRadius(searchRadius)}`}
-            </p>
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4 sm:gap-6 mb-8 items-center">
+          {/* Desktop Filters */}
+          <div className="hidden sm:flex gap-6 flex-wrap">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={`filter-tab ${selectedPaces.length > 0 ? 'active' : ''}`}>
+                  Pace {selectedPaces.length > 0 && `(${selectedPaces.length})`}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 z-[1100]">
+                {PACE_OPTIONS.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={selectedPaces.includes(option.value)}
+                    onCheckedChange={() => togglePace(option.value)}
+                  >
+                    <span className="flex flex-col">
+                      <span>{option.label}</span>
+                      <span className="text-xs text-muted-foreground">{option.desc}</span>
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={`filter-tab ${selectedDistances.length > 0 ? 'active' : ''}`}>
+                  Distance {selectedDistances.length > 0 && `(${selectedDistances.length})`}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 z-[1100]">
+                {DISTANCE_OPTIONS.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={selectedDistances.includes(option.value)}
+                    onCheckedChange={() => toggleDistance(option.value)}
+                  >
+                    <span className="flex flex-col">
+                      <span>{option.label}</span>
+                      <span className="text-xs text-muted-foreground">{option.desc}</span>
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={`filter-tab ${dateRange !== 'all' ? 'active' : ''}`}>
+                  <Calendar className="h-3.5 w-3.5 mr-1.5 inline" />
+                  {DATE_RANGE_OPTIONS.find(o => o.value === dateRange)?.label || 'Date'}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 z-[1100]">
+                {DATE_RANGE_OPTIONS.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={dateRange === option.value}
+                    onCheckedChange={() => setDateRange(option.value)}
+                  >
+                    {option.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearFilters}
+                className="filter-tab text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5 mr-1 inline" />
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Mobile Filter Button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="sm:hidden border-foreground/20">
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="ml-2 h-5 w-5 rounded-full bg-foreground text-background text-xs flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[60vh] z-[1200]">
+              <SheetHeader>
+                <SheetTitle className="text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Filters
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                {/* Pace */}
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider mb-3">Pace</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {PACE_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={selectedPaces.includes(option.value) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => togglePace(option.value)}
+                        className="uppercase text-xs"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Distance */}
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider mb-3">Ride Distance</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {DISTANCE_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={selectedDistances.includes(option.value) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => toggleDistance(option.value)}
+                        className="uppercase text-xs"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date Range */}
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider mb-3">Date Range</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {DATE_RANGE_OPTIONS.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={dateRange === option.value ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setDateRange(option.value)}
+                        className="uppercase text-xs"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {activeFilterCount > 0 && (
+                  <Button variant="outline" className="w-full uppercase text-xs" onClick={clearFilters}>
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Ride count */}
+          <div className="ml-auto text-sm text-muted-foreground">
+            {isLoadingRides ? 'Loading...' : `${filteredRides.length} ride${filteredRides.length !== 1 ? 's' : ''}`}
           </div>
         </div>
 
         {/* Ride List */}
-        <ScrollArea className="flex-1">
-          <div className="mx-auto max-w-6xl px-4 py-4 space-y-3">
-              {isLoadingRides ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Loader2 className="h-10 w-10 mx-auto mb-3 animate-spin" />
-                  <p className="font-medium">Loading rides...</p>
+        <div className="w-full border-t border-border">
+          {isLoadingRides ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredRides.length === 0 ? (
+            <div className="text-center py-16">
+              <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
+              <p className="text-muted-foreground mb-2">No rides found</p>
+              <p className="text-sm text-muted-foreground mb-6">Try increasing the search radius or changing location</p>
+              <Link href="/discover/past" className="cta-link">
+                <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                  <History className="w-2.5 h-2.5" />
                 </div>
-              ) : filteredRides.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <MapPin className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p className="font-medium">No rides found</p>
-                  <p className="text-sm mt-1">Try increasing the search radius or changing location</p>
-                  <Link href="/discover/past" className="mt-4 inline-block">
-                    <Button variant="outline" size="sm">
-                      <History className="h-4 w-4 mr-2" />
-                      Browse past rides
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                filteredRides.map((ride) => (
-                  <Link key={ride.id} href={`/rides/${ride.id}`}>
-                    <Card className="overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          <span>{formatRideDate(ride.date)}</span>
-                          <span>·</span>
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>{formatRideTime(ride.date)}</span>
-                        </div>
-                        <h3 className="font-semibold mb-1">{ride.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{ride.organizer.name}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                          <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                          <span className="truncate">{ride.locationName}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {/* Brand logo for branded rides */}
-                            {ride.brand?.logo && (
-                              <div
-                                className="h-6 w-6 rounded flex-shrink-0 p-0.5"
-                                style={{ backgroundColor: ride.brand.primaryColor || '#f3f4f6' }}
-                              >
-                                <img
-                                  src={ride.brand.logoIcon || ride.brand.logo}
-                                  alt={ride.brand.name}
-                                  className="h-full w-full object-contain"
-                                />
-                              </div>
-                            )}
-                            <Badge variant="secondary" className={PACE_STYLES[ride.pace]}>
-                              {ride.pace}
-                            </Badge>
-                            {ride.distance && (
-                              <span className="text-xs text-muted-foreground">{formatDistance(ride.distance)}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Users className="h-3.5 w-3.5" />
-                            <span>{ride.attendeeCount} going</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))
-              )}
+                Browse Past Rides
+              </Link>
+            </div>
+          ) : (
+            <>
+              {filteredRides.map((ride) => (
+                <RideListItem
+                  key={ride.id}
+                  ride={ride}
+                  formatDistance={formatDistance}
+                />
+              ))}
+            </>
+          )}
+        </div>
 
-            {/* Link to past rides archive */}
-            {!isLoadingRides && filteredRides.length > 0 && (
-              <div className="pt-4 pb-2 border-t mt-4">
-                <Link href="/discover/past">
-                  <Button variant="ghost" size="sm" className="w-full text-muted-foreground hover:text-foreground">
-                    <History className="h-4 w-4 mr-2" />
-                    Browse past rides archive
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+        {/* Link to past rides archive */}
+        {!isLoadingRides && filteredRides.length > 0 && (
+          <Link href="/discover/past" className="cta-link mt-8">
+            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+              <History className="w-2.5 h-2.5" />
+            </div>
+            Browse Past Rides
+          </Link>
+        )}
       </div>
     </div>
   );

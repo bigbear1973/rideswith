@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { RouteEmbed, CommunityRoutes, CakeAndCoffee, LocationLink, RsvpSection, SidebarComments, AddToCalendar, LiveLocationBanner, ShareButton } from '@/components/rides';
 import { SponsorCard } from '@/components/communities';
@@ -17,6 +16,7 @@ import {
   ChevronLeft,
   ArrowUpRight,
   Edit,
+  MapPin,
 } from 'lucide-react';
 
 interface RidePageProps {
@@ -258,6 +258,7 @@ export default async function RidePage({ params }: RidePageProps) {
 
   // Format date and time
   const formattedDate = format(ride.date, 'EEEE, MMMM d, yyyy');
+  const formattedDateShort = format(ride.date, 'EEE, MMM d').toUpperCase();
   const formattedStartTime = format(ride.date, 'h:mm a');
   const formattedEndTime = ride.endTime ? format(ride.endTime, 'h:mm a') : null;
 
@@ -335,7 +336,7 @@ export default async function RidePage({ params }: RidePageProps) {
   };
 
   return (
-    <div className="min-h-screen pb-8">
+    <div className="min-h-screen">
       {/* JSON-LD structured data for SEO */}
       <script
         type="application/ld+json"
@@ -362,7 +363,7 @@ export default async function RidePage({ params }: RidePageProps) {
             className="py-4"
             style={{ backgroundColor: brand.primaryColor || '#1a1a1a' }}
           >
-            <div className="mx-auto max-w-6xl px-4">
+            <div className="mx-auto max-w-[1400px] px-6 md:px-[60px]">
               <div className="flex items-center gap-4">
                 {brand.logo ? (
                   <img
@@ -376,8 +377,8 @@ export default async function RidePage({ params }: RidePageProps) {
                   </div>
                 )}
                 <div className="flex-1 min-w-0 text-white">
-                  <p className="text-xs opacity-70">Presented by</p>
-                  <p className="font-semibold">{brand.name}</p>
+                  <p className="text-xs uppercase tracking-wider opacity-70">Presented by</p>
+                  <p className="font-semibold uppercase">{brand.name}</p>
                   {brand.slogan && (
                     <p className="text-sm opacity-80 italic">{brand.slogan}</p>
                   )}
@@ -390,9 +391,9 @@ export default async function RidePage({ params }: RidePageProps) {
       )}
 
       {/* Mobile Header */}
-      <div className="sticky top-14 z-30 bg-background border-b px-4 py-3 lg:hidden">
+      <div className="sticky top-14 z-30 bg-background border-b border-border px-4 py-3 lg:hidden">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" asChild className="hover:bg-foreground hover:text-background">
             <Link href={hasBranding && brand && chapter ? `/communities/${brand.slug}/${chapter.slug}` : '/discover'}>
               <ChevronLeft className="h-5 w-5" />
             </Link>
@@ -401,15 +402,15 @@ export default async function RidePage({ params }: RidePageProps) {
             {hasBranding && brand && chapter ? (
               <Link
                 href={`/communities/${brand.slug}/${chapter.slug}`}
-                className="text-xs text-muted-foreground hover:text-foreground block truncate"
+                className="text-xs text-muted-foreground hover:text-foreground block truncate uppercase tracking-wider"
               >
                 {brand.name} {chapter.name}
               </Link>
             ) : null}
-            <span className="font-medium truncate block">{ride.title}</span>
+            <span className="font-medium truncate block uppercase">{ride.title}</span>
           </div>
           {canEdit && (
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="border-foreground/20 hover:bg-foreground hover:text-background">
               <Link href={`/rides/${id}/edit`}>
                 <Edit className="h-4 w-4 mr-1" />
                 Edit
@@ -419,38 +420,41 @@ export default async function RidePage({ params }: RidePageProps) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-6 lg:py-8">
-        <div className={hasBranding && brand && chapter && brand.domain ? "lg:grid lg:grid-cols-3 lg:gap-8" : ""}>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-[60px] py-12 md:py-[60px]">
+        <div className={hasBranding && brand && chapter && brand.domain ? "lg:grid lg:grid-cols-[1fr_320px] lg:gap-[60px]" : ""}>
           {/* Main Content */}
-          <div className={hasBranding && brand && chapter && brand.domain ? "lg:col-span-2 space-y-6" : "space-y-6 max-w-3xl"}>
+          <div className="space-y-8">
             {/* Back link - Desktop */}
             <Link
               href={hasBranding && brand && chapter ? `/communities/${brand.slug}/${chapter.slug}` : '/discover'}
-              className="hidden lg:inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+              className="hidden lg:inline-flex items-center text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               {hasBranding && brand && chapter ? `Back to ${brand.name} ${chapter.name}` : 'Back to rides'}
             </Link>
 
             {/* Title Section */}
-            <div className="flex items-start justify-between gap-4">
-              <h1 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
-                {ride.title}
-              </h1>
-              <div className="flex items-center gap-2 shrink-0">
-                <ShareButton
-                  rideInfo={rideInfoText}
-                  rideUrl={rideUrl}
-                  rideTitle={ride.title}
-                />
-                {canEdit && (
-                  <Button variant="outline" size="sm" asChild className="hidden lg:flex">
-                    <Link href={`/rides/${id}/edit`}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Link>
-                  </Button>
-                )}
+            <div>
+              <span className="label-editorial block mb-4">{formattedDateShort}</span>
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="heading-display">
+                  {ride.title}
+                </h1>
+                <div className="flex items-center gap-2 shrink-0">
+                  <ShareButton
+                    rideInfo={rideInfoText}
+                    rideUrl={rideUrl}
+                    rideTitle={ride.title}
+                  />
+                  {canEdit && (
+                    <Button variant="outline" size="sm" asChild className="hidden lg:flex border-foreground/20 hover:bg-foreground hover:text-background uppercase text-xs">
+                      <Link href={`/rides/${id}/edit`}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -462,123 +466,120 @@ export default async function RidePage({ params }: RidePageProps) {
               />
             )}
 
-            {/* Ride Overview Card - Date, Location, Stats, Description */}
-            <Card>
-              <CardContent className="p-4 space-y-4">
-                {/* Date/Time & Location Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Date & Time */}
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <Calendar className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">{formattedDate}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formattedStartTime}
-                        {formattedEndTime && ` - ${formattedEndTime}`}
-                      </p>
-                      {!isPastRide && (
-                        <AddToCalendar
-                          title={ride.title}
-                          description={ride.description}
-                          date={ride.date}
-                          endTime={ride.endTime}
-                          locationName={ride.locationName}
-                          locationAddress={ride.locationAddress}
-                          rideUrl={rideUrl}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  {/* Location */}
+            {/* Ride Stats - Editorial Style */}
+            <div className="border-t border-b border-border py-6 space-y-4">
+              {/* Date & Time */}
+              <div className="stat-row">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground uppercase tracking-wider">Date & Time</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">{formattedDate}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formattedStartTime}
+                    {formattedEndTime && ` - ${formattedEndTime}`}
+                  </p>
+                  {!isPastRide && (
+                    <AddToCalendar
+                      title={ride.title}
+                      description={ride.description}
+                      date={ride.date}
+                      endTime={ride.endTime}
+                      locationName={ride.locationName}
+                      locationAddress={ride.locationAddress}
+                      rideUrl={rideUrl}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="stat-row">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground uppercase tracking-wider">Start Location</span>
+                </div>
+                <div className="text-right">
                   <LocationLink
                     locationName={ride.locationName}
                     locationAddress={ride.locationAddress}
                     latitude={ride.latitude}
                     longitude={ride.longitude}
+                    compact
                   />
                 </div>
+              </div>
 
-                {/* Ride Stats - Grid layout matching date/location */}
-                {(ride.distance || ride.elevation || speedRange || ride.terrain || ride.maxAttendees) && (
-                  <>
-                    <Separator />
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      {ride.distance && (
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            <Route className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium">{ride.distance} km</p>
-                            <p className="text-sm text-muted-foreground">Distance</p>
-                          </div>
-                        </div>
-                      )}
-                      {ride.elevation && (
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            <span className="text-primary font-bold">↗</span>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium">{ride.elevation} m</p>
-                            <p className="text-sm text-muted-foreground">Elevation</p>
-                          </div>
-                        </div>
-                      )}
-                      {speedRange && (
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            <Clock className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium">{speedRange}</p>
-                            <p className="text-sm text-muted-foreground">Speed</p>
-                          </div>
-                        </div>
-                      )}
-                      {ride.terrain && (
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            <span className="text-primary font-bold">◈</span>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium">{ride.terrain}</p>
-                            <p className="text-sm text-muted-foreground">Terrain</p>
-                          </div>
-                        </div>
-                      )}
-                      {ride.maxAttendees && (
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                            <Users className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium">{ride.maxAttendees}</p>
-                            <p className="text-sm text-muted-foreground">Max riders</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
+              {/* Distance */}
+              {ride.distance && (
+                <div className="stat-row">
+                  <div className="flex items-center gap-3">
+                    <Route className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">Distance</span>
+                  </div>
+                  <span className="stat-value">{ride.distance} km</span>
+                </div>
+              )}
 
-                {/* Description */}
-                {ride.description && (
-                  <>
-                    <Separator />
-                    <div className="text-sm">
-                      {ride.description.split('\n').map((paragraph, i) => (
-                        <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+              {/* Elevation */}
+              {ride.elevation && (
+                <div className="stat-row">
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted-foreground font-bold">↗</span>
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">Elevation</span>
+                  </div>
+                  <span className="stat-value">{ride.elevation} m</span>
+                </div>
+              )}
+
+              {/* Speed */}
+              {speedRange && (
+                <div className="stat-row">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">Speed</span>
+                  </div>
+                  <span className="stat-value">{speedRange}</span>
+                </div>
+              )}
+
+              {/* Terrain */}
+              {ride.terrain && (
+                <div className="stat-row">
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted-foreground font-bold">◈</span>
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">Terrain</span>
+                  </div>
+                  <span className="font-medium">{ride.terrain}</span>
+                </div>
+              )}
+
+              {/* Max Riders */}
+              {ride.maxAttendees && (
+                <div className="stat-row">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">Max Riders</span>
+                  </div>
+                  <span className="stat-value">{ride.maxAttendees}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            {ride.description && (
+              <div>
+                <span className="label-editorial block mb-4">About This Ride</span>
+                <div className="text-muted-foreground leading-relaxed">
+                  {ride.description.split('\n').map((paragraph, i) => (
+                    <p key={i} className="mb-3 last:mb-0 whitespace-pre-wrap">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Route Embed - show if routeUrl is provided */}
             {ride.routeUrl && <RouteEmbed routeUrl={ride.routeUrl} />}
@@ -589,38 +590,35 @@ export default async function RidePage({ params }: RidePageProps) {
             {/* Discussion Section */}
             <SidebarComments rideId={id} isOrganizer={!!canEdit} />
 
-            {/* Ride Details Card - RSVP & Attendees */}
-            <Card>
-              <CardContent className="p-4 space-y-4">
-                {/* Hosted by - inline */}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Hosted by</span>
-                  {ride.organizer.members[0]?.user ? (
-                    <Link
-                      href={ride.organizer.members[0].user.slug ? `/u/${ride.organizer.members[0].user.slug}` : '#'}
-                      className="font-medium text-foreground hover:underline"
-                    >
-                      {ride.organizer.members[0].user.name || ride.organizer.name}
-                    </Link>
-                  ) : (
-                    <span className="font-medium text-foreground">{ride.organizer.name}</span>
-                  )}
-                </div>
+            {/* RSVP Section */}
+            <div className="border-t border-border pt-8">
+              <span className="label-editorial block mb-4">Join This Ride</span>
 
-                {/* RSVP & Attendees */}
-                <Separator />
-                <RsvpSection
-                  rideId={id}
-                  currentUserRsvpStatus={currentUserRsvpStatus}
-                  attendees={attendees}
-                  totalGoing={goingRsvps}
-                  totalMaybe={maybeRsvps}
-                  maxAttendees={ride.maxAttendees}
-                  isPastRide={isPastRide}
-                />
+              {/* Hosted by */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                <span>Hosted by</span>
+                {ride.organizer.members[0]?.user ? (
+                  <Link
+                    href={ride.organizer.members[0].user.slug ? `/u/${ride.organizer.members[0].user.slug}` : '#'}
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    {ride.organizer.members[0].user.name || ride.organizer.name}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-foreground">{ride.organizer.name}</span>
+                )}
+              </div>
 
-              </CardContent>
-            </Card>
+              <RsvpSection
+                rideId={id}
+                currentUserRsvpStatus={currentUserRsvpStatus}
+                attendees={attendees}
+                totalGoing={goingRsvps}
+                totalMaybe={maybeRsvps}
+                maxAttendees={ride.maxAttendees}
+                isPastRide={isPastRide}
+              />
+            </div>
 
             {/* Cake & Coffee Stop - Post-ride social section */}
             <CakeAndCoffee rideId={id} rideDate={ride.date} isOrganizer={!!canEdit} />
@@ -636,11 +634,9 @@ export default async function RidePage({ params }: RidePageProps) {
                   if (chapterSponsors.length === 0) return null;
 
                   return (
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-medium text-muted-foreground capitalize">
-                        {labelText}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-4">
+                      <span className="label-editorial">{labelText}</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {chapterSponsors.map((sponsor) => (
                           <SponsorCard
                             key={sponsor.id}
@@ -658,52 +654,50 @@ export default async function RidePage({ params }: RidePageProps) {
           {/* Sidebar - Desktop (only shows for branded rides) */}
           {hasBranding && brand && chapter && brand.domain && (
             <div className="hidden lg:block">
-              <div className="sticky top-24 space-y-4">
+              <div className="sticky top-24 space-y-6">
                 {/* Brand Card - links to external brand site (can be hidden) */}
                 {!hidePresentedBy && (
-                  <Card className="overflow-hidden">
-                    <a
-                      href={`https://${brand.domain}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block group"
-                    >
-                      {/* Backdrop image */}
-                      {brand.backdrop && (
-                        <div
-                          className="h-32 bg-cover bg-center"
-                          style={{ backgroundImage: `url(${brand.backdrop})` }}
-                        />
-                      )}
-                      {/* Brand info below image */}
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                          {brand.logo ? (
-                            <img
-                              src={brand.logo}
-                              alt={brand.name}
-                              className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
-                            />
-                          ) : (
-                            <div
-                              className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
-                              style={{ backgroundColor: brand.primaryColor || '#00D26A' }}
-                            >
-                              {brand.name.charAt(0)}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-muted-foreground">Presented by</p>
-                            <p className="font-semibold truncate">{brand.name}</p>
-                            {brand.slogan && (
-                              <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
-                            )}
+                  <a
+                    href={`https://${brand.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group border border-border rounded-md overflow-hidden hover:border-foreground transition-colors"
+                  >
+                    {/* Backdrop image */}
+                    {brand.backdrop && (
+                      <div
+                        className="h-32 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${brand.backdrop})` }}
+                      />
+                    )}
+                    {/* Brand info below image */}
+                    <div className="p-4">
+                      <div className="flex items-center gap-3">
+                        {brand.logo ? (
+                          <img
+                            src={brand.logo}
+                            alt={brand.name}
+                            className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
+                          />
+                        ) : (
+                          <div
+                            className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold text-white"
+                            style={{ backgroundColor: brand.primaryColor || '#1a1a1a' }}
+                          >
+                            {brand.name.charAt(0)}
                           </div>
-                          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Presented by</p>
+                          <p className="font-semibold truncate uppercase">{brand.name}</p>
+                          {brand.slogan && (
+                            <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
+                          )}
                         </div>
-                      </CardContent>
-                    </a>
-                  </Card>
+                        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      </div>
+                    </div>
+                  </a>
                 )}
 
                 {/* Sponsors Section - chapter-specific sponsors only */}
@@ -716,10 +710,8 @@ export default async function RidePage({ params }: RidePageProps) {
                   if (chapterSponsors.length === 0) return null;
 
                   return (
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-muted-foreground capitalize px-1">
-                        {labelText}
-                      </h3>
+                    <div className="space-y-3">
+                      <span className="label-editorial">{labelText}</span>
                       {chapterSponsors.map((sponsor) => (
                         <SponsorCard
                           key={sponsor.id}
