@@ -73,16 +73,8 @@ export default async function CommunitiesPage() {
             Find your<br />cycling tribe.
           </h1>
 
-          {/* Create Community CTA */}
-          <Link href="/communities/create" className="cta-link mb-8">
-            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
-              <Plus className="w-2.5 h-2.5" />
-            </div>
-            Create Community
-          </Link>
-
           {/* Community List */}
-          <div className="w-full border-t border-border mt-8">
+          <div className="w-full border-t border-border">
             {brands.length === 0 ? (
               <div className="text-center py-16">
                 <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
@@ -165,6 +157,14 @@ export default async function CommunitiesPage() {
               </>
             )}
           </div>
+
+          {/* Create Community CTA - below list */}
+          <Link href="/communities/create" className="cta-link mt-8">
+            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+              <Plus className="w-2.5 h-2.5" />
+            </div>
+            Create Community
+          </Link>
         </main>
 
         {/* Right Column - Sidebar (hidden on mobile) */}

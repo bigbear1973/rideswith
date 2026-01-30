@@ -205,16 +205,8 @@ export default async function BrandPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Start Chapter CTA */}
-          <Link href={`/communities/${brand.slug}/create-chapter`} className="cta-link mb-8">
-            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
-              <Plus className="w-2.5 h-2.5" />
-            </div>
-            Start a Chapter
-          </Link>
-
           {/* Chapters List */}
-          <div className="w-full border-t border-border mt-8">
+          <div className="w-full border-t border-border">
             {brand.chapters.length === 0 ? (
               <div className="text-center py-16">
                 <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
@@ -320,6 +312,14 @@ export default async function BrandPage({ params }: PageProps) {
               </>
             )}
           </div>
+
+          {/* Start Chapter CTA - below chapters list */}
+          <Link href={`/communities/${brand.slug}/create-chapter`} className="cta-link mt-8">
+            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+              <Plus className="w-2.5 h-2.5" />
+            </div>
+            Start a Chapter
+          </Link>
         </main>
 
         {/* Right Column - Community Info */}
@@ -475,15 +475,6 @@ export default async function BrandPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Mobile CTA - shown at bottom on mobile */}
-          <div className="md:hidden mt-8 pt-8 border-t border-border">
-            <Link href={`/communities/${brand.slug}/create-chapter`} className="cta-link">
-              <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
-                <Plus className="w-2.5 h-2.5" />
-              </div>
-              Start a Chapter
-            </Link>
-          </div>
         </aside>
       </div>
     </div>

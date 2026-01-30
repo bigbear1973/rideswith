@@ -309,16 +309,8 @@ export default function ChapterPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Create Ride CTA */}
-          <Link href={`/create?chapterId=${chapter.id}`} className="cta-link mb-8">
-            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
-              <Plus className="w-2.5 h-2.5" />
-            </div>
-            Create Ride
-          </Link>
-
           {/* Rides List */}
-          <div className="w-full border-t border-border mt-8">
+          <div className="w-full border-t border-border">
             {chapter.rides.length === 0 ? (
               <div className="text-center py-16">
                 <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
@@ -386,6 +378,14 @@ export default function ChapterPage({ params }: PageProps) {
               </>
             )}
           </div>
+
+          {/* Create Ride CTA - below rides list */}
+          <Link href={`/create?chapterId=${chapter.id}`} className="cta-link mt-8">
+            <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+              <Plus className="w-2.5 h-2.5" />
+            </div>
+            Create Ride
+          </Link>
 
           {/* Past Rides Section */}
           {chapter.rideCount > chapter.rides.length && (
@@ -618,16 +618,6 @@ export default function ChapterPage({ params }: PageProps) {
               <span className="stat-value">{chapter.rideCount}</span>
               <span className="stat-label">Total Rides</span>
             </div>
-          </div>
-
-          {/* Mobile CTA - shown after team on mobile */}
-          <div className="md:hidden mb-8">
-            <Link href={`/create?chapterId=${chapter.id}`} className="cta-link">
-              <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
-                <Plus className="w-2.5 h-2.5" />
-              </div>
-              Create Ride
-            </Link>
           </div>
 
           {/* Chapter Team */}
