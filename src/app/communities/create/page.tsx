@@ -13,6 +13,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Loader2, Sparkles, Globe, Building2, Users, UsersRound, Trophy } from "lucide-react";
 
+// Feature flag - set to true to enable discipline field
+const ENABLE_DISCIPLINE_FIELD = false;
+
 const DISCIPLINE_OPTIONS = [
   'Road',
   'Gravel',
@@ -225,30 +228,32 @@ export default function CreateBrandPage() {
                   </RadioGroup>
                 </div>
 
-                {/* Discipline */}
-                <div className="space-y-2">
-                  <Label htmlFor="discipline">
-                    Discipline
-                    <span className="text-muted-foreground text-sm ml-2">
-                      Optional
-                    </span>
-                  </Label>
-                  <Select value={discipline} onValueChange={setDiscipline}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select primary discipline" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DISCIPLINE_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-muted-foreground">
-                    The main type of cycling your community focuses on
-                  </p>
-                </div>
+                {/* Discipline - hidden behind feature flag */}
+                {ENABLE_DISCIPLINE_FIELD && (
+                  <div className="space-y-2">
+                    <Label htmlFor="discipline">
+                      Discipline
+                      <span className="text-muted-foreground text-sm ml-2">
+                        Optional
+                      </span>
+                    </Label>
+                    <Select value={discipline} onValueChange={setDiscipline}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select primary discipline" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DISCIPLINE_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      The main type of cycling your community focuses on
+                    </p>
+                  </div>
+                )}
 
                 {/* Description */}
                 <div className="space-y-2">

@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Users, Plus, UsersRound, Trophy } from 'lucide-react';
 import { BrandLogo } from '@/components/brand-logo';
 
+// Feature flag - set to true to enable discipline filter
+const ENABLE_DISCIPLINE_FILTER = false;
+
 const COMMUNITY_TYPE_LABELS: Record<string, { label: string; icon: typeof Building2; color: string }> = {
   BRAND: { label: 'Brand', icon: Building2, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   CLUB: { label: 'Club', icon: Users, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -58,29 +61,33 @@ interface CommunitiesListProps {
 export function CommunitiesList({ brands }: CommunitiesListProps) {
   const [disciplineFilter, setDisciplineFilter] = useState('');
 
-  const filteredBrands = brands.filter((brand) => {
-    if (!disciplineFilter) return true;
-    return brand.discipline === disciplineFilter;
-  });
+  const filteredBrands = ENABLE_DISCIPLINE_FILTER
+    ? brands.filter((brand) => {
+        if (!disciplineFilter) return true;
+        return brand.discipline === disciplineFilter;
+      })
+    : brands;
 
   return (
     <>
-      {/* Discipline Filter */}
-      <div className="flex flex-wrap gap-2 mb-8">
-        {DISCIPLINE_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => setDisciplineFilter(option.value)}
-            className={`px-4 py-2 text-sm rounded-full border transition-colors ${
-              disciplineFilter === option.value
-                ? 'bg-foreground text-background border-foreground'
-                : 'bg-background text-foreground border-border hover:border-foreground/50'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      {/* Discipline Filter - hidden behind feature flag */}
+      {ENABLE_DISCIPLINE_FILTER && (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {DISCIPLINE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setDisciplineFilter(option.value)}
+              className={`px-4 py-2 text-sm rounded-full border transition-colors ${
+                disciplineFilter === option.value
+                  ? 'bg-foreground text-background border-foreground'
+                  : 'bg-background text-foreground border-border hover:border-foreground/50'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Community List */}
       <div className="w-full border-t border-border">
@@ -128,7 +135,7 @@ export function CommunitiesList({ brands }: CommunitiesListProps) {
                     {brand.type && COMMUNITY_TYPE_LABELS[brand.type] && (
                       <div className="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                         {COMMUNITY_TYPE_LABELS[brand.type].label}
-                        {brand.discipline && ` · ${brand.discipline}`}
+                        {ENABLE_DISCIPLINE_FILTER && brand.discipline && ` · ${brand.discipline}`}
                       </div>
                     )}
                     <div className="flex items-center gap-2 mb-1">
@@ -143,7 +150,7 @@ export function CommunitiesList({ brands }: CommunitiesListProps) {
                           {COMMUNITY_TYPE_LABELS[brand.type].label}
                         </Badge>
                       )}
-                      {brand.discipline && (
+                      {ENABLE_DISCIPLINE_FILTER && brand.discipline && (
                         <Badge
                           variant="outline"
                           className="hidden md:inline-flex text-xs"
