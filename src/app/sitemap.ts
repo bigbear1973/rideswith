@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { getAllPosts } from '@/lib/blog';
 
 // Force dynamic generation - sitemap needs database access
 export const dynamic = 'force-dynamic';
@@ -129,8 +130,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
+  // Blog pages
+  const blogPosts = getAllPosts();
+  const blogPages: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    ...blogPosts.map((post) => ({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  ];
+
   return [
     ...staticPages,
+    ...blogPages,
     ...ridePages,
     ...communityPages,
     ...chapterPages,

@@ -25,6 +25,7 @@ import {
 const navLinks = [
   { href: '/discover', label: 'Discover' },
   { href: '/communities', label: 'Communities' },
+  { href: '/blog', label: 'Blog' },
   { href: '/create', label: 'Create Ride' },
 ];
 
