@@ -59,40 +59,65 @@ npm run db:studio    # Open Prisma Studio
 - Supports km/mi unit switching (stored in localStorage)
 - Organizers can have custom branding (colors, logos)
 
-### Design Inspiration: C40.org
-Key elements to adopt from https://www.c40.org/:
+### Editorial Design System (January 2026)
+
+Minimalist editorial design inspired by high-end print magazines and editorial websites.
 
 **Color Palette:**
-- Primary: Vibrant green (#00D26A or similar) - used for stats banners, CTAs
-- Secondary: Cyan/teal (#00B8D4) - used for feature sections
-- Accent: Black (#000) for contrast sections
-- Background: Clean white with generous whitespace
+- Background: Warm off-white (#F9F8F6 light / #0A0A0A dark)
+- Text: Rich black (#1A1A1A light / #F5F5F5 dark)
+- Borders: Warm gray (#E6E4E0 light / #2A2A2A dark)
+- Muted text: #737373
 
 **Typography:**
-- Bold, impactful headlines (large font sizes, strong weight)
-- Clear hierarchy with size and weight variations
-- Sans-serif throughout for modern feel
+- Font: Inter (clean, modern sans-serif)
+- Uppercase labels with tight letter-spacing (-0.05em)
+- Large display headings (text-4xl to text-6xl)
+- Body text: 15-16px with relaxed line-height
 
 **Layout Patterns:**
-- Split hero sections: image left, content right (or vice versa)
-- Full-width colored bands for visual breaks
-- Card grids on colored backgrounds (like the 4-column feature cards on cyan)
-- Generous padding and whitespace between sections
-- Stats displayed prominently with large numbers
+- Two-column grid: `grid-cols-[1.2fr_0.8fr]` with 120px gap
+- Max width container: `max-w-[1400px]` with `px-6 md:px-[60px]` padding
+- Thin borders instead of card backgrounds
+- Generous whitespace (60px vertical padding)
+- Sticky sidebars for info sections
 
-**Components Implemented:**
-- [x] Stats banner (green background, big numbers) - `src/components/ui/stats-banner.tsx`
-- [x] Split hero sections with illustration/photo + text - `src/components/ui/split-hero.tsx`
-- [x] Feature cards on colored background - `src/components/ui/feature-card.tsx`
-- [x] Colored section bands (green/cyan/black) - `src/components/ui/colored-section.tsx`
-- [x] C40 button variants (outlined, uppercase, hover fills) - `src/components/ui/button.tsx`
-- [ ] Scrolling marquee of organizer/city names (future)
+**CSS Utility Classes** (defined in `globals.css`):
+```css
+.label-editorial      /* Uppercase section labels */
+.heading-display      /* Large display headings */
+.list-item-editorial  /* List items with hover effects */
+.stat-row             /* Statistics display rows */
+.cta-link             /* Call-to-action links */
+.icon-btn-circle      /* Circular arrow buttons */
+```
 
-**Button Styles:**
-- Outlined/bordered buttons (not filled)
-- Black border on white, white border on dark backgrounds
-- Uppercase text for CTAs
-- Hover: fill with contrasting color
+**Key Design Elements:**
+- Circle arrow buttons that fill on hover
+- List items with bottom borders, not cards
+- Stats displayed as value + label rows
+- Date columns in ride lists (month abbrev + day number)
+- Member avatars stacked with overlap (-space-x-2)
+
+**Pages Using Editorial Design:**
+- Homepage (`src/app/page.tsx`)
+- Discover (`src/app/discover/page.tsx`)
+- Ride Detail (`src/app/rides/[id]/page.tsx`)
+- Communities Listing (`src/app/communities/page.tsx`)
+- Community Detail (`src/app/communities/[slug]/page.tsx`)
+- Chapter Page (`src/app/communities/[slug]/[chapter]/page.tsx`)
+- User Profile (`src/app/u/[slug]/page.tsx`)
+
+**ArrowIcon Component:**
+Used across all pages for consistent list item navigation:
+```tsx
+const ArrowIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+```
 
 ---
 
@@ -635,7 +660,7 @@ All footer links now have pages:
 - [x] Settings page (units, language, timezone)
 - [x] Auth pages (signin, verify, error)
 - [x] Unit switcher (km/mi) with context
-- [x] C40.org-inspired redesign (green/cyan/black, bold typography, outlined buttons)
+- [x] Editorial design system (January 2026) - minimalist two-column layouts, thin borders, uppercase typography
 
 ### Phase 3: Fix Basics (COMPLETE)
 - [x] Create profile pages (/profile, /profile/edit, /u/[slug])
@@ -752,6 +777,8 @@ All footer links now have pages:
 ## Active TODO List
 
 ### Completed Recently
+- [x] Editorial design system - minimalist design with two-column layouts, thin borders, uppercase typography
+- [x] Redesigned all major pages: homepage, discover, ride detail, communities, chapters, user profiles
 - [x] Chapter-level sponsor toggles in admin panel (expandable community rows with chapter toggles)
 - [x] Admin menu link in user dropdown for platform admin
 - [x] Share button changed to clipboard copy with tooltip explanation
