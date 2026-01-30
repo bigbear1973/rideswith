@@ -236,7 +236,7 @@ export default function HomePage() {
         </main>
 
         {/* Right Column - Sidebar */}
-        <aside className="lg:sticky lg:top-10 order-first lg:order-last">
+        <aside className="lg:sticky lg:top-10">
           <span className="label-editorial block mb-6">Our Purpose</span>
 
           <p className="text-muted-foreground text-[15px] leading-relaxed mb-6 max-w-[420px]">
