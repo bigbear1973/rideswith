@@ -135,6 +135,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       updateData.type = body.type;
     }
 
+    // Discipline field
+    if (body.discipline !== undefined) {
+      updateData.discipline = body.discipline || null;
+    }
+
     // Manual image uploads (Cloudinary URLs)
     if (body.logo !== undefined) updateData.logo = body.logo || null;
     if (body.backdrop !== undefined) updateData.backdrop = body.backdrop || null;

@@ -97,6 +97,7 @@ model Brand {
   name        String        // "Straede"
   slug        String        @unique // "straede"
   type        CommunityType @default(BRAND) // BRAND, CLUB, or GROUP
+  discipline  String?       // "Road", "Gravel", "MTB", etc. - primary cycling discipline
   domain      String?       // "straede.cc" (for Brand.dev lookup)
   description String?       @db.Text
 
@@ -141,9 +142,10 @@ model Chapter {
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
-  name String // "Leipzig"
-  slug String // "leipzig"
-  city String // City name for display/search
+  name       String  // "Leipzig"
+  slug       String  // "leipzig"
+  city       String  // City name for display/search
+  discipline String? // Override brand discipline - "Road", "Gravel", "MTB", etc.
 
   // Optional branding overrides (inherits from Brand if null)
   customLogo   String?

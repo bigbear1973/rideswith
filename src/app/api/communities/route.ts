@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, domain, type } = body;
+    const { name, domain, type, discipline } = body;
 
     // Validate name
     if (!name || typeof name !== "string" || name.trim().length < 2) {
@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         slug,
         type: communityType,
+        discipline: discipline || null,
         domain: domain?.trim() || null,
         description: brandAssets?.description || null,
         logo: brandAssets?.logo || null,

@@ -22,14 +22,25 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, Loader2, Check, AlertCircle, RefreshCw, Trash2, Instagram, Twitter, Facebook, Youtube, Upload, X, Building2, Users, UsersRound, Trophy, Plus, Megaphone } from 'lucide-react';
 import { SponsorForm, SponsorList } from '@/components/communities';
+
+const DISCIPLINE_OPTIONS = [
+  'Road',
+  'Gravel',
+  'Mountain Bike',
+  'Mixed (Road & Gravel)',
+  'Mixed (Road & Cycle Path)',
+  'Cycle Path Only',
+];
 
 interface Brand {
   id: string;
   name: string;
   slug: string;
   type: 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP';
+  discipline: string | null;
   domain: string | null;
   description: string | null;
   logo: string | null;
@@ -97,6 +108,7 @@ export default function EditBrandPage() {
   const [formData, setFormData] = useState({
     name: '',
     type: 'BRAND' as 'BRAND' | 'CLUB' | 'TEAM' | 'GROUP',
+    discipline: '',
     domain: '',
     description: '',
     logo: '',
@@ -125,6 +137,7 @@ export default function EditBrandPage() {
           setFormData({
             name: data.name || '',
             type: data.type || 'BRAND',
+            discipline: data.discipline || '',
             domain: data.domain || '',
             description: data.description || '',
             logo: data.logo || '',
@@ -415,6 +428,29 @@ export default function EditBrandPage() {
                   placeholder="Brand name"
                   required
                 />
+              </div>
+
+              {/* Discipline */}
+              <div className="space-y-2">
+                <Label htmlFor="discipline">Discipline</Label>
+                <Select
+                  value={formData.discipline}
+                  onValueChange={(value) => setFormData({ ...formData, discipline: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select primary discipline" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DISCIPLINE_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  The main type of cycling your community focuses on
+                </p>
               </div>
 
               {/* Website/Link */}

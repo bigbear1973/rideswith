@@ -145,10 +145,22 @@ Brand (e.g., Straede)
 - `/communities/[slug]/create-chapter` - Start a chapter
 
 ### Database Models
-- **Brand** - name, slug, domain, logo, logoDark, colors, backdrop, slogan (from Brand.dev), social links (instagram, twitter, facebook, strava, youtube)
-- **Chapter** - brand reference, city, slug, member counts
+- **Brand** - name, slug, domain, discipline, logo, logoDark, colors, backdrop, slogan (from Brand.dev), social links (instagram, twitter, facebook, strava, youtube)
+- **Chapter** - brand reference, city, slug, discipline (override), member counts
 - **ChapterMember** - user, chapter, role (OWNER, ADMIN, MODERATOR; legacy: LEAD, AMBASSADOR)
 - **Ride** - optional `chapterId` for brand-affiliated rides, `paceMin`/`paceMax` for custom speed range
+
+### Community Discipline (IMPLEMENTED)
+Communities can specify their primary cycling discipline:
+- **Road** - Road cycling on paved roads
+- **Gravel** - Gravel and unpaved roads
+- **Mountain Bike** - Off-road mountain biking
+- **Mixed (Road & Gravel)** - Combination rides
+- **Mixed (Road & Cycle Path)** - Road and dedicated cycle paths
+- **Cycle Path Only** - Dedicated cycling infrastructure
+
+Discipline is set during community creation and can be edited in community settings.
+The communities listing page includes a discipline filter to help users find relevant communities.
 
 ### Community Social Links (IMPLEMENTED)
 Communities can display links to their social media profiles:
