@@ -55,7 +55,7 @@ export function SponsorCard({ sponsor }: SponsorCardProps) {
                 <img
                   src={sponsor.logo}
                   alt={sponsor.name}
-                  className="h-12 w-12 object-contain rounded-lg bg-muted border p-1.5 -mt-8 relative z-10 shadow-md"
+                  className="h-12 w-12 object-contain rounded-lg bg-white dark:bg-neutral-800 border border-border p-1.5 -mt-8 relative z-10 shadow-md"
                 />
               ) : (
                 <div
@@ -99,7 +99,7 @@ export function SponsorCard({ sponsor }: SponsorCardProps) {
                 <img
                   src={sponsor.logo}
                   alt={sponsor.name}
-                  className="h-12 w-12 object-contain rounded-lg bg-muted p-1"
+                  className="h-12 w-12 object-contain rounded-lg bg-white dark:bg-neutral-800 border border-border p-1.5"
                 />
               ) : (
                 <div
@@ -142,7 +142,7 @@ export function SponsorCard({ sponsor }: SponsorCardProps) {
               <img
                 src={sponsor.logo}
                 alt={sponsor.name}
-                className="h-10 w-10 object-contain rounded-lg bg-muted p-1"
+                className="h-10 w-10 object-contain rounded-lg bg-white dark:bg-neutral-800 border border-border p-1.5"
               />
             ) : (
               <div

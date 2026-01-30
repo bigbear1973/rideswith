@@ -133,7 +133,7 @@ export function Navbar() {
 
               {/* User Info - shown when logged in */}
               {session?.user && (
-                <div className="mt-6 flex items-center gap-3 pb-6 border-b border-border">
+                <div className="mt-6 mx-4 flex items-center gap-3 pb-6 border-b border-border">
                   <Avatar className="h-10 w-10">
                     {session.user.image && (
                       <AvatarImage src={session.user.image} alt={session.user.name || ''} />
@@ -154,7 +154,7 @@ export function Navbar() {
                 </div>
               )}
 
-              <nav className="mt-6 flex flex-col gap-1">
+              <nav className="mt-6 flex flex-col gap-1 px-4">
                 {navLinks.map((link) => {
                   const isActive = pathname === link.href;
                   return (
