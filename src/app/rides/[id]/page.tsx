@@ -109,6 +109,16 @@ function formatSpeedRange(paceMin: number | null, paceMax: number | null): strin
   return null;
 }
 
+// Helper to normalize domain to full URL (handles cases where domain already includes protocol)
+function normalizeUrl(domain: string | null | undefined): string | null {
+  if (!domain) return null;
+  // Already has protocol
+  if (domain.startsWith('http://') || domain.startsWith('https://')) {
+    return domain;
+  }
+  return `https://${domain}`;
+}
+
 export default async function RidePage({ params }: RidePageProps) {
   const { id } = await params;
   const session = await auth();
@@ -325,7 +335,7 @@ export default async function RidePage({ params }: RidePageProps) {
     organizer: {
       '@type': 'Organization',
       name: brand?.name || ride.organizer.name,
-      url: brand?.domain ? `https://${brand.domain}` : rideUrl,
+      url: normalizeUrl(brand?.domain) || rideUrl,
     },
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
@@ -346,7 +356,7 @@ export default async function RidePage({ params }: RidePageProps) {
       {/* Brand Header - shown for branded rides */}
       {hasBranding && brand && chapter && brand.domain && (
         <a
-          href={`https://${brand.domain}`}
+          href={normalizeUrl(brand.domain)!}
           target="_blank"
           rel="noopener noreferrer"
           className="block group"
@@ -658,7 +668,7 @@ export default async function RidePage({ params }: RidePageProps) {
                 {/* Brand Card - links to external brand site (can be hidden) */}
                 {!hidePresentedBy && (
                   <a
-                    href={`https://${brand.domain}`}
+                    href={normalizeUrl(brand.domain)!}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block group border border-border rounded-md overflow-hidden hover:border-foreground transition-colors"
@@ -677,7 +687,7 @@ export default async function RidePage({ params }: RidePageProps) {
                           <img
                             src={brand.logo}
                             alt={brand.name}
-                            className="h-12 w-12 object-contain rounded-lg bg-muted p-1.5"
+                            className="h-12 w-12 object-contain rounded-lg bg-white dark:bg-neutral-800 border border-border p-1.5"
                           />
                         ) : (
                           <div

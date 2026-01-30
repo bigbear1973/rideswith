@@ -379,13 +379,13 @@ export default async function BrandPage({ params }: PageProps) {
           {/* Website */}
           {brand.domain && (
             <a
-              href={`https://${brand.domain}`}
+              href={brand.domain.startsWith('http') ? brand.domain : `https://${brand.domain}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
             >
               <Globe className="h-4 w-4" />
-              {brand.domain}
+              {brand.domain.replace(/^https?:\/\//, '')}
               <ExternalLink className="h-3 w-3" />
             </a>
           )}

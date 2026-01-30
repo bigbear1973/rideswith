@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { ArrowRight, Loader2, Bike } from 'lucide-react';
+import { ArrowRight, Loader2, Bike, MapPin } from 'lucide-react';
 import { useUnits } from '@/components/providers/units-provider';
 
 // Type for latest rides from API
@@ -135,6 +135,8 @@ export default function HomePage() {
   const [latestRides, setLatestRides] = useState<LatestRide[]>([]);
   const [isLoadingRides, setIsLoadingRides] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const filters = [
     { id: 'all', label: 'All Rides' },
@@ -143,10 +145,50 @@ export default function HomePage() {
     { id: 'club', label: 'Club Rides' },
   ];
 
+  // Get user location when "Near Me" is selected
+  useEffect(() => {
+    if (activeFilter === 'near' && !userLocation) {
+      setLocationError(null);
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            setLocationError('Unable to get your location. Please enable location services.');
+          }
+        );
+      } else {
+        setLocationError('Geolocation is not supported by your browser.');
+      }
+    }
+  }, [activeFilter, userLocation]);
+
+  // Fetch rides when filter changes
   useEffect(() => {
     async function fetchLatestRides() {
+      setIsLoadingRides(true);
       try {
-        const res = await fetch('/api/rides/latest?limit=6');
+        // Build URL with filter parameters
+        const params = new URLSearchParams({ filter: activeFilter, limit: '6' });
+
+        // Add location for "Near Me" filter
+        if (activeFilter === 'near' && userLocation) {
+          params.set('lat', userLocation.lat.toString());
+          params.set('lng', userLocation.lng.toString());
+        }
+
+        // For "Near Me" without location, don't fetch yet
+        if (activeFilter === 'near' && !userLocation) {
+          setIsLoadingRides(false);
+          return;
+        }
+
+        const res = await fetch(`/api/rides/latest?${params.toString()}`);
         if (res.ok) {
           const data = await res.json();
           setLatestRides(data);
@@ -158,7 +200,7 @@ export default function HomePage() {
       }
     }
     fetchLatestRides();
-  }, []);
+  }, [activeFilter, userLocation]);
 
   return (
     <div className="min-h-screen">
@@ -196,11 +238,36 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* Location error for Near Me */}
+            {activeFilter === 'near' && locationError && (
+              <div className="text-center py-16">
+                <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-6">{locationError}</p>
+                <button
+                  onClick={() => setActiveFilter('all')}
+                  className="cta-link"
+                >
+                  <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                    <ArrowRight className="w-2.5 h-2.5" />
+                  </div>
+                  View All Rides
+                </button>
+              </div>
+            )}
+
             {/* Empty state */}
-            {!isLoadingRides && latestRides.length === 0 && (
+            {!isLoadingRides && latestRides.length === 0 && !locationError && (
               <div className="text-center py-16">
                 <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-6">No rides yet. Be the first to create one!</p>
+                <p className="text-muted-foreground mb-6">
+                  {activeFilter === 'near'
+                    ? 'No rides found within 50km of your location.'
+                    : activeFilter === 'week'
+                    ? 'No rides scheduled for this week.'
+                    : activeFilter === 'club'
+                    ? 'No club rides available.'
+                    : 'No rides yet. Be the first to create one!'}
+                </p>
                 <Link href="/create" className="cta-link">
                   <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
                     <ArrowRight className="w-2.5 h-2.5" />
