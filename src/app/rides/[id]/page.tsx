@@ -699,12 +699,12 @@ export default async function RidePage({ params }: RidePageProps) {
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-muted-foreground uppercase tracking-wider">Presented by</p>
-                          <p className="font-semibold truncate uppercase">{brand.name}</p>
+                          <p className="font-semibold uppercase">{brand.name}</p>
                           {brand.slogan && (
-                            <p className="text-xs text-muted-foreground italic truncate">{brand.slogan}</p>
+                            <p className="text-xs text-muted-foreground italic line-clamp-2">{brand.slogan}</p>
                           )}
                         </div>
-                        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
                       </div>
                     </div>
                   </a>
