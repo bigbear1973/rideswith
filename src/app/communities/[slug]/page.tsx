@@ -453,8 +453,8 @@ export default async function BrandPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Stats */}
-          <div>
+          {/* Stats - hidden on mobile */}
+          <div className="hidden md:block">
             <span className="label-editorial block mb-4">Community Stats</span>
 
             <div className="stat-row">
@@ -473,6 +473,16 @@ export default async function BrandPage({ params }: PageProps) {
               <span className="stat-value">{totalRides}</span>
               <span className="stat-label">Total Rides</span>
             </div>
+          </div>
+
+          {/* Mobile CTA - shown at bottom on mobile */}
+          <div className="md:hidden mt-8 pt-8 border-t border-border">
+            <Link href={`/communities/${brand.slug}/create-chapter`} className="cta-link">
+              <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                <Plus className="w-2.5 h-2.5" />
+              </div>
+              Start a Chapter
+            </Link>
           </div>
         </aside>
       </div>

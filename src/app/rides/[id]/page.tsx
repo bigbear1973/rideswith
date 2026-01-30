@@ -445,11 +445,8 @@ export default async function RidePage({ params }: RidePageProps) {
 
             {/* Title Section */}
             <div>
-              <span className="label-editorial block mb-4">{formattedDateShort}</span>
-              <div className="flex items-start justify-between gap-4">
-                <h1 className="heading-display">
-                  {ride.title}
-                </h1>
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <span className="label-editorial">{formattedDateShort}</span>
                 <div className="flex items-center gap-2 shrink-0">
                   <ShareButton
                     rideInfo={rideInfoText}
@@ -466,6 +463,9 @@ export default async function RidePage({ params }: RidePageProps) {
                   )}
                 </div>
               </div>
+              <h1 className="heading-display">
+                {ride.title}
+              </h1>
             </div>
 
             {/* Live Location Banner - shown when ride is live */}

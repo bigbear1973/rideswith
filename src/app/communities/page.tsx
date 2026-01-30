@@ -167,8 +167,8 @@ export default async function CommunitiesPage() {
           </div>
         </main>
 
-        {/* Right Column - Sidebar */}
-        <aside className="lg:sticky lg:top-10 order-first lg:order-last">
+        {/* Right Column - Sidebar (hidden on mobile) */}
+        <aside className="hidden lg:block lg:sticky lg:top-10 order-first lg:order-last">
           <span className="label-editorial block mb-6">About Communities</span>
 
           <p className="text-muted-foreground text-[15px] leading-relaxed mb-6 max-w-[420px]">

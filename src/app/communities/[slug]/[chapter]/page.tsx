@@ -602,8 +602,8 @@ export default function ChapterPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Stats */}
-          <div className="mb-8">
+          {/* Stats - hidden on mobile */}
+          <div className="hidden md:block mb-8">
             <span className="label-editorial block mb-4">Chapter Stats</span>
 
             <div className="stat-row">
@@ -618,6 +618,16 @@ export default function ChapterPage({ params }: PageProps) {
               <span className="stat-value">{chapter.rideCount}</span>
               <span className="stat-label">Total Rides</span>
             </div>
+          </div>
+
+          {/* Mobile CTA - shown after team on mobile */}
+          <div className="md:hidden mb-8">
+            <Link href={`/create?chapterId=${chapter.id}`} className="cta-link">
+              <div className="w-5 h-5 border border-foreground rounded-full flex items-center justify-center">
+                <Plus className="w-2.5 h-2.5" />
+              </div>
+              Create Ride
+            </Link>
           </div>
 
           {/* Chapter Team */}
