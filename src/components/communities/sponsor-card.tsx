@@ -71,7 +71,7 @@ export function SponsorCard({ sponsor }: SponsorCardProps) {
                   <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
                 </div>
                 {sponsor.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {sponsor.description}
                   </p>
                 )}
@@ -115,7 +115,7 @@ export function SponsorCard({ sponsor }: SponsorCardProps) {
                   <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
                 </div>
                 {sponsor.description && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {sponsor.description}
                   </p>
                 )}
