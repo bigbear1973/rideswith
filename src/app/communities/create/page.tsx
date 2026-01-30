@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Loader2, Sparkles, Globe, Building2, Users, UsersRound, Trophy } from "lucide-react";
+import { ChevronLeft, Loader2, Sparkles, Globe, Building2, Users, UsersRound, Trophy } from "lucide-react";
 
 const COMMUNITY_TYPES = [
   { value: "BRAND", label: "Brand", description: "Commercial cycling brand (Rapha, Straede)", icon: Building2 },
@@ -55,7 +55,7 @@ export default function CreateBrandPage() {
       // Try to fetch brand preview (this would call Brand.dev)
       // For now, we'll just show the domain was recognized
       setBrandPreview({
-        primaryColor: "#00D26A", // Placeholder
+        primaryColor: "#1A1A1A", // Use editorial black
       });
 
       // Auto-fill name from domain if empty
@@ -102,166 +102,171 @@ export default function CreateBrandPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-[#00D26A] text-white py-12">
-        <div className="container mx-auto px-4">
-          <Link
-            href="/communities"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Communities
-          </Link>
-          <h1 className="text-3xl md:text-4xl font-bold">Create Your Community</h1>
-          <p className="text-white/80 mt-2">
+    <div className="min-h-screen">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-[60px] py-12 md:py-[60px]">
+        {/* Back link */}
+        <Link
+          href="/communities"
+          className="inline-flex items-center text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground mb-8"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back to Communities
+        </Link>
+
+        {/* Header */}
+        <div className="mb-12">
+          <span className="label-editorial block mb-4">New Community</span>
+          <h1 className="heading-display mb-4">
+            Create Your Community
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-[600px]">
             Start a brand, club, or group and build local chapters.
           </p>
         </div>
-      </div>
 
-      {/* Form */}
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Community Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+        {/* Form */}
+        <div className="max-w-2xl">
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Community Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
 
-              {/* Website/Link Input */}
-              <div className="space-y-2">
-                <Label htmlFor="domain">
-                  Website or Link (optional)
-                </Label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="domain"
-                    placeholder="straede.cc or instagram.com/yourgroup"
-                    value={domain}
-                    onChange={(e) => setDomain(e.target.value)}
-                    onBlur={handleDomainBlur}
-                    className="pl-10"
-                  />
-                  {fetchingBrand && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                {/* Website/Link Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="domain">
+                    Website or Link (optional)
+                  </Label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="domain"
+                      placeholder="straede.cc or instagram.com/yourgroup"
+                      value={domain}
+                      onChange={(e) => setDomain(e.target.value)}
+                      onBlur={handleDomainBlur}
+                      className="pl-10"
+                    />
+                    {fetchingBrand && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    If you enter a domain, we&apos;ll try to auto-fetch branding from Brand.dev
+                  </p>
+                  {brandPreview && (
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <Sparkles className="h-4 w-4" />
+                      Brand recognized! We&apos;ll import your branding automatically.
+                    </div>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  If you enter a domain, we&apos;ll try to auto-fetch branding from Brand.dev
-                </p>
-                {brandPreview && (
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <Sparkles className="h-4 w-4" />
-                    Brand recognized! We&apos;ll import your branding automatically.
-                  </div>
-                )}
-              </div>
 
-              {/* Brand Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="Straede"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  minLength={2}
-                  maxLength={50}
-                />
-              </div>
+                {/* Brand Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Straede"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    minLength={2}
+                    maxLength={50}
+                  />
+                </div>
 
-              {/* Community Type */}
-              <div className="space-y-3">
-                <Label className="text-base">What type of community is this?</Label>
-                <RadioGroup
-                  value={type}
-                  onValueChange={(value) => setType(value as "BRAND" | "CLUB" | "TEAM" | "GROUP")}
-                  className="grid gap-3"
-                >
-                  {COMMUNITY_TYPES.map((communityType) => (
-                    <label
-                      key={communityType.value}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        type === communityType.value
-                          ? "border-primary bg-primary/5"
-                          : "hover:bg-muted/50"
-                      }`}
-                    >
-                      <RadioGroupItem value={communityType.value} id={communityType.value} />
-                      <communityType.icon className="h-5 w-5 text-muted-foreground" />
-                      <div className="flex-1">
-                        <p className="font-medium">{communityType.label}</p>
-                        <p className="text-sm text-muted-foreground">{communityType.description}</p>
-                      </div>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
+                {/* Community Type */}
+                <div className="space-y-3">
+                  <Label className="text-base">What type of community is this?</Label>
+                  <RadioGroup
+                    value={type}
+                    onValueChange={(value) => setType(value as "BRAND" | "CLUB" | "TEAM" | "GROUP")}
+                    className="grid gap-3"
+                  >
+                    {COMMUNITY_TYPES.map((communityType) => (
+                      <label
+                        key={communityType.value}
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          type === communityType.value
+                            ? "border-foreground bg-muted"
+                            : "border-border hover:bg-muted/50"
+                        }`}
+                      >
+                        <RadioGroupItem value={communityType.value} id={communityType.value} />
+                        <communityType.icon className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex-1">
+                          <p className="font-medium">{communityType.label}</p>
+                          <p className="text-sm text-muted-foreground">{communityType.description}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </RadioGroup>
+                </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description
-                  <span className="text-muted-foreground text-sm ml-2">
-                    Optional
-                  </span>
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Tell riders about your brand..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="description">
+                    Description
+                    <span className="text-muted-foreground text-sm ml-2">
+                      Optional
+                    </span>
+                  </Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Tell riders about your brand..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
 
-              {/* Submit */}
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.back()}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading || !name.trim()}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Community"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                {/* Submit */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={loading || !name.trim()}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Community"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
 
-        {/* Info Card */}
-        <Card className="mt-6 bg-muted/50">
-          <CardContent className="pt-6">
-            <h3 className="font-semibold mb-2">What happens next?</h3>
-            <ul className="text-sm text-muted-foreground space-y-2">
-              <li>1. Your brand profile is created with your logo and colors</li>
-              <li>2. You can create chapters in different cities</li>
-              <li>3. Chapter leads and ambassadors get verified badges</li>
-              <li>4. Rides created by ambassadors display your brand styling</li>
-            </ul>
-          </CardContent>
-        </Card>
+          {/* Info Card */}
+          <Card className="mt-6 bg-muted/50 border-border">
+            <CardContent className="pt-6">
+              <h3 className="font-semibold mb-2">What happens next?</h3>
+              <ul className="text-sm text-muted-foreground space-y-2">
+                <li>1. Your brand profile is created with your logo and colors</li>
+                <li>2. You can create chapters in different cities</li>
+                <li>3. Chapter leads and ambassadors get verified badges</li>
+                <li>4. Rides created by ambassadors display your brand styling</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

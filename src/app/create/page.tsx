@@ -295,29 +295,26 @@ export default function CreateRidePage() {
     <div className="min-h-screen pb-8">
       {/* Chapter Banner - shown when creating for a chapter */}
       {chapterInfo && (
-        <div
-          className="py-4 text-white"
-          style={{ backgroundColor: chapterInfo.brand.primaryColor || '#00D26A' }}
-        >
-          <div className="container mx-auto px-4">
+        <div className="border-b border-border">
+          <div className="container mx-auto px-4 py-4">
             <Link
               href={backLink}
-              className="inline-flex items-center gap-3 hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
               {chapterInfo.brand.logo ? (
                 <img
                   src={chapterInfo.brand.logo}
                   alt={chapterInfo.brand.name}
-                  className="h-10 w-10 object-contain rounded-lg bg-white p-1"
+                  className="h-10 w-10 object-contain rounded-lg bg-muted p-1"
                 />
               ) : (
-                <div className="h-10 w-10 rounded-lg bg-white/20 flex items-center justify-center font-bold">
+                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center font-bold">
                   {chapterInfo.brand.name.charAt(0)}
                 </div>
               )}
               <div>
                 <p className="font-semibold">{chapterInfo.brand.name} {chapterInfo.name}</p>
-                <p className="text-white/80 text-sm">{chapterInfo.city}</p>
+                <p className="text-muted-foreground text-sm">{chapterInfo.city}</p>
               </div>
             </Link>
           </div>
