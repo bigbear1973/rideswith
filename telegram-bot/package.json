@@ -1,0 +1,29 @@
+{
+  "name": "rideswith-telegram-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot for RidesWith.com ride discovery",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate --schema=../prisma/schema.prisma",
+    "db:generate": "prisma generate --schema=../prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "dotenv": "^17.2.3",
+    "grammy": "^1.35.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "prisma": "^6.19.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5"
+  }
+}

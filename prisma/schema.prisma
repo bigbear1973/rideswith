@@ -540,3 +540,26 @@ model UserNotificationSettings {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+// ============================================
+// Telegram Bot
+// ============================================
+
+model TelegramUser {
+  id              String   @id @default(cuid())
+  telegramId      BigInt   @unique
+  username        String?
+  firstName       String?
+
+  // Preferences
+  defaultLatitude  Float?
+  defaultLongitude Float?
+  defaultCity      String?
+  defaultRadius    Int      @default(50)  // km
+  unitPreference   String   @default("km") // "km" | "mi"
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([telegramId])
+}
