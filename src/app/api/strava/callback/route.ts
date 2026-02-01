@@ -10,11 +10,13 @@ import { exchangeCodeForTokens } from '@/lib/strava';
  * Then redirects to club selection page.
  */
 export async function GET(request: NextRequest) {
+  const baseUrl = process.env.AUTH_URL || 'https://rideswith.com';
+
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.redirect(
-        new URL('/auth/signin?error=Unauthorized', request.url)
+        new URL('/auth/signin?error=Unauthorized', baseUrl)
       );
     }
 
@@ -26,14 +28,14 @@ export async function GET(request: NextRequest) {
     // Handle Strava authorization errors
     if (error) {
       console.error('Strava authorization error:', error);
-      const errorUrl = new URL('/api/strava/error', request.url);
+      const errorUrl = new URL('/api/strava/error', baseUrl);
       errorUrl.searchParams.set('error', error);
       return NextResponse.redirect(errorUrl);
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL('/api/strava/error?error=missing_params', request.url)
+        new URL('/api/strava/error?error=missing_params', baseUrl)
       );
     }
 
@@ -43,14 +45,14 @@ export async function GET(request: NextRequest) {
       stateData = JSON.parse(Buffer.from(state, 'base64url').toString());
     } catch {
       return NextResponse.redirect(
-        new URL('/api/strava/error?error=invalid_state', request.url)
+        new URL('/api/strava/error?error=invalid_state', baseUrl)
       );
     }
 
     // Verify the user matches
     if (stateData.userId !== session.user.id) {
       return NextResponse.redirect(
-        new URL('/api/strava/error?error=user_mismatch', request.url)
+        new URL('/api/strava/error?error=user_mismatch', baseUrl)
       );
     }
 
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest) {
     const stateAge = Date.now() - stateData.timestamp;
     if (stateAge > 10 * 60 * 1000) {
       return NextResponse.redirect(
-        new URL('/api/strava/error?error=state_expired', request.url)
+        new URL('/api/strava/error?error=state_expired', baseUrl)
       );
     }
 
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     if (!chapter) {
       return NextResponse.redirect(
-        new URL('/api/strava/error?error=chapter_not_found', request.url)
+        new URL('/api/strava/error?error=chapter_not_found', baseUrl)
       );
     }
 
@@ -106,7 +108,7 @@ export async function GET(request: NextRequest) {
     // Redirect to chapter edit page with a flag to show club selection
     const redirectUrl = new URL(
       `/communities/${chapter.brand.slug}/${chapter.slug}/edit`,
-      request.url
+      baseUrl
     );
     redirectUrl.searchParams.set('stravaConnected', 'true');
     redirectUrl.searchParams.set('selectClub', 'true');
@@ -114,8 +116,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error('GET /api/strava/callback error:', error);
+    const baseUrl = process.env.AUTH_URL || 'https://rideswith.com';
     return NextResponse.redirect(
-      new URL('/api/strava/error?error=callback_failed', request.url)
+      new URL('/api/strava/error?error=callback_failed', baseUrl)
     );
   }
 }
