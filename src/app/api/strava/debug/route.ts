@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getClubEvents, getValidAccessToken } from '@/lib/strava';
+import { getValidAccessToken, stravaApiFetch } from '@/lib/strava';
 import { isAdmin } from '@/lib/roles';
 
 /**
@@ -85,26 +85,18 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch raw events
-    const events = await getClubEvents(connection.stravaClubId, accessToken);
+    // Fetch raw events - return EVERYTHING Strava sends (no type filtering)
+    const events = await stravaApiFetch<Record<string, unknown>[]>(
+      `/clubs/${connection.stravaClubId}/group_events`,
+      accessToken
+    );
 
     return NextResponse.json({
       clubId: connection.stravaClubId,
       clubName: connection.stravaClubName,
       eventCount: events.length,
-      events: events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        description: e.description?.substring(0, 100),
-        address: e.address,
-        start_latlng: e.start_latlng,
-        start_date_local: e.start_date_local,
-        created_at: e.created_at,
-        upcoming_occurrences: e.upcoming_occurrences,
-        activity_type: e.activity_type,
-        private: e.private,
-        skill_level: e.skill_level,
-      })),
+      // Return complete raw event data to see ALL fields Strava returns
+      rawEvents: events,
     });
   } catch (error) {
     console.error('GET /api/strava/debug error:', error);
