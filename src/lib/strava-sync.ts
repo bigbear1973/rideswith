@@ -47,9 +47,32 @@ function mapStravaEventToRide(
   organizerId: string,
   stravaClubId: string
 ) {
-  // Get the next occurrence date
-  const nextOccurrence = event.upcoming_occurrences?.[0];
-  if (!nextOccurrence) {
+  // Get the event date - try upcoming_occurrences first, then start_date_local
+  let eventDate: Date | null = null;
+  const now = new Date();
+
+  // Check upcoming_occurrences for a future date
+  if (event.upcoming_occurrences && event.upcoming_occurrences.length > 0) {
+    for (const occurrence of event.upcoming_occurrences) {
+      const date = new Date(occurrence);
+      if (date > now) {
+        eventDate = date;
+        break;
+      }
+    }
+  }
+
+  // Fall back to start_date_local if no future occurrence found
+  if (!eventDate && event.start_date_local) {
+    const date = new Date(event.start_date_local);
+    if (date > now) {
+      eventDate = date;
+    }
+  }
+
+  // Skip events with no valid future date
+  if (!eventDate) {
+    console.log(`Skipping event "${event.title}" - no future date found`);
     return null;
   }
 
@@ -78,7 +101,7 @@ function mapStravaEventToRide(
   return {
     title: event.title,
     description: event.description || null,
-    date: new Date(nextOccurrence),
+    date: eventDate,
     timezone: 'UTC',
     locationName: event.address || 'See Strava event for details',
     locationAddress: event.address || '',
