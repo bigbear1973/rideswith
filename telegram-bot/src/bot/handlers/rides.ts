@@ -63,14 +63,17 @@ export async function handleRides(ctx: Context): Promise<void> {
     // Parse the natural language query with Groq
     const today = new Date().toISOString().split('T')[0];
     const parsed = await parseRideQuery(query, today);
+    console.log('Parsed query:', JSON.stringify(parsed));
 
     // Build search params from parsed query
     const searchParams = buildSearchParams(parsed, user);
+    console.log('Search params:', JSON.stringify(searchParams));
 
     // If we need to geocode a location
     let locationName: string | undefined;
     if (parsed.location?.name) {
       const geocoded = await geocodeLocation(parsed.location.name);
+      console.log('Geocoded result:', JSON.stringify(geocoded));
       if (geocoded) {
         searchParams.lat = geocoded.latitude;
         searchParams.lng = geocoded.longitude;
@@ -94,7 +97,9 @@ export async function handleRides(ctx: Context): Promise<void> {
     }
 
     // Search for rides
+    console.log('Final search params:', JSON.stringify(searchParams));
     const rides = await searchRides(searchParams);
+    console.log('Rides found:', rides.length);
 
     // Delete loading message
     await ctx.api.deleteMessage(ctx.chat!.id, loadingMsg.message_id).catch(() => {});
