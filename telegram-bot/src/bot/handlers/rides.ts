@@ -158,8 +158,6 @@ async function findAlternatives(
   originalParams: SearchParams,
   parsed: ParsedQuery
 ): Promise<{ rides: RideResponse[]; message: string }> {
-  const tried: string[] = [];
-
   // Build a description of what was searched
   const searchDesc: string[] = [];
   if (parsed.discipline) searchDesc.push(parsed.discipline);
@@ -173,61 +171,59 @@ async function findAlternatives(
     };
     searchDesc.push(dateWords[parsed.dateRange.relative] || 'that date');
   }
-  if (parsed.pace?.min || parsed.pace?.max) searchDesc.push('that pace');
+  if (parsed.pace?.min || parsed.pace?.max) searchDesc.push('at that pace');
 
-  // Try 1: Remove discipline filter but keep date
-  if (parsed.discipline && originalParams.dateFrom) {
-    const relaxedParams = { ...originalParams };
-    // Discipline isn't in SearchParams yet, so this is for future use
-    const rides = await searchRides(relaxedParams);
-    if (rides.length > 0) {
-      const noExactMatch = searchDesc.length > 0
-        ? `🚴 No ${searchDesc.join(' ')} rides found.`
-        : '🚴 No exact matches found.';
-      return {
-        rides,
-        message: `${noExactMatch}\n\n💡 But here's what's coming up:`,
-      };
-    }
-    tried.push('same date, any type');
-  }
+  const noExactMatch = searchDesc.length > 0
+    ? `🚴 No ${searchDesc.join(' ')} rides found.`
+    : '🚴 No exact matches found.';
 
-  // Try 2: Remove date filter but keep location
-  if (originalParams.dateFrom && originalParams.lat !== undefined) {
-    const relaxedParams = {
-      ...originalParams,
-      dateFrom: undefined,
-      dateTo: undefined,
-      limit: 5,
-    };
-    const rides = await searchRides(relaxedParams);
-    if (rides.length > 0) {
-      const noExactMatch = searchDesc.length > 0
-        ? `🚴 No ${searchDesc.join(' ')} rides found.`
-        : '🚴 No rides found for that date.';
-      return {
-        rides,
-        message: `${noExactMatch}\n\n💡 Here are upcoming rides nearby:`,
-      };
-    }
-    tried.push('any date nearby');
-  }
-
-  // Try 3: Just location, no other filters
-  if (originalParams.lat !== undefined) {
+  // Try 1: Same date, any discipline (if we had a date filter)
+  if (originalParams.dateFrom) {
     const relaxedParams: SearchParams = {
       lat: originalParams.lat,
       lng: originalParams.lng,
-      radius: originalParams.radius || 50,
+      radius: originalParams.radius,
+      dateFrom: originalParams.dateFrom,
+      dateTo: originalParams.dateTo,
       limit: 5,
     };
+    console.log('Trying alternatives with same date:', JSON.stringify(relaxedParams));
     const rides = await searchRides(relaxedParams);
     if (rides.length > 0) {
       return {
         rides,
-        message: `🚴 No exact matches, but here are rides nearby:`,
+        message: `${noExactMatch}\n\n💡 But here's what's happening ${parsed.dateRange?.relative || 'then'}:`,
       };
     }
+  }
+
+  // Try 2: Remove date filter, keep location if we have it
+  if (originalParams.dateFrom) {
+    const relaxedParams: SearchParams = {
+      lat: originalParams.lat,
+      lng: originalParams.lng,
+      radius: originalParams.radius,
+      limit: 5,
+    };
+    console.log('Trying alternatives without date:', JSON.stringify(relaxedParams));
+    const rides = await searchRides(relaxedParams);
+    if (rides.length > 0) {
+      return {
+        rides,
+        message: `${noExactMatch}\n\n💡 Here are upcoming rides:`,
+      };
+    }
+  }
+
+  // Try 3: No filters at all - just get some rides
+  const relaxedParams: SearchParams = { limit: 5 };
+  console.log('Trying alternatives with no filters');
+  const rides = await searchRides(relaxedParams);
+  if (rides.length > 0) {
+    return {
+      rides,
+      message: `${noExactMatch}\n\n💡 Here are some upcoming rides you might like:`,
+    };
   }
 
   // No alternatives found
