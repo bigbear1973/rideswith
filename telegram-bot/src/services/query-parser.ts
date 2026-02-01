@@ -46,17 +46,16 @@ IMPORTANT: Speed/pace is always in km/h. Distance is always in km.
 - "long" ride means 60-100 km
 - "epic" ride means 100+ km
 
-For dates:
-- "this weekend" = Saturday and Sunday of current week
-- "next week" = Monday through Sunday of next week
-- If no date specified, assume they want upcoming rides
+CRITICAL: Only include dateRange if the user EXPLICITLY mentions a time frame (today, tomorrow, this weekend, next week, etc).
+- Do NOT add dateRange for queries like "rides near Berlin" - they want ALL upcoming rides
+- Only add dateRange for queries like "rides this weekend" or "rides tomorrow"
 
 Examples:
-- "rides near Berlin" → location search near Berlin
-- "fast rides this weekend" → search with pace filter and date filter
-- "any gravel rides?" → search with discipline filter
-- "rides in the next 3 days" → search with date range
-- "Straede rides" → search with community filter`;
+- "rides near Berlin" → location only, NO dateRange
+- "fast rides this weekend" → location + pace + dateRange
+- "any gravel rides?" → discipline only, NO dateRange
+- "rides tomorrow" → dateRange only
+- "Straede rides" → community filter only`;
 
 /**
  * Parse a ride query using Groq's fast inference API
