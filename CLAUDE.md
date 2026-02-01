@@ -581,6 +581,102 @@ model UserNotificationSettings {
 
 **Generate VAPID keys:** Run `node -e "console.log(require('web-push').generateVAPIDKeys())"`
 
+### Telegram Bot (IMPLEMENTED)
+
+Telegram bot for natural language ride discovery at [@rideswith_bot](https://t.me/rideswith_bot).
+
+**Architecture:**
+- Separate Node.js service in `telegram-bot/` directory
+- Uses Grammy framework (TypeScript Telegram bot library)
+- Groq API (Llama 3.3 70B) for natural language query parsing
+- Shares PostgreSQL database with main app via Prisma
+- Deployed as separate Railway service with webhooks
+
+**Features:**
+- Natural language ride search ("gravel rides this weekend", "rides near Berlin")
+- Location-aware searches (share location or search by city)
+- Geocoding via OpenStreetMap Nominatim (free, no API key)
+- Smart alternatives when no exact matches found
+- Inline links to each ride in results
+
+**Bot Commands:**
+- `/start` - Welcome message and location request
+- `/rides [query]` - Search for rides
+- `/nearby` - Rides near saved location
+- `/settings` - Update preferences
+- `/help` - Usage guide
+
+**Key Files:**
+```
+telegram-bot/
+├── src/
+│   ├── index.ts              # Entry point (webhook server)
+│   ├── config.ts             # Environment config
+│   ├── bot/
+│   │   ├── bot.ts            # Grammy bot setup
+│   │   └── handlers/         # Command handlers
+│   │       ├── start.ts
+│   │       ├── help.ts
+│   │       ├── rides.ts      # Main search handler
+│   │       ├── nearby.ts
+│   │       ├── settings.ts
+│   │       └── message.ts    # Natural language fallback
+│   ├── services/
+│   │   ├── rideswith-api.ts  # HTTP client for /api/rides
+│   │   ├── query-parser.ts   # Groq NLP parsing
+│   │   └── geocoding.ts      # Nominatim geocoding
+│   ├── db/
+│   │   └── prisma.ts
+│   └── utils/
+│       └── format.ts         # Telegram message formatting
+├── prisma/
+│   └── schema.prisma         # Local copy for standalone deploy
+├── package.json
+├── tsconfig.json
+└── nixpacks.toml             # Railway build config
+```
+
+**Database Model:**
+```prisma
+model TelegramUser {
+  id               String   @id @default(cuid())
+  telegramId       BigInt   @unique
+  username         String?
+  firstName        String?
+  defaultLatitude  Float?
+  defaultLongitude Float?
+  defaultCity      String?
+  defaultRadius    Int      @default(50)
+  unitPreference   String   @default("km")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+```
+
+**Environment Variables (telegram-bot service):**
+- `TELEGRAM_BOT_TOKEN` - Bot token from @BotFather
+- `GROQ_API_KEY` - Groq API key for NLP
+- `DATABASE_URL` - Shared PostgreSQL connection
+- `WEBHOOK_URL` - Public Railway URL for webhooks
+- `NODE_ENV` - "production" for webhook mode
+
+**Development:**
+```bash
+cd telegram-bot
+npm install
+npm run dev    # Long-polling mode (no webhook needed)
+```
+
+**Website Integration:**
+- `/telegram` page with bot instructions and usage examples
+- "Telegram Bot" link in main navigation
+- Callout on Discover page
+
+**Future: Analytics (Planned)**
+- `TelegramBotEvent` model for tracking searches, commands, results
+- Admin page at `/admin/telegram` for usage stats
+- See plan file: `.claude/plans/ethereal-sleeping-trinket.md`
+
 ---
 
 ## Site Structure & 404 Analysis
