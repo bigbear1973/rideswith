@@ -1012,6 +1012,7 @@ export default function EditChapterPage() {
               <StravaSyncSettings
                 chapterId={chapter.id}
                 showClubSelection={new URLSearchParams(window.location.search).get('selectClub') === 'true'}
+                createRideUrl={`/create?chapterId=${chapter.id}`}
               />
             </div>
 

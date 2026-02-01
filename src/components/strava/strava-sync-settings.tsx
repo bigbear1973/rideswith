@@ -12,9 +12,11 @@ import {
   RefreshCw,
   Unlink,
   ExternalLink,
+  Plus,
 } from 'lucide-react';
 import { StravaConnectButton, StravaIcon } from './strava-connect';
 import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
 
 interface Club {
   id: string;
@@ -49,11 +51,13 @@ interface SyncResult {
 interface StravaSyncSettingsProps {
   chapterId: string;
   showClubSelection?: boolean;
+  createRideUrl?: string;
 }
 
 export function StravaSyncSettings({
   chapterId,
   showClubSelection = false,
+  createRideUrl,
 }: StravaSyncSettingsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState<SyncStatus | null>(null);
@@ -465,6 +469,21 @@ export function StravaSyncSettings({
           Disconnect
         </Button>
       </div>
+
+      {/* Manual create fallback */}
+      {createRideUrl && (
+        <div className="pt-4 border-t">
+          <p className="text-sm text-muted-foreground mb-2">
+            Strava sync not working? Some events may have outdated data in Strava&apos;s API.
+          </p>
+          <Button variant="outline" asChild>
+            <Link href={createRideUrl}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create ride manually
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
