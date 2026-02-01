@@ -18,6 +18,9 @@ async function main() {
       throw new Error('WEBHOOK_URL is required in production');
     }
 
+    // Initialize bot (fetches bot info from Telegram)
+    await bot.init();
+
     // Set up webhook
     await setupWebhook(`${config.webhookUrl}/webhook`);
 
