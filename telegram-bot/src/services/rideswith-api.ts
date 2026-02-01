@@ -53,7 +53,7 @@ export interface SearchParams {
  */
 export async function searchRides(params: SearchParams = {}): Promise<RideResponse[]> {
   try {
-    const url = new URL('/rides', config.ridesWithApiUrl);
+    const url = new URL(`${config.ridesWithApiUrl}/rides`);
 
     // Add query parameters
     if (params.lat !== undefined) url.searchParams.set('lat', params.lat.toString());
