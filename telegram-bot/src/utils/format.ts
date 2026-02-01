@@ -71,7 +71,8 @@ export function calculateDistance(
 export function formatRide(
   ride: RideResponse,
   userLat?: number,
-  userLng?: number
+  userLng?: number,
+  includeLink?: boolean
 ): string {
   const lines: string[] = [];
 
@@ -101,11 +102,11 @@ export function formatRide(
 
   // Community/Brand
   if (ride.brand) {
-    lines.push(`\n🏢 ${escapeHtml(ride.brand.name)}`);
+    lines.push(`🏢 ${escapeHtml(ride.brand.name)}`);
   }
 
   // Attendees
-  let attendeeLine = `\n👥 ${ride.attendeeCount} going`;
+  let attendeeLine = `👥 ${ride.attendeeCount} going`;
   if (ride.maxAttendees) {
     const spotsLeft = ride.maxAttendees - ride.attendeeCount;
     if (spotsLeft > 0) {
@@ -115,6 +116,11 @@ export function formatRide(
     }
   }
   lines.push(attendeeLine);
+
+  // Include link if requested
+  if (includeLink) {
+    lines.push(`🔗 <a href="https://rideswith.com/rides/${ride.id}">View ride</a>`);
+  }
 
   return lines.join('\n');
 }
@@ -137,7 +143,7 @@ export function formatRideList(
     : `🚴 Found ${rides.length} ride${rides.length === 1 ? '' : 's'}:`;
 
   const rideBlocks = rides.map((ride) => {
-    const formatted = formatRide(ride, userLat, userLng);
+    const formatted = formatRide(ride, userLat, userLng, true);
     return `━━━━━━━━━━━━━━━\n${formatted}`;
   });
 

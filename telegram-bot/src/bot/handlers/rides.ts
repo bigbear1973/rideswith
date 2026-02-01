@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import { prisma } from '../../db/prisma.js';
 import { parseRideQuery, type ParsedQuery } from '../../services/query-parser.js';
 import { geocodeLocation } from '../../services/geocoding.js';
-import { searchRides, getRideUrl, type SearchParams } from '../../services/rideswith-api.js';
+import { searchRides, getRideUrl, type SearchParams, type RideResponse } from '../../services/rideswith-api.js';
 import { formatRideList, getDateRange } from '../../utils/format.js';
 
 interface UserPrefs {
@@ -98,33 +98,44 @@ export async function handleRides(ctx: Context): Promise<void> {
 
     // Search for rides
     console.log('Final search params:', JSON.stringify(searchParams));
-    const rides = await searchRides(searchParams);
+    let rides = await searchRides(searchParams);
     console.log('Rides found:', rides.length);
 
     // Delete loading message
     await ctx.api.deleteMessage(ctx.chat!.id, loadingMsg.message_id).catch(() => {});
 
-    // Format and send results
-    const message = formatRideList(
-      rides,
-      locationName,
-      searchParams.lat,
-      searchParams.lng
-    );
-
-    // Build inline keyboard with View buttons
-    const keyboard = new InlineKeyboard();
-    rides.slice(0, 5).forEach((ride, index) => {
-      if (index > 0) keyboard.row();
-      const title = ride.title.length > 25 ? ride.title.substring(0, 22) + '...' : ride.title;
-      keyboard.url(`View: ${title}`, getRideUrl(ride.id));
-    });
-
-    if (rides.length > 0) {
-      keyboard.row().url('🌐 Browse all rides', 'https://rideswith.com/discover');
-    } else {
-      keyboard.url('🌐 Browse rides on RidesWith', 'https://rideswith.com/discover');
+    // If no rides found, try to find alternatives
+    let alternativeMessage = '';
+    if (rides.length === 0) {
+      const alternatives = await findAlternatives(searchParams, parsed);
+      if (alternatives.rides.length > 0) {
+        rides = alternatives.rides;
+        alternativeMessage = alternatives.message;
+      }
     }
+
+    // Format and send results
+    let message: string;
+    if (alternativeMessage) {
+      // Show "no exact matches" + alternatives
+      message = alternativeMessage + '\n\n' + formatRideList(
+        rides,
+        locationName,
+        searchParams.lat,
+        searchParams.lng
+      );
+    } else {
+      message = formatRideList(
+        rides,
+        locationName,
+        searchParams.lat,
+        searchParams.lng
+      );
+    }
+
+    // Build inline keyboard - just the browse button since links are now inline
+    const keyboard = new InlineKeyboard();
+    keyboard.url('🌐 Browse all rides on RidesWith', 'https://rideswith.com/discover');
 
     await ctx.reply(message, {
       parse_mode: 'HTML',
@@ -138,6 +149,89 @@ export async function handleRides(ctx: Context): Promise<void> {
       'Sorry, something went wrong while searching. Please try again.\n\nYou can also browse rides at rideswith.com/discover'
     );
   }
+}
+
+/**
+ * Find alternative rides when exact search returns no results
+ */
+async function findAlternatives(
+  originalParams: SearchParams,
+  parsed: ParsedQuery
+): Promise<{ rides: RideResponse[]; message: string }> {
+  const tried: string[] = [];
+
+  // Build a description of what was searched
+  const searchDesc: string[] = [];
+  if (parsed.discipline) searchDesc.push(parsed.discipline);
+  if (parsed.dateRange?.relative) {
+    const dateWords: Record<string, string> = {
+      today: 'today',
+      tomorrow: 'tomorrow',
+      this_weekend: 'this weekend',
+      this_week: 'this week',
+      next_week: 'next week',
+    };
+    searchDesc.push(dateWords[parsed.dateRange.relative] || 'that date');
+  }
+  if (parsed.pace?.min || parsed.pace?.max) searchDesc.push('that pace');
+
+  // Try 1: Remove discipline filter but keep date
+  if (parsed.discipline && originalParams.dateFrom) {
+    const relaxedParams = { ...originalParams };
+    // Discipline isn't in SearchParams yet, so this is for future use
+    const rides = await searchRides(relaxedParams);
+    if (rides.length > 0) {
+      const noExactMatch = searchDesc.length > 0
+        ? `🚴 No ${searchDesc.join(' ')} rides found.`
+        : '🚴 No exact matches found.';
+      return {
+        rides,
+        message: `${noExactMatch}\n\n💡 But here's what's coming up:`,
+      };
+    }
+    tried.push('same date, any type');
+  }
+
+  // Try 2: Remove date filter but keep location
+  if (originalParams.dateFrom && originalParams.lat !== undefined) {
+    const relaxedParams = {
+      ...originalParams,
+      dateFrom: undefined,
+      dateTo: undefined,
+      limit: 5,
+    };
+    const rides = await searchRides(relaxedParams);
+    if (rides.length > 0) {
+      const noExactMatch = searchDesc.length > 0
+        ? `🚴 No ${searchDesc.join(' ')} rides found.`
+        : '🚴 No rides found for that date.';
+      return {
+        rides,
+        message: `${noExactMatch}\n\n💡 Here are upcoming rides nearby:`,
+      };
+    }
+    tried.push('any date nearby');
+  }
+
+  // Try 3: Just location, no other filters
+  if (originalParams.lat !== undefined) {
+    const relaxedParams: SearchParams = {
+      lat: originalParams.lat,
+      lng: originalParams.lng,
+      radius: originalParams.radius || 50,
+      limit: 5,
+    };
+    const rides = await searchRides(relaxedParams);
+    if (rides.length > 0) {
+      return {
+        rides,
+        message: `🚴 No exact matches, but here are rides nearby:`,
+      };
+    }
+  }
+
+  // No alternatives found
+  return { rides: [], message: '' };
 }
 
 function buildSearchParams(
