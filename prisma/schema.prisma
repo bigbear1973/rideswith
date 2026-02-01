@@ -51,6 +51,7 @@ model User {
   follows              Follow[]
   pushSubscriptions    PushSubscription[]
   notificationSettings UserNotificationSettings?
+  stravaConnections    StravaConnection[]
 }
 
 model Account {
@@ -181,10 +182,12 @@ model Chapter {
   updatedAt DateTime @updatedAt
 
   // Relations
-  members   ChapterMember[]
-  rides     Ride[]
-  sponsors  Sponsor[]
-  followers Follow[]
+  members            ChapterMember[]
+  rides              Ride[]
+  sponsors           Sponsor[]
+  followers          Follow[]
+  stravaConnection   StravaConnection?
+  stravaSyncedEvents StravaSyncedEvent[]
 
   @@unique([brandId, slug])
 }
@@ -333,6 +336,10 @@ model Ride {
   // Optional chapter association (for brand-affiliated rides)
   chapterId String?
   chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  // Strava sync (if ride was imported from Strava)
+  stravaEventUrl     String?           // Link to Strava event
+  stravaSyncedEvent  StravaSyncedEvent?
 
   rsvps      Rsvp[]
   routes     RideRoute[]  // Community-contributed route links
@@ -562,4 +569,52 @@ model TelegramUser {
   updatedAt       DateTime @updatedAt
 
   @@index([telegramId])
+}
+
+// ============================================
+// Strava Integration
+// ============================================
+
+model StravaConnection {
+  id        String @id @default(cuid())
+  userId    String
+  chapterId String @unique
+
+  // OAuth tokens
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  expiresAt    DateTime
+
+  // Strava club info
+  stravaClubId   String
+  stravaClubName String?
+
+  // Sync settings
+  autoSync      Boolean   @default(false)
+  lastSyncAt    DateTime?
+  lastSyncError String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([chapterId])
+}
+
+model StravaSyncedEvent {
+  id              String   @id @default(cuid())
+  chapterId       String
+  rideId          String   @unique
+  stravaEventId   String
+  stravaEventHash String?  // Hash of event data to detect changes
+  syncedAt        DateTime @default(now())
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  ride    Ride    @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@unique([chapterId, stravaEventId])
+  @@index([chapterId])
 }

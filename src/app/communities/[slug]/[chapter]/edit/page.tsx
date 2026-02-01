@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ChevronLeft, Loader2, Check, AlertCircle, Plus, Megaphone, Settings, Users, Search, X, Crown, Shield, UserCheck, MessageCircle, Trash2, Link2, Instagram, Twitter, Facebook, Youtube, Globe } from 'lucide-react';
 import { SponsorForm, SponsorList } from '@/components/communities';
+import { StravaSyncSettings } from '@/components/strava';
 
 interface ChapterMember {
   id: string;
@@ -993,6 +994,25 @@ export default function EditChapterPage() {
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* Strava Integration Section */}
+            <div className="space-y-4 border-t pt-6">
+              <div>
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                  </svg>
+                  Strava Integration
+                </Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Sync events from your Strava club to automatically create rides
+                </p>
+              </div>
+              <StravaSyncSettings
+                chapterId={chapter.id}
+                showClubSelection={new URLSearchParams(window.location.search).get('selectClub') === 'true'}
+              />
             </div>
 
             {/* Sponsors/Partners/Ads Section */}

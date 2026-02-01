@@ -20,6 +20,8 @@ Cycling group ride discovery and management platform.
 - `src/lib/brand-dev.ts` - Brand.dev API integration for auto-fetching brand assets
 - `src/lib/roles.ts` - Chapter role helpers (normalizeRole, isOwner, isAdmin, isModerator)
 - `src/lib/platform-admin.ts` - Platform admin helpers (isPlatformAdmin, canManageSponsors)
+- `src/lib/strava.ts` - Strava OAuth and API client
+- `src/lib/strava-sync.ts` - Strava club event sync logic
 - `src/components/providers/units-provider.tsx` - km/mi unit preference context
 - `src/components/rides/location-link.tsx` - Map app picker (Apple Maps, Google Maps, Waze)
 - `src/components/rides/cake-and-coffee.tsx` - Post-ride comments and media gallery
@@ -52,6 +54,9 @@ npm run db:studio    # Open Prisma Studio
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - Web Push VAPID public key (for push notifications)
 - `VAPID_PRIVATE_KEY` - Web Push VAPID private key (for push notifications)
 - `VAPID_EMAIL` - Contact email for push service (optional, defaults to support@rideswith.com)
+- `STRAVA_CLIENT_ID` - Strava OAuth app client ID
+- `STRAVA_CLIENT_SECRET` - Strava OAuth app client secret
+- `STRAVA_REDIRECT_URI` - OAuth callback URL (defaults to AUTH_URL/api/strava/callback)
 
 ## Design Notes
 
@@ -580,6 +585,85 @@ model UserNotificationSettings {
 - `VAPID_EMAIL` - Contact email for push service (optional)
 
 **Generate VAPID keys:** Run `node -e "console.log(require('web-push').generateVAPIDKeys())"`
+
+### Strava Club Events Sync (IMPLEMENTED)
+
+Chapter owners can connect their Strava club to automatically sync events to RidesWith.
+
+**Features:**
+- OAuth 2.0 authentication with Strava
+- Club selection from user's Strava memberships
+- Manual sync trigger to import events
+- Duplicate detection (prevents reimporting same events)
+- Event updates (detects changes and updates rides)
+
+**Database Models:**
+```prisma
+model StravaConnection {
+  id             String   @id @default(cuid())
+  userId         String
+  chapterId      String   @unique
+  accessToken    String   @db.Text
+  refreshToken   String   @db.Text
+  expiresAt      DateTime
+  stravaClubId   String
+  stravaClubName String?
+  autoSync       Boolean  @default(false)
+  lastSyncAt     DateTime?
+  lastSyncError  String?
+  // ... relations to User and Chapter
+}
+
+model StravaSyncedEvent {
+  id              String   @id @default(cuid())
+  chapterId       String
+  rideId          String   @unique
+  stravaEventId   String
+  stravaEventHash String?  // Hash to detect changes
+  syncedAt        DateTime @default(now())
+  // ... relations to Chapter and Ride
+  @@unique([chapterId, stravaEventId])
+}
+```
+
+**API Endpoints:**
+- `GET /api/strava/authorize?chapterId=xxx` - Start OAuth flow
+- `GET /api/strava/callback` - OAuth callback, stores tokens
+- `DELETE /api/strava/disconnect?chapterId=xxx` - Remove connection
+- `GET/POST /api/strava/clubs?chapterId=xxx` - List/select clubs
+- `GET/POST/PUT /api/strava/sync/[chapterId]` - Get status, trigger sync, update settings
+
+**Key Files:**
+- `src/lib/strava.ts` - OAuth functions, API client wrapper
+- `src/lib/strava-sync.ts` - Sync logic (fetch, map, create rides)
+- `src/components/strava/strava-sync-settings.tsx` - Chapter settings UI
+- `src/app/api/strava/*` - API routes
+
+**UI Location:**
+- Chapter settings page: `/communities/[slug]/[chapter]/edit`
+- "Strava Integration" section with connect/sync controls
+
+**Event Mapping:**
+| Strava Field | RidesWith Field |
+|--------------|-----------------|
+| title | title |
+| description | description |
+| address | locationName |
+| start_latlng[0] | latitude |
+| start_latlng[1] | longitude |
+| upcoming_occurrences[0] | date |
+| skill_level (1-4) | paceMin/paceMax |
+
+**Environment Variables:**
+- `STRAVA_CLIENT_ID` - From Strava API settings
+- `STRAVA_CLIENT_SECRET` - From Strava API settings
+- `STRAVA_REDIRECT_URI` - Optional, defaults to `{AUTH_URL}/api/strava/callback`
+
+**Setup:**
+1. Register app at https://www.strava.com/settings/api
+2. Set Authorization Callback Domain to your domain (e.g., rideswith.com)
+3. Add environment variables to Railway/deployment
+4. Chapter admins can connect via chapter settings page
 
 ### Telegram Bot (IMPLEMENTED)
 
