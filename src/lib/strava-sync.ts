@@ -173,6 +173,15 @@ export async function syncStravaEvents(chapterId: string): Promise<SyncResult> {
     // Fetch events from Strava
     const events = await getClubEvents(connection.stravaClubId, accessToken);
 
+    // Log raw event data for debugging
+    console.log(`[Strava Sync] Fetched ${events.length} events from club ${connection.stravaClubId}`);
+    for (const event of events) {
+      console.log(`[Strava Sync] Event: "${event.title}" (ID: ${event.id})`);
+      console.log(`  - upcoming_occurrences: ${JSON.stringify(event.upcoming_occurrences)}`);
+      console.log(`  - start_date_local: ${event.start_date_local}`);
+      console.log(`  - created_at: ${event.created_at}`);
+    }
+
     // Find or create an organizer for the user who connected Strava
     let organizer = await prisma.organizer.findFirst({
       where: {
