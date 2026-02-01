@@ -115,6 +115,10 @@ export function StravaSyncSettings({
   };
 
   const selectClub = async (club: Club) => {
+    setIsSyncing(true);
+    setSyncResult(null);
+    setError(null);
+
     try {
       const res = await fetch('/api/strava/clubs', {
         method: 'POST',
@@ -126,15 +130,22 @@ export function StravaSyncSettings({
         }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         setShowClubs(false);
+        // Show sync result from initial sync
+        if (data.syncResult) {
+          setSyncResult(data.syncResult);
+        }
         await loadStatus();
       } else {
-        const data = await res.json();
         setError(data.error || 'Failed to select club');
       }
     } catch {
       setError('Failed to select club');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -249,7 +260,14 @@ export function StravaSyncSettings({
           Select a Strava club to sync events from:
         </p>
 
-        {isLoadingClubs ? (
+        {isSyncing ? (
+          <div className="flex items-center gap-2 py-4">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">
+              Connecting and syncing events...
+            </span>
+          </div>
+        ) : isLoadingClubs ? (
           <div className="flex items-center gap-2 py-4">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm text-muted-foreground">

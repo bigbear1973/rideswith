@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getAthleteClubs, getValidAccessToken } from '@/lib/strava';
+import { syncStravaEvents } from '@/lib/strava-sync';
 import { isAdmin } from '@/lib/roles';
 
 /**
@@ -198,10 +199,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Run initial sync immediately
+    const syncResult = await syncStravaEvents(chapterId);
+
     return NextResponse.json({
       success: true,
       clubId,
       clubName,
+      syncResult,
     });
   } catch (error) {
     console.error('POST /api/strava/clubs error:', error);
