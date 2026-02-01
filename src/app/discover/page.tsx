@@ -680,6 +680,17 @@ export default function DiscoverPage() {
             Browse Past Rides
           </Link>
         )}
+
+        {/* Telegram Bot Callout */}
+        <div className="mt-12 pt-8 border-t border-border">
+          <p className="text-sm text-muted-foreground">
+            Prefer searching on your phone? Try our{' '}
+            <Link href="/telegram" className="underline hover:text-foreground">
+              Telegram bot
+            </Link>
+            {' '}&mdash; just message @rideswith_bot with queries like &quot;rides near Berlin&quot;.
+          </p>
+        </div>
       </div>
     </div>
   );
