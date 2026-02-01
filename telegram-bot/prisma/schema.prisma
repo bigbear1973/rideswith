@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Telegram Bot - only needs TelegramUser model
+// This is a subset of the main app's schema
+
+model TelegramUser {
+  id              String   @id @default(cuid())
+  telegramId      BigInt   @unique
+  username        String?
+  firstName       String?
+
+  // Preferences
+  defaultLatitude  Float?
+  defaultLongitude Float?
+  defaultCity      String?
+  defaultRadius    Int      @default(50)  // km
+  unitPreference   String   @default("km") // "km" | "mi"
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([telegramId])
+}
