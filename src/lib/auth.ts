@@ -4,10 +4,10 @@ import { Resend } from 'resend';
 import { prisma } from './prisma';
 import type { Adapter } from 'next-auth/adapters';
 
-// Log environment status on startup
+// Log environment status on startup (avoid leaking secrets)
 console.log('[Auth] RESEND_API_KEY configured:', !!process.env.RESEND_API_KEY);
-console.log('[Auth] EMAIL_FROM:', process.env.EMAIL_FROM || 'not set, using default');
-console.log('[Auth] AUTH_URL:', process.env.AUTH_URL || 'https://rideswith.com');
+console.log('[Auth] EMAIL_FROM configured:', !!process.env.EMAIL_FROM);
+console.log('[Auth] AUTH_URL configured:', !!process.env.AUTH_URL);
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -23,16 +23,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       type: 'email',
       maxAge: 24 * 60 * 60, // 24 hours
       sendVerificationRequest: async ({ identifier: email, url }) => {
-        console.log('[Auth] sendVerificationRequest called for:', email);
-        console.log('[Auth] Verification URL:', url);
-
         if (!process.env.RESEND_API_KEY) {
           console.error('[Auth] RESEND_API_KEY is not configured!');
           throw new Error('Email service not configured');
         }
 
         const fromEmail = process.env.EMAIL_FROM || 'RidesWith <onboarding@resend.dev>';
-        console.log('[Auth] Sending from:', fromEmail);
+        console.log('[Auth] Sending magic link email');
 
         try {
           const result = await resend.emails.send({
@@ -69,14 +66,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             `,
           });
 
-          console.log('[Auth] Resend API response:', JSON.stringify(result, null, 2));
-
           if (result.error) {
             console.error('[Auth] Resend error:', result.error);
             throw new Error(result.error.message);
           }
 
-          console.log('[Auth] Magic link email sent successfully to:', email, 'ID:', result.data?.id);
+          console.log('[Auth] Magic link email sent successfully. ID:', result.data?.id);
         } catch (error) {
           console.error('[Auth] Failed to send magic link email:', error);
           throw error;

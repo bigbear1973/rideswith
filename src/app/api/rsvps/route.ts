@@ -5,12 +5,41 @@ import { prisma } from '@/lib/prisma';
 // GET /api/rsvps?rideId=xxx - Get RSVPs for a ride
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const rideId = searchParams.get('rideId');
 
     if (!rideId) {
       return NextResponse.json({ error: 'rideId is required' }, { status: 400 });
     }
+
+    const ride = await prisma.ride.findUnique({
+      where: { id: rideId },
+      select: {
+        id: true,
+        organizer: {
+          select: {
+            members: {
+              where: {
+                userId: session.user.id,
+                role: { in: ['OWNER', 'ADMIN'] },
+              },
+              select: { id: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!ride) {
+      return NextResponse.json({ error: 'Ride not found' }, { status: 404 });
+    }
+
+    const canSeeEmail = ride.organizer.members.length > 0;
 
     const rsvps = await prisma.rsvp.findMany({
       where: { rideId },
@@ -28,7 +57,21 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'asc' },
     });
 
-    return NextResponse.json(rsvps);
+    if (canSeeEmail) {
+      return NextResponse.json(rsvps);
+    }
+
+    return NextResponse.json(
+      rsvps.map((rsvp) => ({
+        ...rsvp,
+        user: {
+          id: rsvp.user.id,
+          name: rsvp.user.name,
+          image: rsvp.user.image,
+          slug: rsvp.user.slug,
+        },
+      }))
+    );
   } catch (error) {
     console.error('GET /api/rsvps error:', error);
     return NextResponse.json({ error: 'Failed to fetch RSVPs' }, { status: 500 });
