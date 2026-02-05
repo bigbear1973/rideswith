@@ -14,6 +14,7 @@ import { useBrand } from '@/components/providers/brand-provider';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 import { UnitSelector } from './unit-selector';
+import { defaultLocale, locales } from '@/i18n/routing';
 import {
   Sheet,
   SheetContent,
@@ -38,6 +39,13 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  // Minimal locale switcher: keep current path and swap /en or /de prefix.
+  const pathParts = pathname.split('/');
+  const currentLocale = locales.includes(pathParts[1] as (typeof locales)[number])
+    ? (pathParts[1] as (typeof locales)[number])
+    : defaultLocale;
+  const basePath = currentLocale === defaultLocale ? pathname : `/${pathParts.slice(2).join('/') || ''}` || '/';
 
   return (
     <header className="border-b border-border bg-background sticky top-0 z-[1000]">
@@ -80,6 +88,24 @@ export function Navbar() {
           {/* Unit Selector - show for guests */}
           {!session && <UnitSelector />}
 
+          {/* Locale Switcher */}
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {locales.map((locale) => {
+              const href = locale === defaultLocale ? basePath : `/${locale}${basePath}`;
+              const isActive = locale === currentLocale;
+              return (
+                <Link
+                  key={locale}
+                  href={href}
+                  className={isActive ? 'text-foreground' : 'hover:text-foreground'}
+                  aria-label={`Switch language to ${locale}`}
+                >
+                  {locale}
+                </Link>
+              );
+            })}
+          </div>
+
           {/* Theme Toggle */}
           <button
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
@@ -107,6 +133,24 @@ export function Navbar() {
         <div className="flex md:hidden items-center gap-4">
           {/* Unit Selector - show for guests */}
           {!session && <UnitSelector />}
+
+          {/* Locale Switcher */}
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {locales.map((locale) => {
+              const href = locale === defaultLocale ? basePath : `/${locale}${basePath}`;
+              const isActive = locale === currentLocale;
+              return (
+                <Link
+                  key={locale}
+                  href={href}
+                  className={isActive ? 'text-foreground' : 'hover:text-foreground'}
+                  aria-label={`Switch language to ${locale}`}
+                >
+                  {locale}
+                </Link>
+              );
+            })}
+          </div>
 
           {/* Theme Toggle */}
           <button
