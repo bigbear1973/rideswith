@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ArrowRight, Loader2, Bike, MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useUnits } from '@/components/providers/units-provider';
 
 // Type for latest rides from API
@@ -132,6 +133,7 @@ function FilterTab({
 
 export default function HomePage() {
   const { formatDistance } = useUnits();
+  const t = useTranslations('common');
   const [latestRides, setLatestRides] = useState<LatestRide[]>([]);
   const [isLoadingRides, setIsLoadingRides] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -209,7 +211,7 @@ export default function HomePage() {
 
         {/* Left Column - Ride Discovery */}
         <main>
-          <span className="label-editorial block mb-6">Ride Discovery</span>
+          <span className="label-editorial block mb-6">{t('home.rideDiscovery')}</span>
           <h1 className="heading-display mb-10">
             Find your ride.
             <br />

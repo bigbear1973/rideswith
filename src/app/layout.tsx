@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import { Providers } from '@/components/providers';
 import { Navbar } from '@/components/shared/navbar';
 import { Footer } from '@/components/shared/footer';
@@ -59,26 +61,31 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <Providers>
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-          <Navbar />
-          <main id="main-content" className="flex-1" role="main">
-            {children}
-          </main>
-          <Footer />
-        </Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>
+            <a href="#main-content" className="skip-link">
+              Skip to main content
+            </a>
+            <Navbar />
+            <main id="main-content" className="flex-1" role="main">
+              {children}
+            </main>
+            <Footer />
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
