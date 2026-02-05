@@ -144,6 +144,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Location is required' }, { status: 400 });
     }
 
+    if (body.chapterId) {
+      const chapter = await prisma.chapter.findUnique({
+        where: { id: body.chapterId },
+        select: {
+          id: true,
+          brand: { select: { createdById: true } },
+          members: {
+            where: {
+              userId,
+              role: { in: ['OWNER', 'ADMIN'] },
+            },
+            select: { id: true },
+          },
+        },
+      });
+
+      if (!chapter) {
+        return NextResponse.json({ error: 'Chapter not found' }, { status: 404 });
+      }
+
+      const isBrandOwner = chapter.brand.createdById === userId;
+      const isChapterAdmin = chapter.members.length > 0;
+
+      if (!isBrandOwner && !isChapterAdmin) {
+        return NextResponse.json(
+          { error: 'You do not have permission to create rides for this chapter' },
+          { status: 403 }
+        );
+      }
+    }
+
     // Find or create organizer for the user
     let organizer = await prisma.organizer.findFirst({
       where: {

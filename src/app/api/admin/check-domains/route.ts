@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isPlatformAdmin } from "@/lib/platform-admin";
 
 // GET /api/admin/check-domains - List brands with potentially malformed domains
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!isPlatformAdmin(session)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const brands = await prisma.brand.findMany({

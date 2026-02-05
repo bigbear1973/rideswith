@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isPlatformAdmin } from "@/lib/platform-admin";
 
 // GET /api/chapters - List chapters (optionally filtered by brand)
 export async function GET(request: NextRequest) {
@@ -98,10 +99,19 @@ export async function POST(request: NextRequest) {
     // Verify brand exists
     const brand = await prisma.brand.findUnique({
       where: { id: brandId },
+      select: { id: true, createdById: true },
     });
 
     if (!brand) {
       return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+    }
+
+    // Only brand owners or platform admins can create chapters
+    if (brand.createdById !== userId && !isPlatformAdmin(session)) {
+      return NextResponse.json(
+        { error: "You don't have permission to create a chapter for this community" },
+        { status: 403 }
+      );
     }
 
     // Generate slug from city name
