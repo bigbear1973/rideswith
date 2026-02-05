@@ -229,6 +229,17 @@ export default function HomePage() {
             ))}
           </div>
 
+          {/* Telegram Bot Callout */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-sm text-muted-foreground">
+              Prefer searching on your phone? Try our{' '}
+              <Link href="/telegram" className="underline hover:text-foreground">
+                Telegram bot
+              </Link>
+              {' '}&mdash; just message @rideswith_bot with queries like &quot;rides near Berlin&quot;.
+            </p>
+          </div>
+
           {/* Ride List */}
           <div className="w-full border-t border-border">
             {/* Loading state */}
