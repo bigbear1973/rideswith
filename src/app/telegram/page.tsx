@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Telegram Bot | RidesWith',
-  description: 'Find cycling group rides near you using our Telegram bot. Search with natural language like "gravel rides this weekend" or "rides near Berlin".',
+  description: 'Find cycling group rides near you using our Telegram bot. Search with natural language like "gravel rides this weekend" or "rides near Leipzig".',
 };
 
 export default function TelegramPage() {
@@ -116,7 +116,7 @@ export default function TelegramPage() {
           <h2 className="text-xl font-semibold mb-6">Example searches</h2>
           <div className="flex flex-wrap gap-2">
             {[
-              'rides near Berlin',
+              'rides near Leipzig',
               'gravel rides this weekend',
               'fast rides tomorrow',
               'rides near me',

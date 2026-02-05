@@ -647,7 +647,7 @@ export default function DiscoverPage() {
             <Link href="/telegram" className="underline hover:text-foreground">
               Telegram bot
             </Link>
-            {' '}&mdash; just message @rideswith_bot with queries like &quot;rides near Berlin&quot;.
+            {' '}&mdash; just message @rideswith_bot with queries like &quot;rides near Leipzig&quot;.
           </p>
         </div>
 
