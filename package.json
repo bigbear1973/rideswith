@@ -36,7 +36,6 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@swc/helpers": "^0.5.18",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.9.0",
