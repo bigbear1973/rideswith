@@ -640,6 +640,17 @@ export default function DiscoverPage() {
           </div>
         </div>
 
+        {/* Telegram Bot Callout */}
+        <div className="mt-6 pt-4 border-t border-border">
+          <p className="text-sm text-muted-foreground">
+            Prefer searching on your phone? Try our{' '}
+            <Link href="/telegram" className="underline hover:text-foreground">
+              Telegram bot
+            </Link>
+            {' '}&mdash; just message @rideswith_bot with queries like &quot;rides near Berlin&quot;.
+          </p>
+        </div>
+
         {/* Ride List */}
         <div className="w-full border-t border-border">
           {isLoadingRides ? (
@@ -681,16 +692,6 @@ export default function DiscoverPage() {
           </Link>
         )}
 
-        {/* Telegram Bot Callout */}
-        <div className="mt-12 pt-8 border-t border-border">
-          <p className="text-sm text-muted-foreground">
-            Prefer searching on your phone? Try our{' '}
-            <Link href="/telegram" className="underline hover:text-foreground">
-              Telegram bot
-            </Link>
-            {' '}&mdash; just message @rideswith_bot with queries like &quot;rides near Berlin&quot;.
-          </p>
-        </div>
       </div>
     </div>
   );
