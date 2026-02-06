@@ -72,12 +72,12 @@ export default function BlogPage() {
                 className="list-item-editorial group"
               >
                 {/* Date */}
-                <div className="hidden md:block text-xs font-semibold text-muted-foreground uppercase tracking-wider min-w-[100px]">
+                <div className="hidden md:block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {format(new Date(post.date), 'MMM d, yyyy')}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 pr-6">
+                <div className="pr-6">
                   {/* Mobile date */}
                   <div className="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                     {format(new Date(post.date), 'MMM d, yyyy')}
