@@ -1,6 +1,7 @@
 import HomeClient from './home-client';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
 async function getLatestRides() {
