@@ -18,7 +18,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'RidesWith - Find Your Next Cycling Group Ride',
+  title: {
+    default: 'RidesWith - Find Your Next Cycling Group Ride',
+    template: '%s | RidesWith',
+  },
   description:
     'Discover cycling group rides near you, join with one click, and get routes on any GPS platform. For riders and organizers.',
   keywords: ['cycling', 'group rides', 'bike rides', 'cycling events', 'GPS routes'],
@@ -44,6 +47,22 @@ export const metadata: Metadata = {
     title: 'RidesWith - Find Your Next Cycling Group Ride',
     description: 'Discover cycling group rides near you, join with one click, and get routes on any GPS platform.',
     type: 'website',
+    url: '/',
+    siteName: 'RidesWith',
+    images: [
+      {
+        url: '/og-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'RidesWith - Find Your Next Cycling Group Ride',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RidesWith - Find Your Next Cycling Group Ride',
+    description: 'Discover cycling group rides near you, join with one click, and get routes on any GPS platform.',
+    images: ['/og-default.png'],
   },
 };
 

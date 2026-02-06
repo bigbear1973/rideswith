@@ -3,6 +3,30 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms of Service | RidesWith',
   description: 'Terms of Service for RidesWith - the rules and guidelines for using our platform.',
+  openGraph: {
+    title: 'Terms of Service | RidesWith',
+    description: 'Terms of Service for RidesWith - the rules and guidelines for using our platform.',
+    type: 'website',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/terms`,
+    siteName: 'RidesWith',
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: 'RidesWith Terms of Service',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms of Service | RidesWith',
+    description: 'Terms of Service for RidesWith - the rules and guidelines for using our platform.',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`],
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/terms`,
+  },
 };
 
 export default function TermsPage() {

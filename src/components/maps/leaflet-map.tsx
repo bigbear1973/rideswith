@@ -50,11 +50,7 @@ export function Map({
   markers = [],
   className,
 }: MapProps) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const [isMounted] = useState(() => typeof window !== 'undefined');
 
   // Don't render on server
   if (!isMounted) {

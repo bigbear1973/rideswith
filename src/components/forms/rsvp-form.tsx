@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { RsvpStatus } from '@/types';
@@ -13,21 +14,53 @@ interface RsvpFormProps {
 export function RsvpForm({ rideId, onSuccess }: RsvpFormProps) {
   const [status, setStatus] = useState<RsvpStatus>('going');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+
+  const mapStatus = (value: RsvpStatus) => {
+    switch (value) {
+      case 'going':
+        return 'GOING';
+      case 'maybe':
+        return 'MAYBE';
+      case 'cant_go':
+        return 'NOT_GOING';
+      default:
+        return 'GOING';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+
+    if (!session?.user?.id) {
+      setIsLoading(false);
+      setError('Please sign in to RSVP.');
+      return;
+    }
 
     const formData = new FormData(e.currentTarget);
-    const data = {
-      rideId,
-      name: formData.get('name'),
-      email: formData.get('email'),
-      status,
-    };
+    try {
+      const response = await fetch('/api/rsvps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rideId,
+          status: mapStatus(status),
+        }),
+      });
 
-    // TODO: Implement RSVP submission
-    console.log('RSVP data:', data);
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Failed to submit RSVP');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit RSVP');
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(false);
     onSuccess?.();
@@ -54,7 +87,7 @@ export function RsvpForm({ rideId, onSuccess }: RsvpFormProps) {
           required
         />
         <p className="text-xs text-gray-500 mt-1">
-          We'll send you ride updates and reminders
+          We&apos;ll send you ride updates and reminders
         </p>
       </div>
 
@@ -83,7 +116,7 @@ export function RsvpForm({ rideId, onSuccess }: RsvpFormProps) {
             onClick={() => setStatus('cant_go')}
             className="flex-1"
           >
-            Can't Go
+            Can&apos;t Go
           </Button>
         </div>
       </div>
@@ -91,6 +124,7 @@ export function RsvpForm({ rideId, onSuccess }: RsvpFormProps) {
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? 'Submitting...' : 'Confirm RSVP'}
       </Button>
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </form>
   );
 }

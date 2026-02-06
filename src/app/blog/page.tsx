@@ -11,6 +11,25 @@ export const metadata: Metadata = {
     title: 'Blog | RidesWith',
     description: 'Tips, guides, and stories about group cycling, ride organization, and building cycling communities.',
     type: 'website',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/blog`,
+    siteName: 'RidesWith',
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: 'RidesWith Blog',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Blog | RidesWith',
+    description: 'Tips, guides, and stories about group cycling, ride organization, and building cycling communities.',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`],
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/blog`,
   },
 };
 

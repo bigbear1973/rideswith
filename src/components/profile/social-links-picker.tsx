@@ -162,7 +162,7 @@ export function SocialLinksPicker({ values, onChange }: SocialLinksPickerProps) 
 
       {activeLinks.length === 0 ? (
         <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-          No social links added yet. Click "Add Link" to add your profiles.
+          No social links added yet. Click &quot;Add Link&quot; to add your profiles.
         </div>
       ) : (
         <div className="space-y-3">

@@ -166,7 +166,7 @@ export function RsvpButton({
               className="flex-1"
             >
               <X className="h-4 w-4 mr-1" />
-              Can't Go
+              Can&apos;t Go
             </Button>
           </div>
         )}

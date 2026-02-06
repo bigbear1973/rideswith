@@ -23,52 +23,39 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
-  const [brandColors, setBrandColorsState] = useState<BrandColors | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'system';
     const savedTheme = localStorage.getItem('theme') as Theme | null;
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    }
-  }, []);
+    return savedTheme || 'system';
+  });
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+  const [brandColors, setBrandColorsState] = useState<BrandColors | null>(null);
+  const resolvedTheme: 'light' | 'dark' = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
-    if (!mounted) return;
-
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
 
-    let resolved: 'light' | 'dark';
-    if (theme === 'system') {
-      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-    } else {
-      resolved = theme;
-    }
-
-    root.classList.add(resolved);
-    setResolvedTheme(resolved);
+    root.classList.add(resolvedTheme);
     localStorage.setItem('theme', theme);
-  }, [theme, mounted]);
+  }, [theme, resolvedTheme]);
 
   useEffect(() => {
-    if (!mounted || !brandColors?.primary) return;
+    if (!brandColors?.primary) return;
 
     const root = document.documentElement;
     root.style.setProperty('--brand-primary', brandColors.primary);
     if (brandColors.secondary) {
       root.style.setProperty('--brand-secondary', brandColors.secondary);
     }
-  }, [brandColors, mounted]);
+  }, [brandColors]);
 
   // Listen for system theme changes
   useEffect(() => {
-    if (!mounted || theme !== 'system') return;
+    if (theme !== 'system') return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
@@ -76,12 +63,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.remove('light', 'dark');
       const resolved = e.matches ? 'dark' : 'light';
       root.classList.add(resolved);
-      setResolvedTheme(resolved);
+      setSystemTheme(resolved);
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme, mounted]);
+  }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

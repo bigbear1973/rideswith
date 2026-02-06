@@ -1,9 +1,39 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { Plus } from "lucide-react";
 import { CommunitiesList } from "./communities-list";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Communities | RidesWith",
+  description: "Discover cycling communities, clubs, teams, and brands on RidesWith. Find local chapters, join group rides, and connect with fellow cyclists.",
+  openGraph: {
+    title: "Communities | RidesWith",
+    description: "Discover cycling communities, clubs, teams, and brands on RidesWith. Find local chapters, join group rides, and connect with fellow cyclists.",
+    type: "website",
+    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://rideswith.com"}/communities`,
+    siteName: "RidesWith",
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://rideswith.com"}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: "RidesWith Communities",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Communities | RidesWith",
+    description: "Discover cycling communities, clubs, teams, and brands on RidesWith. Find local chapters, join group rides, and connect with fellow cyclists.",
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || "https://rideswith.com"}/og-default.png`],
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://rideswith.com"}/communities`,
+  },
+};
 
 // Arrow icon component
 const ArrowIcon = ({ className }: { className?: string }) => (

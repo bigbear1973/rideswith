@@ -41,29 +41,25 @@ const defaultPreferences: StoredPreferences = {
 };
 
 export function UnitsProvider({ children }: { children: ReactNode }) {
-  const [preferences, setPreferences] = useState<StoredPreferences>(defaultPreferences);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Load preferences from localStorage on mount
-  useEffect(() => {
+  const [preferences, setPreferences] = useState<StoredPreferences>(() => {
+    if (typeof window === 'undefined') return defaultPreferences;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<StoredPreferences>;
-        setPreferences({ ...defaultPreferences, ...parsed });
+        return { ...defaultPreferences, ...parsed };
       }
     } catch {
       // Ignore errors
     }
-    setIsLoaded(true);
-  }, []);
+    return defaultPreferences;
+  });
 
   // Save preferences to localStorage when they change
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
-    }
-  }, [preferences, isLoaded]);
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+  }, [preferences]);
 
   const setUnitSystem = (unitSystem: UnitSystem) => {
     setPreferences((prev) => ({

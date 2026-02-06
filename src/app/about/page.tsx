@@ -7,6 +7,30 @@ import { Users, MapPin, Calendar, Heart } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'About | RidesWith',
   description: 'Learn about RidesWith - the platform connecting cyclists with group rides in their area.',
+  openGraph: {
+    title: 'About | RidesWith',
+    description: 'Learn about RidesWith - the platform connecting cyclists with group rides in their area.',
+    type: 'website',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/about`,
+    siteName: 'RidesWith',
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: 'About RidesWith',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About | RidesWith',
+    description: 'Learn about RidesWith - the platform connecting cyclists with group rides in their area.',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`],
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/about`,
+  },
 };
 
 export default function AboutPage() {

@@ -9,11 +9,20 @@ export const metadata: Metadata = {
     url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/discover`,
     siteName: "RidesWith",
     type: "website",
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: "Discover Group Rides",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Discover Group Rides | RidesWith",
     description: "Find and join cycling group rides near you. Browse upcoming rides by location, distance, pace, and date.",
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`],
   },
   alternates: {
     canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/discover`,

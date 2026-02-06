@@ -3,6 +3,30 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Privacy Policy | RidesWith',
   description: 'Privacy Policy for RidesWith - how we collect, use, and protect your information.',
+  openGraph: {
+    title: 'Privacy Policy | RidesWith',
+    description: 'Privacy Policy for RidesWith - how we collect, use, and protect your information.',
+    type: 'website',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/privacy`,
+    siteName: 'RidesWith',
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: 'RidesWith Privacy Policy',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy | RidesWith',
+    description: 'Privacy Policy for RidesWith - how we collect, use, and protect your information.',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`],
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/privacy`,
+  },
 };
 
 export default function PrivacyPage() {

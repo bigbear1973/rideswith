@@ -175,9 +175,25 @@ export default async function BrandPage({ params }: PageProps) {
     0
   );
   const totalRides = brand.chapters.reduce((sum, c) => sum + c.rideCount, 0);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com';
+  const communityUrl = `${baseUrl}/communities/${brand.slug}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsOrganization',
+    name: brand.name,
+    url: communityUrl,
+    description: brand.description || brand.slogan || undefined,
+    logo: brand.logo || undefined,
+  };
 
   return (
     <div className="min-h-screen">
+      {/* JSON-LD structured data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-[1400px] mx-auto px-6 md:px-[60px] py-12 md:py-[60px] grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-12 lg:gap-[120px]">
 
         {/* Left Column - Chapters List */}

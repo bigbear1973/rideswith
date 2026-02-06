@@ -112,6 +112,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const contentHtml = markdownToHtml(post.content);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com';
 
   // JSON-LD structured data for the article
   const jsonLd = {
@@ -130,7 +131,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       name: 'RidesWith',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://rideswith.com/icon.png',
+        url: `${baseUrl}/icons/icon-512.png`,
       },
     },
   };

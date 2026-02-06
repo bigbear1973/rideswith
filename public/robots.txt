@@ -16,8 +16,13 @@ Allow: /terms
 Disallow: /auth/
 Disallow: /admin/
 Disallow: /settings/
+Disallow: /profile
 Disallow: /profile/edit
 Disallow: /create
+Disallow: /communities/create
+Disallow: /communities/*/edit
+Disallow: /communities/*/create-chapter
+Disallow: /organizers/
 Disallow: /api/
 
 # Sitemap location

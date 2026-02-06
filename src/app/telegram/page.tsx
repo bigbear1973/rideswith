@@ -6,6 +6,30 @@ import { Button } from '@/components/ui/button';
 export const metadata: Metadata = {
   title: 'Telegram Bot | RidesWith',
   description: 'Find cycling group rides near you using our Telegram bot. Search with natural language like "gravel rides this weekend" or "rides near Leipzig".',
+  openGraph: {
+    title: 'Telegram Bot | RidesWith',
+    description: 'Find cycling group rides near you using our Telegram bot. Search with natural language like "gravel rides this weekend" or "rides near Leipzig".',
+    type: 'website',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/telegram`,
+    siteName: 'RidesWith',
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`,
+        width: 1200,
+        height: 630,
+        alt: 'RidesWith Telegram Bot',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Telegram Bot | RidesWith',
+    description: 'Find cycling group rides near you using our Telegram bot. Search with natural language like "gravel rides this weekend" or "rides near Leipzig".',
+    images: [`${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/og-default.png`],
+  },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || 'https://rideswith.com'}/telegram`,
+  },
 };
 
 export default function TelegramPage() {
