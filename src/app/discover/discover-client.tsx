@@ -215,35 +215,7 @@ export default function DiscoverPage({ initialRides = [] }: { initialRides?: Rid
   const [selectedDistances, setSelectedDistances] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState('all');
   const [locationName, setLocationName] = useState('Dublin, Ireland');
-  const [hasRequestedLocation, setHasRequestedLocation] = useState(false);
   const { formatDistance, unitSystem } = useUnits();
-
-  // Request user location on first load
-  useEffect(() => {
-    if (hasRequestedLocation) return;
-    setHasRequestedLocation(true);
-
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setMapCenter({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setLocationName('Your location');
-        },
-        (error) => {
-          // User denied or error - keep default location (Dublin)
-          console.log('Geolocation not available or denied:', error.message);
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 10000,
-          maximumAge: 300000, // Cache for 5 minutes
-        }
-      );
-    }
-  }, [hasRequestedLocation]);
 
   // Fetch rides from database
   useEffect(() => {
@@ -365,6 +337,11 @@ export default function DiscoverPage({ initialRides = [] }: { initialRides?: Rid
         },
         (error) => {
           console.error('Geolocation error:', error);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000, // Cache for 5 minutes
         }
       );
     }
