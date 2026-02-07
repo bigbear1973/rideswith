@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchBrandAssets } from '@/lib/brand-dev';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({ interval: 60000, limit: 10 });
 
 // GET /api/brandfetch?domain=example.com - Fetch brand assets from Brand.dev
 export async function GET(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const { success } = await limiter.check(ip);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { searchParams } = new URL(request.url);
     const domain = searchParams.get('domain');
 
