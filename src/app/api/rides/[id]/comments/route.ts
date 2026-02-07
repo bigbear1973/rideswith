@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
+
+const commentLimiter = rateLimit({ interval: 60000, limit: 20 });
 
 // GET /api/rides/[id]/comments - List all comments for a ride
 export async function GET(
@@ -83,6 +86,11 @@ export async function POST(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { success } = await commentLimiter.check(session.user.id);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const { id: rideId } = await params;

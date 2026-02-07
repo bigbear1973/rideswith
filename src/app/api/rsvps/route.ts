@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
+
+const rsvpLimiter = rateLimit({ interval: 60000, limit: 30 });
 
 // GET /api/rsvps?rideId=xxx - Get RSVPs for a ride
 export async function GET(request: NextRequest) {
@@ -84,6 +87,11 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { success } = await rsvpLimiter.check(session.user.id);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const body = await request.json();

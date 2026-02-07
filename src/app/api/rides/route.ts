@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { notifyNewRide } from '@/lib/push-notifications';
 import { addWeeks, addMonths, isBefore, startOfDay } from 'date-fns';
 import { RecurrencePattern } from '@prisma/client';
+import { rateLimit } from '@/lib/rate-limit';
+
+const createRideLimiter = rateLimit({ interval: 60000, limit: 10 });
 
 export async function GET(request: NextRequest) {
   try {
@@ -127,6 +130,11 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id;
+
+    const { success } = await createRideLimiter.check(userId);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     const body = await request.json();
 
     // Validate required fields

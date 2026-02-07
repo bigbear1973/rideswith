@@ -20,11 +20,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Upsert subscription (update if endpoint exists, create if not)
+    // Check if endpoint already belongs to another user
+    const existing = await prisma.pushSubscription.findUnique({
+      where: { endpoint },
+      select: { userId: true },
+    });
+    if (existing && existing.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Subscription conflict' }, { status: 409 });
+    }
+
     const subscription = await prisma.pushSubscription.upsert({
       where: { endpoint },
       update: {
-        userId: session.user.id,
         p256dh: keys.p256dh,
         auth: keys.auth,
       },
@@ -78,11 +85,9 @@ export async function DELETE(request: Request) {
         where: { userId: session.user.id },
       });
     } else {
-      // Delete specific subscription
-      await prisma.pushSubscription.delete({
-        where: { endpoint },
-      }).catch(() => {
-        // Ignore if not found
+      // Delete specific subscription (scoped to current user)
+      await prisma.pushSubscription.deleteMany({
+        where: { endpoint, userId: session.user.id },
       });
     }
 
