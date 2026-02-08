@@ -174,7 +174,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <span className="label-editorial block mb-4">
             {format(new Date(post.date), 'MMMM d, yyyy')}
           </span>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6 font-geist-pixel">
             {post.title}
           </h1>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">

@@ -210,7 +210,7 @@ export default function HomePage({ initialRides = [] }: { initialRides?: LatestR
         {/* Left Column - Ride Discovery */}
         <main>
           <span className="label-editorial block mb-6">Ride Discovery</span>
-          <h1 className="heading-display mb-10">
+          <h1 className="heading-display mb-10 font-geist-pixel">
             Find your ride.
             <br />
             Find your people.

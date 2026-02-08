@@ -50,7 +50,7 @@ export default function BlogPage() {
         {/* Header */}
         <div className="max-w-3xl mb-12">
           <span className="label-editorial block mb-6">Blog</span>
-          <h1 className="heading-display mb-6">
+          <h1 className="heading-display mb-6 font-geist-pixel">
             Cycling tips, guides & stories
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed">
@@ -82,7 +82,7 @@ export default function BlogPage() {
                   <div className="md:hidden text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                     {format(new Date(post.date), 'MMM d, yyyy')}
                   </div>
-                  <h2 className="text-lg md:text-xl font-medium mb-2 group-hover:text-foreground transition-colors">
+                  <h2 className="text-lg md:text-xl font-medium mb-2 group-hover:text-foreground transition-colors font-geist-pixel">
                     {post.title}
                   </h2>
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
