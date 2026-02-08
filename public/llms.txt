@@ -29,5 +29,11 @@
 ## Sitemaps
 - https://rideswith.com/sitemap.xml
 
+## Markdown Exports
+- https://rideswith.com/llms/blog/benefits-of-cycling-with-others.md
+- https://rideswith.com/llms/blog/essential-gear-for-group-rides.md
+- https://rideswith.com/llms/blog/group-ride-etiquette-unwritten-rules.md
+- https://rideswith.com/llms/blog/how-to-organize-your-first-group-ride.md
+
 ## Optional
-- llms-full.txt : Not currently available.
+- https://rideswith.com/llms-full.txt : Full blog content in a single file.

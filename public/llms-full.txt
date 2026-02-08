@@ -1,0 +1,425 @@
+# RidesWith Group Ride Platform
+
+Public website for discovering and organizing cycling group rides, communities, and organizers.
+
+## Primary Content
+- https://rideswith.com/
+- https://rideswith.com/discover
+- https://rideswith.com/rides
+- https://rideswith.com/communities
+- https://rideswith.com/organizers
+- https://rideswith.com/blog
+- https://rideswith.com/about
+
+## Policies
+- https://rideswith.com/terms
+- https://rideswith.com/privacy
+
+## Markdown Exports (Blog)
+- https://rideswith.com/llms/blog/benefits-of-cycling-with-others.md
+- https://rideswith.com/llms/blog/essential-gear-for-group-rides.md
+- https://rideswith.com/llms/blog/group-ride-etiquette-unwritten-rules.md
+- https://rideswith.com/llms/blog/how-to-organize-your-first-group-ride.md
+
+## Full Blog Content
+
+---
+
+---
+title: "5 Surprising Benefits of Cycling With Others"
+excerpt: "Solo rides have their place, but group cycling offers unique advantages for your fitness, motivation, and social wellbeing."
+date: "2026-01-05"
+author: "RidesWith Team"
+tags: ["fitness", "community", "motivation"]
+---
+
+There's something magical about turning pedals alongside others. While solo rides offer solitude and flexibility, group cycling delivers benefits you simply can't get alone.
+
+## 1. You'll Ride Farther and Faster
+
+The science is clear: we perform better in groups. Here's why:
+
+**Drafting efficiency** - Sitting in someone's slipstream can save up to 30% of your energy. That means you can go farther on the same effort.
+
+**Positive peer pressure** - When others are pushing, you push too. Studies show cyclists produce higher power outputs in group settings.
+
+**Distraction from discomfort** - Conversation and camaraderie take your mind off tired legs. Before you know it, you've added an extra 20km.
+
+## 2. You'll Learn Faster
+
+Every group ride is a masterclass in cycling:
+
+- Watch how experienced riders handle descents
+- Learn efficient pedaling techniques
+- Discover new routes and roads
+- Pick up mechanical tips
+- Understand race tactics and positioning
+
+There's no substitute for learning by riding with those more experienced than you.
+
+## 3. Your Motivation Will Skyrocket
+
+The hardest part of any ride is getting out the door. Group rides solve this:
+
+**Accountability** - When others are expecting you, you show up
+**Scheduled commitment** - A recurring group ride becomes non-negotiable
+**Social reward** - The café stop and post-ride chat are something to look forward to
+**Progress tracking** - Comparing your performance over time is natural in a group
+
+## 4. It's Safer (In Most Situations)
+
+There's safety in numbers:
+
+- **Visibility** - Drivers see groups more easily
+- **Assistance** - Help is immediate if you puncture or crash
+- **Navigation** - Less likely to get lost with local riders
+- **Emergency response** - Someone can always call for help
+
+Of course, this assumes the group rides responsibly. A poorly organized bunch can increase risk.
+
+## 5. You'll Build Genuine Community
+
+In an increasingly disconnected world, cycling clubs offer something rare: real human connection.
+
+The relationships formed over miles become genuine friendships:
+
+- Training partners become confidants
+- Coffee stops become therapy sessions
+- Club members become family
+
+Many cyclists cite their riding friends as their closest relationships outside of family.
+
+## Finding Your Tribe
+
+Not all groups are right for everyone. Look for:
+
+- **Appropriate pace** - Be honest about your fitness
+- **Compatible goals** - Racing vs. social rides
+- **Good culture** - Supportive and welcoming atmosphere
+- **Convenient timing** - Fits your schedule
+
+Try a few different groups before committing. The right one will feel like home.
+
+---
+
+Ready to experience these benefits yourself? [Browse group rides near you](/discover) and join the community.
+
+
+---
+
+---
+title: "Essential Gear Checklist for Group Rides"
+excerpt: "Don't show up unprepared. Here's everything you need to bring on a group ride, from the obvious to the often-forgotten."
+date: "2026-01-01"
+author: "RidesWith Team"
+tags: ["gear", "beginners", "checklist"]
+---
+
+Nothing derails a group ride faster than a rider without a spare tube or someone running out of water 30km from home. Here's your complete checklist.
+
+## The Non-Negotiables
+
+These items are mandatory for every group ride:
+
+### Safety Gear
+- **Helmet** - Properly fitted, no exceptions
+- **Front and rear lights** - Even for daytime rides
+- **Reflective elements** - Visible clothing or accessories
+
+### Repair Kit
+- **Spare inner tube** - Minimum one, ideally two
+- **Tire levers** - For removing stubborn tires
+- **Multi-tool** - With hex keys and screwdriver
+- **Mini pump or CO2 inflator** - With spare cartridges if using CO2
+- **Patch kit** - For that second puncture
+
+### Hydration & Nutrition
+- **Full water bottles** - One per hour of riding minimum
+- **Energy gels or bars** - One per hour for rides over 90 minutes
+- **Emergency cash** - For café stops and emergencies
+
+## Highly Recommended
+
+These make every ride better:
+
+### Comfort Items
+- **Chamois cream** - Prevents saddle sores
+- **Sunglasses** - Eye protection from sun, wind, and insects
+- **Sunscreen** - Applied before you leave
+- **Arm/knee warmers** - For variable conditions
+
+### Technology
+- **Phone** - Charged, in a waterproof case
+- **Cycle computer** - For navigation and stats
+- **Emergency contact card** - Laminated, in your pocket
+
+### Clothing Considerations
+- **Rain jacket** - Packable, even on sunny days
+- **Gloves** - Padded for comfort, grip for control
+- **Shoe covers** - For cold or wet conditions
+
+## What to Wear
+
+Dress appropriately for the conditions:
+
+### Temperature Guide
+- **Above 20°C** - Short jersey, bib shorts
+- **15-20°C** - Add arm warmers, consider knee warmers
+- **10-15°C** - Long sleeve jersey or gilet, knee warmers
+- **Below 10°C** - Winter jacket, thermal tights, gloves
+
+**Pro tip:** You should feel slightly cold when you start. You'll warm up within 10 minutes.
+
+## Group-Specific Items
+
+For group rides specifically:
+
+- **Matching or club kit** - If you're a member
+- **Pocket food to share** - Earns goodwill
+- **Knowledge of the route** - Downloaded or memorized
+
+## What NOT to Bring
+
+Some things are better left at home:
+
+- **Earbuds/headphones** - You need to hear traffic and communication
+- **Heavy locks** - Only for destination rides
+- **Excess gear** - Pack light, ride light
+- **Negativity** - Check your mood at the door
+
+## Pre-Ride Checklist
+
+Before every ride, run through the ABC check:
+
+**A - Air**
+- Tires properly inflated
+- No cuts or wear on tire surface
+
+**B - Brakes**
+- Pads have life left
+- Brakes engage properly
+- Quick releases are closed
+
+**C - Chain**
+- Clean and lubricated
+- No stiff links
+- Cassette and chainrings not worn
+
+## The Night Before
+
+Prepare everything the night before:
+
+1. Check the weather forecast
+2. Lay out your kit
+3. Charge your lights and computer
+4. Fill your bottles (store in fridge overnight)
+5. Prepare your nutrition
+6. Set multiple alarms
+
+---
+
+Got your gear sorted? [Find a group ride](/discover) and put it all to use!
+
+
+---
+
+---
+title: "Group Ride Etiquette: The Unwritten Rules Every Cyclist Should Know"
+excerpt: "Master the unwritten rules of group cycling. From drafting etiquette to communication signals, here's how to be a great group riding companion."
+date: "2026-01-10"
+author: "RidesWith Team"
+tags: ["etiquette", "safety", "tips"]
+---
+
+There's an art to riding in a group. Beyond the written rules of the road, there are unwritten codes that make group rides safer and more enjoyable for everyone. Here's your guide to group ride etiquette.
+
+## Arriving at the Ride
+
+**Be punctual.** Aim to arrive 10-15 minutes early. This gives you time to pump tires, use facilities, and socialize before departure.
+
+**Come prepared.** Bring:
+- Spare tube and tools
+- Full water bottles
+- Nutrition for the ride
+- Lights (even for daytime rides)
+- Cash for café stops
+
+**Check your bike.** A quick ABC check (Air, Brakes, Chain) prevents you from holding up the group.
+
+## Riding in the Pack
+
+### Holding Your Line
+
+Nothing is more dangerous than an unpredictable rider. When in a group:
+
+- Ride in a straight line
+- Don't overlap wheels with the rider ahead
+- Signal before moving
+- Avoid sudden braking
+
+### Drafting Etiquette
+
+When sitting in someone's draft:
+
+- Maintain a steady distance (about half a wheel length)
+- Don't stare at their wheel - look ahead
+- Take your turn at the front
+- Thank the person who's been pulling
+
+### Taking Pulls
+
+When rotating through at the front:
+
+- Pull for a consistent time (30 seconds to 2 minutes)
+- Maintain the group's pace - don't surge
+- Peel off smoothly and drift to the back
+- If you're struggling, say "I'll skip" rather than disrupting rotation
+
+## Communication is Key
+
+### Hand Signals
+
+Learn these essential signals:
+
+- **Pointing down at road** - Hazard (pothole, glass, etc.)
+- **Hand behind back, waving** - Move over in that direction
+- **Arm out straight** - Turning that direction
+- **Arm raised** - Stopping or slowing
+
+### Verbal Calls
+
+Always call out:
+
+- "Car back!" - Vehicle approaching from behind
+- "Car up!" - Vehicle approaching from ahead
+- "Slowing!" - Before braking
+- "Stopping!" - Before a complete stop
+- "Clear!" or "Wait!" - At junctions
+
+## The Coffee Stop
+
+The café stop is sacred in cycling culture:
+
+- Don't order until everyone arrives
+- Keep orders simple when it's busy
+- Offer to help carry drinks
+- Be ready to leave when the group is
+- Tip well - we want cyclists to be welcome
+
+## Pace and No-Drop Rides
+
+If a ride is advertised as "no-drop":
+
+- Wait for dropped riders at the top of climbs
+- Slow the pace if someone is struggling
+- Offer encouragement, not advice
+- Never attack or race on a social ride
+
+If you're struggling:
+
+- Communicate early - "I'm finding this tough"
+- Don't blow up trying to stay on
+- There's no shame in turning back early
+
+## After the Ride
+
+- Thank the organizer
+- Share photos respectfully
+- Provide constructive feedback
+- Sign up for the next one!
+
+## The Golden Rule
+
+**Leave no one behind.** A dropped rider is everyone's responsibility. The strongest riders should be looking after the weakest, not attacking off the front.
+
+---
+
+Now that you know the rules, [find a group ride near you](/discover) and put them into practice!
+
+
+---
+
+---
+title: "How to Organize Your First Group Ride"
+excerpt: "A complete guide to planning, promoting, and leading your first group cycling ride. From choosing a route to managing different skill levels."
+date: "2026-01-15"
+author: "RidesWith Team"
+tags: ["organizing", "beginners", "guide"]
+---
+
+Organizing your first group ride can feel overwhelming, but with the right preparation, you'll create an experience that brings cyclists together and builds lasting community. Here's everything you need to know.
+
+## Choose the Right Route
+
+The foundation of any great group ride is the route. When selecting yours, consider:
+
+- **Distance appropriate for your group** - Start shorter (30-50km) for mixed-ability groups
+- **Road conditions** - Smooth surfaces are safer for groups
+- **Traffic levels** - Quieter roads allow riders to chat and stay together
+- **Points of interest** - A café stop adds a social element
+
+A good route has escape options too. If someone needs to bail early, they should be able to get home safely.
+
+## Set Clear Expectations
+
+Before anyone shows up, communicate:
+
+- **Start time and location** - Be specific about where to meet
+- **Expected pace** - Use average speeds (e.g., 25-28 km/h) not just "moderate"
+- **Distance and elevation** - No surprises
+- **Required gear** - Helmet, lights, spare tube, etc.
+- **Weather policy** - Will you ride in light rain?
+
+## The Day Before
+
+Send a reminder to everyone signed up. Include:
+
+- Weather forecast
+- Any last-minute route changes
+- Your mobile number for emergencies
+- Reminder about punctuality
+
+## Managing Different Skill Levels
+
+Mixed-ability groups are common. Here's how to keep everyone together:
+
+1. **Regroup points** - Stop at the top of climbs and at turns
+2. **Sweep rider** - Have someone experienced ride at the back
+3. **Communication** - Establish hand signals for hazards
+4. **Patience** - The group moves at the pace of the slowest rider
+
+## Safety First
+
+Group riding introduces unique safety considerations:
+
+- Brief everyone on hand signals before departure
+- Call out hazards ("hole left!", "car back!")
+- Ride two abreast maximum on open roads
+- Single file on narrow sections
+- No sudden braking or swerving
+
+## The Social Element
+
+The best group rides are about more than just cycling. Build community by:
+
+- Planning a coffee stop midway
+- Staying for a chat after the ride
+- Taking group photos
+- Following up with riders afterward
+
+## After the Ride
+
+Your job isn't done when the wheels stop turning:
+
+- Thank everyone for coming
+- Ask for feedback on the route and pace
+- Share photos to the group
+- Start planning the next one!
+
+---
+
+Ready to organize your first ride? [Create one on RidesWith](/create) and let us handle the RSVPs, reminders, and route sharing.
+
+
+---
+
