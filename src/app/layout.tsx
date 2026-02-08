@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { GeistPixelSquare } from 'geist/font/pixel';
 import { Providers } from '@/components/providers';
 import { Navbar } from '@/components/shared/navbar';
 import { Footer } from '@/components/shared/footer';
@@ -15,6 +16,11 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
+});
+
+const geistPixel = GeistPixelSquare({
+  variable: '--font-geist-pixel',
   display: 'swap',
 });
 
@@ -101,7 +107,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${geistPixel.variable} antialiased min-h-screen flex flex-col`}
       >
         <Providers>
           <a href="#main-content" className="skip-link">
