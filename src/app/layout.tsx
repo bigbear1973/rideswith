@@ -19,10 +19,7 @@ const geistMono = Geist_Mono({
   display: 'swap',
 });
 
-const geistPixel = GeistPixelSquare({
-  variable: '--font-geist-pixel',
-  display: 'swap',
-});
+const geistPixel = GeistPixelSquare;
 
 export const metadata: Metadata = {
   title: {
