@@ -1,21 +1,21 @@
-# Group Ride Organizer Platform
-
-## Summary
-A platform for discovering and organizing cycling group rides with AI-assisted branding and universal route distribution.
+# RidesWith Group Ride Platform
+> Public website for discovering and organizing cycling group rides, communities, and organizers.
 
 ## Primary Content
-- https://rideswith.com/ (home)
-- https://rideswith.com/discover (ride discovery)
-- https://rideswith.com/rides (ride listings and details)
-- https://rideswith.com/communities (clubs and groups)
-- https://rideswith.com/organizers (organizer profiles)
-- https://rideswith.com/blog (product and community updates)
-- https://rideswith.com/about (company and mission)
-- https://rideswith.com/terms (terms of service)
-- https://rideswith.com/privacy (privacy policy)
+- https://rideswith.com/ : Home
+- https://rideswith.com/discover : Ride discovery and search
+- https://rideswith.com/rides : Ride listings and details
+- https://rideswith.com/communities : Cycling clubs and groups
+- https://rideswith.com/organizers : Organizer profiles
+- https://rideswith.com/blog : Product and community updates
+- https://rideswith.com/about : Company and mission
+
+## Policies
+- https://rideswith.com/terms : Terms of service
+- https://rideswith.com/privacy : Privacy policy
 
 ## Crawl Guidance
-- Prefer human-facing pages listed above.
+- Prefer the human-facing pages listed above.
 - Avoid authenticated or private areas, API endpoints, and admin surfaces.
 
 ## Disallowed
@@ -28,3 +28,6 @@ A platform for discovering and organizing cycling group rides with AI-assisted b
 
 ## Sitemaps
 - https://rideswith.com/sitemap.xml
+
+## Optional
+- llms-full.txt : Not currently available.
