@@ -27,3 +27,6 @@ Disallow: /api/
 
 # Sitemap location
 Sitemap: https://rideswith.com/sitemap.xml
+
+# LLMs guidance
+LLMS: https://rideswith.com/llms.txt
